@@ -2511,10 +2511,6 @@ function toggleDriveConnection() {
     setDriveStatus(false, 'NOT CONNECTED', 'var(--text-dim)');
     return;
   }
-  if (GDRIVE_CLIENT_ID === '651803114273-kriebf4th77p8chp37cgkgrdinfc1d9o.apps.googleusercontent.com') {
-    showDriveSetupModal();
-    return;
-  }
   initDriveAuth();
 }
 
