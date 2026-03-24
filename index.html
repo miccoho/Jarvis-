@@ -218,10 +218,10 @@ body::before { content:''; position:fixed; inset:0; background-image:linear-grad
 .pill-btn:hover { border-color:var(--accent); color:var(--accent); }
 .pill-btn.active-pill { border-color:var(--accent3); color:var(--accent3); }
 
-.task-ring-card { position:relative; cursor:pointer; }
+.task-ring-card { position:relative; cursor:pointer; overflow:visible !important; }
 .task-ring-wrap { position:relative; width:70px; height:70px; margin:0 auto 6px; }
 .task-ring-pct { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Orbitron',monospace; font-size:18px; font-weight:700; color:var(--accent); }
-.task-popup { display:none; position:absolute; top:105%; left:50%; transform:translateX(-50%); background:var(--surface); border:1px solid var(--border-active); border-radius:6px; padding:14px 18px; min-width:240px; z-index:50; box-shadow:0 0 30px rgba(0,200,255,0.2), 0 8px 30px rgba(0,0,0,0.5); }
+.task-popup { display:none; position:fixed; z-index:200; background:var(--surface); border:1px solid var(--border-active); border-radius:6px; padding:14px 18px; min-width:240px; z-index:50; box-shadow:0 0 30px rgba(0,200,255,0.2), 0 8px 30px rgba(0,0,0,0.5); }
 .task-popup.visible { display:block; animation:fadeIn 0.15s ease; }
 .task-popup-item { display:flex; align-items:center; gap:8px; padding:4px 0; font-size:13px; }
 .task-popup-item .tpi-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
@@ -841,7 +841,7 @@ function updateStats() {
   const popList=document.getElementById('taskPopupList');
   if(popList){popList.innerHTML=STATE.tasks.map(t=>'<div class="task-popup-item'+(t.done?' tpi-done':'')+'"><div class="tpi-dot" style="background:'+(t.priority==='high'?'var(--danger)':t.priority==='med'?'var(--accent4)':'var(--accent3)')+';"></div><div class="tpi-text">'+t.text+'</div></div>').join('');}
 }
-function showTaskPopup(){const p=document.getElementById('taskPopup');if(p)p.classList.add('visible');}
+function showTaskPopup(){const p=document.getElementById('taskPopup');const card=document.getElementById('taskRingCard');if(p&&card){const r=card.getBoundingClientRect();p.style.top=(r.bottom+4)+'px';p.style.left=(r.left+r.width/2)+'px';p.style.transform='translateX(-50%)';p.classList.add('visible');}}
 function hideTaskPopup(){const p=document.getElementById('taskPopup');if(p)p.classList.remove('visible');}
 
 // ===================== FOCUS TIMER =====================
