@@ -8,1209 +8,221 @@
 <script src="https://apis.google.com/js/api.js" async defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #03050d
-    --surface: #080d1a;
-    --surface2: #0d1526;
-    --border: rgba(0,200,255,0.12);
-    --border-active: rgba(0,200,255,0.45);
-    --accent: #00c8ff;
-    --accent2: #7b2fff;
-    --accent3: #00ffa3;
-    --accent4: #ff6b35;
-    --danger: #ff3366;
-    --text: #c8dff0;
-    --text-dim: #4a6a8a;
-    --text-bright: #e8f4ff;
-    --glow: 0 0 20px rgba(0,200,255,0.3);
-    --glow2: 0 0 20px rgba(123,47,255,0.3);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Rajdhani', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-    cursor: crosshair;
-  }
-
-  /* Static background grid — no animation */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  /* ========================
-     TOP HEADER
-  ======================== */
-  .header {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 28px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(3,5,13,0.97);
-  }
-
-  .logo {
-    font-family: 'Orbitron', monospace;
-    font-size: 18px;
-    font-weight: 900;
-    letter-spacing: 4px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: none;
-  }
-
-  .logo-sub {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: var(--text-dim);
-    margin-top: 2px;
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--accent3);
-    box-shadow: 0 0 8px var(--accent3);
-  }
-
-  /* ========================
-     NAV TABS — DRAGGABLE
-  ======================== */
-  .nav-container {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 10px 28px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(8,13,26,0.99);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .nav-container::-webkit-scrollbar { display: none; }
-
-  .nav-tab {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 7px 16px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--surface);
-    color: var(--text-dim);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-    user-select: none;
-    draggable: true;
-  }
-
-  .nav-tab:hover {
-    border-color: var(--border-active);
-    color: var(--accent);
-    background: rgba(0,200,255,0.05);
-    box-shadow: var(--glow);
-  }
-
-  .nav-tab.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(0,200,255,0.08);
-    box-shadow: var(--glow);
-  }
-
-  .nav-tab.drag-over {
-    border-color: var(--accent2);
-    background: rgba(123,47,255,0.12);
-  }
-
-  .tab-icon { font-size: 13px; }
-
-  .drag-handle {
-    display: inline-flex;
-    flex-direction: column;
-    gap: 2px;
-    cursor: grab;
-    opacity: 0.4;
-    margin-right: 2px;
-  }
-
-  .drag-handle:active { cursor: grabbing; }
-
-  .drag-handle span {
-    display: block;
-    width: 10px;
-    height: 1px;
-    background: currentColor;
-  }
-
-  .nav-add-btn {
-    padding: 7px 12px;
-    border: 1px dashed var(--border);
-    border-radius: 4px;
-    background: transparent;
-    color: var(--text-dim);
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-
-  .nav-add-btn:hover {
-    border-color: var(--accent3);
-    color: var(--accent3);
-  }
-
-  /* ========================
-     MAIN LAYOUT
-  ======================== */
-  .main {
-    position: relative;
-    z-index: 5;
-    padding: 24px 28px;
-    animation: fadeIn 0.5s ease;
-    min-height: calc(100vh - 120px);
-  }
-
-  .page { display: none; animation: fadeIn 0.3s ease; }
-  .page.active { display: block; }
-
-  /* ========================
-     DASHBOARD PAGE
-  ======================== */
-  .dashboard-grid {
-    display: grid;
-    grid-template-columns: 320px 1fr 260px;
-    grid-template-rows: auto auto;
-    gap: 16px;
-    height: calc(100vh - 170px);
-  }
-
-  /* ========================
-     WIDGET BASE
-  ======================== */
-  .widget {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 18px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-
-  .widget::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-
-  .widget:hover::before { opacity: 1; }
-  .widget:hover { border-color: var(--border-active); }
-
-  .widget-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-
-  .widget-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-  }
-
-  .widget-badge {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    padding: 2px 8px;
-    border-radius: 2px;
-    border: 1px solid;
-  }
-
-  .badge-accent { border-color: var(--accent); color: var(--accent); }
-  .badge-green { border-color: var(--accent3); color: var(--accent3); }
-  .badge-purple { border-color: var(--accent2); color: var(--accent2); }
-  .badge-orange { border-color: var(--accent4); color: var(--accent4); }
-
-  /* ========================
-     TASK PANE
-  ======================== */
-  .task-pane {
-    grid-row: 1 / 3;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .task-pane .widget-body {
-    flex: 1;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
-  }
-
-  .task-input-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-
-  .task-input {
-    flex: 1;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 8px 12px;
-    color: var(--text-bright);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  .task-input:focus { border-color: var(--accent); }
-  .task-input::placeholder { color: var(--text-dim); }
-
-  .btn-add {
-    padding: 8px 14px;
-    background: rgba(0,200,255,0.1);
-    border: 1px solid var(--accent);
-    border-radius: 4px;
-    color: var(--accent);
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn-add:hover { background: rgba(0,200,255,0.2); box-shadow: var(--glow); }
-
-  .task-section-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-    margin-bottom: 8px;
-    margin-top: 4px;
-    text-transform: uppercase;
-  }
-
-  .task-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 9px 10px;
-    border-radius: 4px;
-    margin-bottom: 4px;
-    border: 1px solid transparent;
-    transition: all 0.15s;
-    cursor: pointer;
-    position: relative;
-  }
-
-  .task-item:hover {
-    background: rgba(0,200,255,0.04);
-    border-color: var(--border);
-  }
-
-  .task-item.done { opacity: 0.45; }
-
-  .task-checkbox {
-    width: 14px;
-    height: 14px;
-    border: 1px solid var(--text-dim);
-    border-radius: 2px;
-    flex-shrink: 0;
-    margin-top: 1px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    font-size: 9px;
-    color: var(--accent3);
-  }
-
-  .task-item.done .task-checkbox {
-    border-color: var(--accent3);
-    background: rgba(0,255,163,0.1);
-  }
-
-  .task-text {
-    font-size: 13px;
-    font-weight: 500;
-    flex: 1;
-    line-height: 1.4;
-    color: var(--text-bright);
-  }
-
-  .task-item.done .task-text {
-    text-decoration: line-through;
-    color: var(--text-dim);
-  }
-
-  .task-priority {
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    margin-top: 5px;
-  }
-
-  .priority-high { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
-  .priority-med { background: var(--accent4); box-shadow: 0 0 6px var(--accent4); }
-  .priority-low { background: var(--accent3); box-shadow: 0 0 6px var(--accent3); }
-
-  .task-delete {
-    opacity: 0;
-    font-size: 10px;
-    color: var(--text-dim);
-    cursor: pointer;
-    transition: all 0.15s;
-    padding: 0 4px;
-  }
-
-  .task-item:hover .task-delete { opacity: 1; }
-  .task-delete:hover { color: var(--danger); }
-
-  /* ========================
-     CENTER WIDGETS
-  ======================== */
-  .center-col {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  /* Stats Row */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-  }
-
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 14px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.2s;
-  }
-
-  .stat-card:hover { border-color: var(--border-active); }
-
-  .stat-value {
-    font-family: 'Orbitron', monospace;
-    font-size: 22px;
-    font-weight: 700;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-
-  .stat-label {
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-  }
-
-  .stat-bar {
-    height: 2px;
-    background: var(--border);
-    border-radius: 1px;
-    margin-top: 10px;
-    overflow: hidden;
-  }
-
-  .stat-bar-fill {
-    height: 100%;
-    border-radius: 1px;
-    transition: width 0.8s ease;
-  }
-
-  /* Habit Tracker */
-  .habit-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .habit-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .habit-item:hover { border-color: var(--border-active); }
-  .habit-item.done { border-color: rgba(0,255,163,0.3); background: rgba(0,255,163,0.04); }
-
-  .habit-icon { font-size: 16px; }
-
-  .habit-info { flex: 1; }
-
-  .habit-name {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-bright);
-  }
-
-  .habit-streak {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    color: var(--text-dim);
-    margin-top: 1px;
-  }
-
-  .habit-check {
-    width: 20px;
-    height: 20px;
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    transition: all 0.2s;
-    color: transparent;
-  }
-
-  .habit-item.done .habit-check {
-    border-color: var(--accent3);
-    background: rgba(0,255,163,0.15);
-    color: var(--accent3);
-  }
-
-  /* Focus Timer */
-  .focus-display {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    padding: 10px 0;
-  }
-
-  .timer-circle {
-    position: relative;
-    width: 100px;
-    height: 100px;
-  }
-
-  .timer-svg {
-    width: 100px;
-    height: 100px;
-    transform: rotate(-90deg);
-  }
-
-  .timer-bg { fill: none; stroke: var(--surface2); stroke-width: 3; }
-  .timer-fill { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
-
-  .timer-text {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .timer-num {
-    font-family: 'Orbitron', monospace;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--accent);
-    line-height: 1;
-  }
-
-  .timer-label {
-    font-size: 8px;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-  }
-
-  .focus-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: flex-start;
-  }
-
-  .focus-mode {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    color: var(--accent);
-    letter-spacing: 1px;
-  }
-
-  .focus-session {
-    font-size: 11px;
-    color: var(--text-dim);
-  }
-
-  .btn-group { display: flex; gap: 6px; }
-
-  .btn-sm {
-    padding: 6px 14px;
-    border-radius: 3px;
-    border: 1px solid;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn-accent {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(0,200,255,0.08);
-  }
-
-  .btn-accent:hover { background: rgba(0,200,255,0.18); box-shadow: var(--glow); }
-
-  .btn-ghost {
-    border-color: var(--border);
-    color: var(--text-dim);
-    background: transparent;
-  }
-
-  .btn-ghost:hover { border-color: var(--text-dim); color: var(--text); }
-
-  /* ========================
-     RIGHT COLUMN
-  ======================== */
-  .right-col {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  /* Mood / Energy */
-  .mood-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-  }
-
-  .mood-btn {
-    aspect-ratio: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--surface2);
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 16px;
-  }
-
-  .mood-btn:hover { border-color: var(--border-active); transform: scale(1.05); }
-  .mood-btn.selected { border-color: var(--accent); box-shadow: var(--glow); }
-
-  .mood-label {
-    font-size: 8px;
-    letter-spacing: 1px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-  }
-
-  /* Insight / Quote */
-  .insight-text {
-    font-style: italic;
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--text);
-    border-left: 2px solid var(--accent2);
-    padding-left: 12px;
-    margin-bottom: 10px;
-  }
-
-  .insight-source {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    color: var(--text-dim);
-    letter-spacing: 1px;
-  }
-
-  /* Nutrition mini tracker */
-  .nutrition-bars { display: flex; flex-direction: column; gap: 8px; }
-
-  .nutrition-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .nutrition-label {
-    font-size: 10px;
-    letter-spacing: 1px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    width: 60px;
-    flex-shrink: 0;
-  }
-
-  .nutrition-bar {
-    flex: 1;
-    height: 5px;
-    background: var(--surface2);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-
-  .nutrition-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.6s ease;
-  }
-
-  .nutrition-val {
-    font-family: 'Orbitron', monospace;
-    font-size: 9px;
-    color: var(--text-dim);
-    width: 36px;
-    text-align: right;
-    flex-shrink: 0;
-  }
-
-  /* ========================
-     INDIVIDUAL PAGES
-  ======================== */
-  .page-layout {
-    max-width: 900px;
-    margin: 0 auto;
-    animation: fadeIn 0.3s ease;
-  }
-
-  .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .page-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 3px;
-  }
-
-  .page-title span {
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  /* Todo full page */
-  .todo-columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 16px;
-  }
-
-  .kanban-col {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 16px;
-    min-height: 400px;
-  }
-
-  .kanban-header {
-    font-family: 'Orbitron', monospace;
-    font-size: 9px;
-    letter-spacing: 2px;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .kanban-count {
-    font-size: 9px;
-    padding: 1px 7px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-  }
-
-  /* Job applications page */
-  .job-form {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 20px;
-    margin-bottom: 20px;
-  }
-
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-
-  .form-group { display: flex; flex-direction: column; gap: 5px; }
-
-  .form-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 1.5px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-  }
-
-  .form-input, .form-select, .form-textarea {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 8px 12px;
-    color: var(--text-bright);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.2s;
-    width: 100%;
-  }
-
-  .form-input:focus, .form-select:focus, .form-textarea:focus {
-    border-color: var(--accent);
-  }
-
-  .form-select {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%234a6a8a' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 28px;
-    cursor: pointer;
-  }
-
-  .form-select option { background: var(--surface2); }
-
-  .job-table-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-
-  .job-table { width: 100%; border-collapse: collapse; }
-
-  .job-table th {
-    background: var(--surface2);
-    padding: 10px 14px;
-    text-align: left;
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 1.5px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .job-table td {
-    padding: 11px 14px;
-    font-size: 13px;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
-  }
-
-  .job-table tr:last-child td { border-bottom: none; }
-  .job-table tr:hover td { background: rgba(0,200,255,0.02); }
-
-  .status-pill {
-    padding: 2px 10px;
-    border-radius: 2px;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    display: inline-block;
-  }
-
-  .status-applied { background: rgba(0,200,255,0.1); color: var(--accent); border: 1px solid rgba(0,200,255,0.3); }
-  .status-interview { background: rgba(123,47,255,0.1); color: var(--accent2); border: 1px solid rgba(123,47,255,0.3); }
-  .status-offer { background: rgba(0,255,163,0.1); color: var(--accent3); border: 1px solid rgba(0,255,163,0.3); }
-  .status-rejected { background: rgba(255,51,102,0.1); color: var(--danger); border: 1px solid rgba(255,51,102,0.3); }
-  .status-watching { background: rgba(255,107,53,0.1); color: var(--accent4); border: 1px solid rgba(255,107,53,0.3); }
-
-  /* Fitness page */
-  .fitness-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  .exercise-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .exercise-item:hover { border-color: var(--border-active); }
-  .exercise-item.done { border-color: rgba(0,255,163,0.3); }
-
-  .exercise-icon { font-size: 18px; }
-
-  .exercise-name { font-size: 13px; font-weight: 600; color: var(--text-bright); }
-  .exercise-detail { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
-
-  .exercise-check-box {
-    margin-left: auto;
-    width: 22px;
-    height: 22px;
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    transition: all 0.2s;
-    color: transparent;
-    flex-shrink: 0;
-  }
-
-  .exercise-item.done .exercise-check-box {
-    border-color: var(--accent3);
-    background: rgba(0,255,163,0.12);
-    color: var(--accent3);
-  }
-
-  /* Vitamin page */
-  .vitamin-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-
-  .vitamin-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 16px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .vitamin-card:hover { border-color: var(--border-active); }
-
-  .vitamin-card.taken {
-    border-color: rgba(0,255,163,0.4);
-    background: rgba(0,255,163,0.04);
-  }
-
-  .vitamin-card.taken::after {
-    content: '✓ TAKEN';
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    font-family: 'Space Mono', monospace;
-    font-size: 8px;
-    color: var(--accent3);
-    letter-spacing: 1px;
-  }
-
-  .vitamin-emoji { font-size: 28px; margin-bottom: 8px; }
-  .vitamin-name { font-weight: 700; font-size: 14px; color: var(--text-bright); }
-  .vitamin-dose {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--text-dim);
-    margin-top: 4px;
-  }
-  .vitamin-benefit { font-size: 11px; color: var(--text-dim); margin-top: 6px; line-height: 1.4; }
-
-  /* Skincare page */
-  .skincare-routine {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-
-  .routine-block {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 18px;
-  }
-
-  .routine-time {
-    font-family: 'Orbitron', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--accent4);
-    margin-bottom: 14px;
-  }
-
-  .skincare-step {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .skincare-step.done { border-color: rgba(0,255,163,0.3); }
-  .step-num {
-    width: 24px;
-    height: 24px;
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Orbitron', monospace;
-    font-size: 9px;
-    color: var(--text-dim);
-    flex-shrink: 0;
-  }
-
-  .skincare-step.done .step-num {
-    border-color: var(--accent3);
-    color: var(--accent3);
-    background: rgba(0,255,163,0.1);
-  }
-
-  .step-name { font-size: 13px; font-weight: 600; color: var(--text-bright); }
-  .step-detail { font-size: 11px; color: var(--text-dim); }
-
-  /* ========================
-     MODAL
-  ======================== */
-  .modal-backdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(3,5,13,0.92);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .modal-backdrop.open { display: flex; }
-
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border-active);
-    border-radius: 8px;
-    padding: 28px;
-    width: 480px;
-    max-width: 90vw;
-    box-shadow: 0 0 60px rgba(0,200,255,0.1);
-    animation: fadeIn 0.2s ease;
-  }
-
-  .modal-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 12px;
-    letter-spacing: 2px;
-    margin-bottom: 20px;
-    color: var(--accent);
-  }
-
-  .modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
-  }
-
-  /* ========================
-     SCROLLBAR
-  ======================== */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  /* ========================
-     PROGRESS RING
-  ======================== */
-  .progress-section {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 12px 0;
-  }
-
-  .ring-wrap { position: relative; flex-shrink: 0; }
-
-  .ring-svg { transform: rotate(-90deg); }
-
-  .ring-bg { fill: none; stroke: var(--surface2); stroke-width: 5; }
-  .ring-fill { fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
-
-  .ring-center {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Orbitron', monospace;
-    font-size: 14px;
-    font-weight: 700;
-  }
-
-  .progress-info { flex: 1; }
-  .progress-title { font-size: 13px; font-weight: 600; color: var(--text-bright); margin-bottom: 4px; }
-  .progress-sub { font-size: 11px; color: var(--text-dim); }
-
-  /* Note taking */
-  .note-area {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 12px;
-    color: var(--text-bright);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    line-height: 1.6;
-    outline: none;
-    width: 100%;
-    resize: vertical;
-    min-height: 80px;
-    transition: border-color 0.2s;
-  }
-
-  .note-area:focus { border-color: var(--accent); }
-
-  /* Separator */
-  .sep {
-    height: 1px;
-    background: var(--border);
-    margin: 14px 0;
-  }
-
-  /* Full width buttons */
-  .btn-full {
-    width: 100%;
-    padding: 9px;
-    border-radius: 4px;
-    border: 1px solid var(--accent);
-    background: rgba(0,200,255,0.06);
-    color: var(--accent);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 8px;
-  }
-
-  .btn-full:hover { background: rgba(0,200,255,0.14); box-shadow: var(--glow); }
-
-  /* ========================
-     KANBAN CARDS EXTENDED
-  ======================== */
-  .kanban-task-list .task-item {
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 10px 12px;
-    background: var(--surface2);
-    user-select: none;
-  }
-
-  .kanban-task-list .task-item:hover {
-    border-color: var(--border-active);
-    background: rgba(0,200,255,0.03);
-  }
-
-  .todo-columns {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px;
-    align-items: start;
-  }
-
+:root {
+  --bg: #03050d;
+  --surface: #080d1a;
+  --surface2: #0d1526;
+  --border: rgba(0,200,255,0.12);
+  --border-active: rgba(0,200,255,0.45);
+  --accent: #00c8ff;
+  --accent2: #7b2fff;
+  --accent3: #00ffa3;
+  --accent4: #ff6b35;
+  --danger: #ff3366;
+  --text: #c8dff0;
+  --text-dim: #4a6a8a;
+  --text-bright: #e8f4ff;
+  --glow: 0 0 20px rgba(0,200,255,0.3);
+  --glow2: 0 0 20px rgba(123,47,255,0.3);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'Rajdhani',sans-serif; min-height:100vh; overflow-x:hidden; cursor:crosshair; }
+body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(rgba(0,200,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,0.03) 1px,transparent 1px); background-size:40px 40px; pointer-events:none; z-index:0; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.header { position:relative; z-index:10; display:flex; align-items:center; justify-content:space-between; padding:14px 28px; border-bottom:1px solid var(--border); background:rgba(3,5,13,0.97); }
+.logo { font-family:'Orbitron',monospace; font-size:18px; font-weight:900; letter-spacing:4px; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.logo-sub { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:3px; color:var(--text-dim); margin-top:2px; }
+.header-right { display:flex; align-items:center; gap:20px; }
+.status-dot { width:8px; height:8px; border-radius:50%; background:var(--accent3); box-shadow:0 0 8px var(--accent3); }
+.nav-container { position:relative; z-index:10; display:flex; align-items:center; gap:4px; padding:10px 28px; border-bottom:1px solid var(--border); background:rgba(8,13,26,0.99); overflow-x:auto; scrollbar-width:none; }
+.nav-container::-webkit-scrollbar { display:none; }
+.nav-tab { position:relative; display:flex; align-items:center; gap:7px; padding:7px 16px; border:1px solid var(--border); border-radius:4px; background:var(--surface); color:var(--text-dim); font-family:'Rajdhani',sans-serif; font-size:12px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; transition:all 0.2s; white-space:nowrap; user-select:none; }
+.nav-tab:hover { border-color:var(--border-active); color:var(--accent); background:rgba(0,200,255,0.05); box-shadow:var(--glow); }
+.nav-tab.active { border-color:var(--accent); color:var(--accent); background:rgba(0,200,255,0.08); box-shadow:var(--glow); }
+.nav-tab.drag-over { border-color:var(--accent2); background:rgba(123,47,255,0.12); }
+.tab-icon { font-size:13px; }
+.drag-handle { display:inline-flex; flex-direction:column; gap:2px; cursor:grab; opacity:0.4; margin-right:2px; }
+.drag-handle span { display:block; width:10px; height:1px; background:currentColor; }
+.nav-add-btn { padding:7px 12px; border:1px dashed var(--border); border-radius:4px; background:transparent; color:var(--text-dim); font-size:14px; cursor:pointer; transition:all 0.2s; flex-shrink:0; }
+.nav-add-btn:hover { border-color:var(--accent3); color:var(--accent3); }
+.main { position:relative; z-index:5; padding:24px 28px; animation:fadeIn 0.5s ease; min-height:calc(100vh - 120px); background:var(--bg); }
+.page { display:none; animation:fadeIn 0.3s ease; }
+.page.active { display:block; }
+.dashboard-grid { display:grid; grid-template-columns:320px 1fr 260px; gap:16px; height:calc(100vh - 170px); }
+.widget { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:18px; position:relative; overflow:hidden; transition:border-color 0.2s; }
+.widget::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--accent),transparent); opacity:0; transition:opacity 0.3s; }
+.widget:hover::before { opacity:1; }
+.widget:hover { border-color:var(--border-active); }
+.widget-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.widget-title { font-family:'Orbitron',monospace; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim); }
+.widget-badge { font-family:'Space Mono',monospace; font-size:9px; padding:2px 8px; border-radius:2px; border:1px solid; }
+.badge-accent { border-color:var(--accent); color:var(--accent); }
+.badge-green { border-color:var(--accent3); color:var(--accent3); }
+.badge-purple { border-color:var(--accent2); color:var(--accent2); }
+.badge-orange { border-color:var(--accent4); color:var(--accent4); }
+.task-pane { grid-row:1/3; display:flex; flex-direction:column; overflow:hidden; }
+.task-pane .widget-body { flex:1; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+.task-input-row { display:flex; gap:8px; margin-bottom:8px; }
+.task-input { flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:8px 12px; color:var(--text-bright); font-family:'Rajdhani',sans-serif; font-size:13px; outline:none; transition:border-color 0.2s; }
+.task-input:focus { border-color:var(--accent); }
+.task-input::placeholder { color:var(--text-dim); }
+.btn-add { padding:8px 14px; background:rgba(0,200,255,0.1); border:1px solid var(--accent); border-radius:4px; color:var(--accent); font-size:16px; cursor:pointer; transition:all 0.2s; }
+.btn-add:hover { background:rgba(0,200,255,0.2); box-shadow:var(--glow); }
+.task-section-label { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--text-dim); margin-bottom:8px; margin-top:4px; text-transform:uppercase; }
+.task-item { display:flex; align-items:flex-start; gap:10px; padding:9px 10px; border-radius:4px; margin-bottom:4px; border:1px solid transparent; transition:all 0.15s; cursor:pointer; position:relative; }
+.task-item:hover { background:rgba(0,200,255,0.04); border-color:var(--border); }
+.task-item.done { opacity:0.45; }
+.task-item.urgent-important { background:rgba(255,51,102,0.12) !important; border:1px solid rgba(255,51,102,0.5) !important; box-shadow:0 0 8px rgba(255,51,102,0.15); }
+.task-item.urgent-important .task-text { color:#ff6b8a !important; }
+.task-checkbox { width:14px; height:14px; border:1px solid var(--text-dim); border-radius:2px; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; font-size:9px; color:var(--accent3); }
+.task-item.done .task-checkbox { border-color:var(--accent3); background:rgba(0,255,163,0.1); }
+.task-text { font-size:13px; font-weight:500; flex:1; line-height:1.4; color:var(--text-bright); }
+.task-item.done .task-text { text-decoration:line-through; color:var(--text-dim); }
+.task-priority { width:4px; height:4px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.priority-high { background:var(--danger); box-shadow:0 0 6px var(--danger); }
+.priority-med { background:var(--accent4); box-shadow:0 0 6px var(--accent4); }
+.priority-low { background:var(--accent3); box-shadow:0 0 6px var(--accent3); }
+.task-actions { display:flex; gap:4px; opacity:0; transition:opacity 0.15s; flex-shrink:0; }
+.task-item:hover .task-actions { opacity:1; }
+.task-act-btn { font-size:10px; color:var(--text-dim); cursor:pointer; padding:0 4px; transition:all 0.15s; background:none; border:none; line-height:1; }
+.task-act-btn:hover { color:var(--accent); }
+.task-act-btn.del:hover { color:var(--danger); }
+.task-repeat-badge { font-family:'Space Mono',monospace; font-size:7px; color:var(--accent2); border:1px solid var(--accent2); border-radius:2px; padding:1px 4px; flex-shrink:0; margin-top:2px; letter-spacing:0.5px; }
+.critical-note { text-align:center; padding:10px 6px 4px; font-family:'Space Mono',monospace; font-size:9px; color:var(--text-dim); letter-spacing:1px; border-top:1px solid var(--border); margin-top:8px; }
+.critical-note span { color:var(--accent4); }
+.center-col { display:flex; flex-direction:column; gap:16px; }
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:14px; text-align:center; position:relative; overflow:hidden; transition:all 0.2s; }
+.stat-card:hover { border-color:var(--border-active); }
+.stat-value { font-family:'Orbitron',monospace; font-size:22px; font-weight:700; line-height:1; margin-bottom:4px; }
+.stat-label { font-size:10px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; }
+.stat-bar { height:2px; background:var(--border); border-radius:1px; margin-top:10px; overflow:hidden; }
+.stat-bar-fill { height:100%; border-radius:1px; transition:width 0.8s ease; }
+.focus-display { display:flex; align-items:center; justify-content:center; gap:20px; padding:10px 0; }
+.timer-circle { position:relative; width:100px; height:100px; }
+.timer-svg { width:100px; height:100px; transform:rotate(-90deg); }
+.timer-bg { fill:none; stroke:var(--surface2); stroke-width:3; }
+.timer-fill { fill:none; stroke:var(--accent); stroke-width:3; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.timer-text { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.timer-num { font-family:'Orbitron',monospace; font-size:20px; font-weight:700; color:var(--accent); line-height:1; }
+.timer-label { font-size:8px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; }
+.focus-controls { display:flex; flex-direction:column; gap:8px; align-items:flex-start; }
+.focus-mode { font-family:'Space Mono',monospace; font-size:9px; color:var(--accent); letter-spacing:1px; }
+.focus-session { font-size:11px; color:var(--text-dim); }
+.btn-group { display:flex; gap:6px; }
+.btn-sm { padding:6px 14px; border-radius:3px; border:1px solid; font-family:'Rajdhani',sans-serif; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; transition:all 0.2s; }
+.btn-accent { border-color:var(--accent); color:var(--accent); background:rgba(0,200,255,0.08); }
+.btn-accent:hover { background:rgba(0,200,255,0.18); box-shadow:var(--glow); }
+.btn-ghost { border-color:var(--border); color:var(--text-dim); background:transparent; }
+.btn-ghost:hover { border-color:var(--text-dim); color:var(--text); }
+.right-col { display:flex; flex-direction:column; gap:16px; }
+.mood-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+.mood-btn { aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; border:1px solid var(--border); border-radius:4px; background:var(--surface2); cursor:pointer; transition:all 0.2s; font-size:16px; }
+.mood-btn:hover { border-color:var(--border-active); transform:scale(1.05); }
+.mood-btn.selected { border-color:var(--accent); box-shadow:var(--glow); }
+.mood-label { font-size:8px; letter-spacing:1px; color:var(--text-dim); text-transform:uppercase; }
+.insight-text { font-style:italic; font-size:13px; line-height:1.6; color:var(--text); border-left:2px solid var(--accent2); padding-left:12px; margin-bottom:10px; }
+.insight-source { font-family:'Space Mono',monospace; font-size:9px; color:var(--text-dim); letter-spacing:1px; }
+.page-layout { max-width:900px; margin:0 auto; animation:fadeIn 0.3s ease; }
+.page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+.page-title { font-family:'Orbitron',monospace; font-size:18px; font-weight:700; letter-spacing:3px; }
+.page-title span { background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.todo-columns { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; align-items:start; }
+.kanban-col { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:16px; min-height:400px; }
+.kanban-header { font-family:'Orbitron',monospace; font-size:9px; letter-spacing:2px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; }
+.kanban-count { font-size:9px; padding:1px 7px; border-radius:10px; border:1px solid var(--border); color:var(--text-dim); }
+.job-form { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:20px; margin-bottom:20px; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+.form-group { display:flex; flex-direction:column; gap:5px; }
+.form-label { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; }
+.form-input,.form-select,.form-textarea { background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:8px 12px; color:var(--text-bright); font-family:'Rajdhani',sans-serif; font-size:13px; outline:none; transition:border-color 0.2s; width:100%; }
+.form-input:focus,.form-select:focus,.form-textarea:focus { border-color:var(--accent); }
+.form-select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%234a6a8a' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; padding-right:28px; cursor:pointer; }
+.form-select option { background:var(--surface2); }
+.job-table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+.job-table { width:100%; border-collapse:collapse; }
+.job-table th { background:var(--surface2); padding:10px 14px; text-align:left; font-family:'Space Mono',monospace; font-size:9px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; border-bottom:1px solid var(--border); }
+.job-table td { padding:11px 14px; font-size:13px; border-bottom:1px solid var(--border); vertical-align:middle; }
+.job-table tr:last-child td { border-bottom:none; }
+.job-table tr:hover td { background:rgba(0,200,255,0.02); }
+.status-pill { padding:2px 10px; border-radius:2px; font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; display:inline-block; }
+.status-applied { background:rgba(0,200,255,0.1); color:var(--accent); border:1px solid rgba(0,200,255,0.3); }
+.status-interview { background:rgba(123,47,255,0.1); color:var(--accent2); border:1px solid rgba(123,47,255,0.3); }
+.status-offer { background:rgba(0,255,163,0.1); color:var(--accent3); border:1px solid rgba(0,255,163,0.3); }
+.status-rejected { background:rgba(255,51,102,0.1); color:var(--danger); border:1px solid rgba(255,51,102,0.3); }
+.status-watching { background:rgba(255,107,53,0.1); color:var(--accent4); border:1px solid rgba(255,107,53,0.3); }
+.fitness-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.exercise-item { display:flex; align-items:center; gap:12px; padding:10px; background:var(--surface2); border:1px solid var(--border); border-radius:4px; margin-bottom:8px; cursor:pointer; transition:all 0.2s; }
+.exercise-item:hover { border-color:var(--border-active); }
+.exercise-item.done { border-color:rgba(0,255,163,0.3); }
+.exercise-icon { font-size:18px; }
+.exercise-name { font-size:13px; font-weight:600; color:var(--text-bright); }
+.exercise-detail { font-size:11px; color:var(--text-dim); margin-top:1px; }
+.exercise-check-box { margin-left:auto; width:22px; height:22px; border:1px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; transition:all 0.2s; color:transparent; flex-shrink:0; }
+.exercise-item.done .exercise-check-box { border-color:var(--accent3); background:rgba(0,255,163,0.12); color:var(--accent3); }
+.vitamin-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.vitamin-card { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:16px; text-align:center; cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; }
+.vitamin-card:hover { border-color:var(--border-active); }
+.vitamin-card.taken { border-color:rgba(0,255,163,0.4); background:rgba(0,255,163,0.04); }
+.vitamin-card.taken::after { content:'✓ TAKEN'; position:absolute; top:8px; right:8px; font-family:'Space Mono',monospace; font-size:8px; color:var(--accent3); letter-spacing:1px; }
+.vitamin-emoji { font-size:28px; margin-bottom:8px; }
+.vitamin-name { font-weight:700; font-size:14px; color:var(--text-bright); }
+.vitamin-dose { font-family:'Space Mono',monospace; font-size:10px; color:var(--accent); margin-top:4px; }
+.vitamin-benefit { font-size:11px; color:var(--text-dim); margin-top:6px; line-height:1.4; }
+.skincare-routine { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.routine-block { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:18px; }
+.routine-time { font-family:'Orbitron',monospace; font-size:10px; letter-spacing:2px; color:var(--accent4); margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; }
+.skincare-step { display:flex; align-items:center; gap:12px; padding:10px; background:var(--surface2); border:1px solid var(--border); border-radius:4px; margin-bottom:8px; cursor:pointer; transition:all 0.2s; }
+.skincare-step.done { border-color:rgba(0,255,163,0.3); }
+.step-num { width:24px; height:24px; border:1px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Orbitron',monospace; font-size:9px; color:var(--text-dim); flex-shrink:0; }
+.skincare-step.done .step-num { border-color:var(--accent3); color:var(--accent3); background:rgba(0,255,163,0.1); }
+.step-name { font-size:13px; font-weight:600; color:var(--text-bright); }
+.step-detail { font-size:11px; color:var(--text-dim); }
+.step-edit-btn { margin-left:auto; opacity:0; font-size:11px; color:var(--text-dim); cursor:pointer; padding:2px 5px; border:1px solid var(--border); border-radius:3px; background:none; transition:all 0.2s; flex-shrink:0; }
+.skincare-step:hover .step-edit-btn { opacity:1; }
+.step-edit-btn:hover { color:var(--accent); border-color:var(--accent); }
+.tracker-chart { width:100%; }
+.tracker-bar-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.tracker-day-label { font-family:'Space Mono',monospace; font-size:8px; color:var(--text-dim); width:28px; flex-shrink:0; text-align:right; }
+.tracker-bar { flex:1; height:14px; background:var(--surface2); border-radius:2px; overflow:hidden; position:relative; }
+.tracker-bar-fill { height:100%; border-radius:2px; transition:width 0.5s ease; }
+.tracker-pct { font-family:'Space Mono',monospace; font-size:8px; color:var(--text-dim); width:30px; text-align:right; flex-shrink:0; }
+.modal-backdrop { display:none; position:fixed; inset:0; background:rgba(3,5,13,0.92); z-index:100; align-items:center; justify-content:center; }
+.modal-backdrop.open { display:flex; }
+.modal { background:var(--surface); border:1px solid var(--border-active); border-radius:8px; padding:28px; width:480px; max-width:90vw; box-shadow:0 0 60px rgba(0,200,255,0.1); animation:fadeIn 0.2s ease; max-height:85vh; overflow-y:auto; }
+.modal-title { font-family:'Orbitron',monospace; font-size:12px; letter-spacing:2px; margin-bottom:20px; color:var(--accent); }
+.modal-footer { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+.progress-section { display:flex; align-items:center; gap:16px; padding:12px 0; }
+.ring-wrap { position:relative; flex-shrink:0; }
+.ring-svg { transform:rotate(-90deg); }
+.ring-bg { fill:none; stroke:var(--surface2); stroke-width:5; }
+.ring-fill { fill:none; stroke-width:5; stroke-linecap:round; transition:stroke-dashoffset 1s ease; }
+.ring-center { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Orbitron',monospace; font-size:14px; font-weight:700; }
+.progress-info { flex:1; }
+.progress-title { font-size:13px; font-weight:600; color:var(--text-bright); margin-bottom:4px; }
+.progress-sub { font-size:11px; color:var(--text-dim); }
+.note-area { background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:12px; color:var(--text-bright); font-family:'Rajdhani',sans-serif; font-size:13px; line-height:1.6; outline:none; width:100%; resize:vertical; min-height:80px; transition:border-color 0.2s; }
+.note-area:focus { border-color:var(--accent); }
+.sep { height:1px; background:var(--border); margin:14px 0; }
+.btn-full { width:100%; padding:9px; border-radius:4px; border:1px solid var(--accent); background:rgba(0,200,255,0.06); color:var(--accent); font-family:'Rajdhani',sans-serif; font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:all 0.2s; margin-top:8px; }
+.btn-full:hover { background:rgba(0,200,255,0.14); box-shadow:var(--glow); }
+.kanban-task-list .task-item { border:1px solid var(--border); border-radius:4px; padding:10px 12px; background:var(--surface2); user-select:none; }
+.kanban-task-list .task-item:hover { border-color:var(--border-active); background:rgba(0,200,255,0.03); }
+.kanban-task-list .task-item.urgent-important { background:rgba(255,51,102,0.12) !important; border:1px solid rgba(255,51,102,0.5) !important; }
+.edit-inline { background:var(--surface2); border:1px solid var(--accent); border-radius:3px; color:var(--text-bright); font-family:'Rajdhani',sans-serif; font-size:13px; padding:3px 8px; outline:none; width:100%; }
+.pill-btn { padding:3px 10px; border-radius:3px; border:1px solid var(--border); background:transparent; color:var(--text-dim); font-size:10px; cursor:pointer; transition:all 0.2s; font-family:'Space Mono',monospace; letter-spacing:0.5px; }
+.pill-btn:hover { border-color:var(--accent); color:var(--accent); }
+.pill-btn.active-pill { border-color:var(--accent3); color:var(--accent3); }
 </style>
 </head>
 <body>
-
-<!-- ==================== HEADER ==================== -->
 <header class="header">
   <div>
     <div class="logo">J.A.R.V.I.S</div>
-    <div class="logo-sub">personal intelligence system v7.4</div>
+    <div class="logo-sub">personal intelligence system v<span id="sysVersion">7.4</span></div>
   </div>
   <div class="header-right" style="gap:10px;">
     <div id="drive-status" style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:1px;display:flex;align-items:center;gap:6px;">
@@ -1218,414 +230,338 @@
       <span id="drive-label">NOT CONNECTED</span>
     </div>
     <button onclick="toggleDriveConnection()" id="drive-btn" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:4px 10px;cursor:pointer;">CONNECT DRIVE</button>
-    <button onclick="manualSave()" id="save-btn" style="display:none;background:none;border:1px solid var(--accent3);border-radius:3px;color:var(--accent3);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:4px 10px;cursor:pointer;" title="Save to Google Drive">SAVE ↑</button>
-    <button onclick="exportData()" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:4px 10px;cursor:pointer;" title="Export JSON backup">EXPORT</button>
-    <label style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:5px 10px;cursor:pointer;" title="Import from JSON">
+    <button onclick="manualSave()" id="save-btn" style="display:none;background:none;border:1px solid var(--accent3);border-radius:3px;color:var(--accent3);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:4px 10px;cursor:pointer;">SAVE ↑</button>
+    <button onclick="exportData()" style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:4px 10px;cursor:pointer;">EXPORT</button>
+    <label style="background:none;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:5px 10px;cursor:pointer;">
       IMPORT<input type="file" accept=".json" onchange="importData(event)" style="display:none;">
     </label>
     <div class="status-dot"></div>
   </div>
 </header>
-
-<!-- ==================== NAV TABS ==================== -->
-<nav class="nav-container" id="navContainer">
-  <!-- Tabs are rendered by JS for full draggability -->
-</nav>
-
-<!-- ==================== PAGES ==================== -->
+<nav class="nav-container" id="navContainer"></nav>
 <main class="main">
 
-  <!-- DASHBOARD -->
-  <div class="page active" id="page-dashboard">
-    <div class="dashboard-grid">
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="dashboard-grid">
+    <!-- LEFT: Task Pane -->
+    <div class="widget task-pane">
+      <div class="widget-header">
+        <div class="widget-title">Daily Tasks</div>
+        <div class="widget-badge badge-accent" id="task-count">0 remaining</div>
+      </div>
+      <div class="task-input-row">
+        <input type="text" class="task-input" id="taskInput" placeholder="Add task...">
+        <select class="form-select" id="taskPriority" style="width:90px;padding:8px 28px 8px 8px;font-size:11px;">
+          <option value="high">🔴 High</option>
+          <option value="med" selected>🟠 Med</option>
+          <option value="low">🟢 Low</option>
+        </select>
+        <button class="btn-add" onclick="addTask()">+</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;">
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-dim);cursor:pointer;">
+          <input type="checkbox" id="taskRepeat" style="accent-color:var(--accent2);"> <span style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;">REPEATS DAILY</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-dim);cursor:pointer;margin-left:8px;">
+          <input type="checkbox" id="taskUrgent" style="accent-color:var(--danger);"> <span style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;">URGENT</span>
+        </label>
+      </div>
+      <div class="task-section-label">TODAY'S TASKS</div>
+      <div id="taskList"></div>
+      <div class="critical-note">3 critical tasks for today — <span>everything else is noise</span></div>
+      <div class="sep"></div>
+      <div class="task-section-label">QUICK NOTE</div>
+      <textarea class="note-area" placeholder="Brain dump, thought fragments, ideas…" id="quickNote"></textarea>
+    </div>
 
-      <!-- LEFT: Task Pane -->
-      <div class="widget task-pane">
+    <!-- CENTER -->
+    <div class="center-col">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--accent);" id="stat-tasks-done">0</div>
+          <div class="stat-label">Tasks Done</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="bar-tasks" style="width:0%;background:var(--accent);"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--accent3);" id="stat-skin-streak">0</div>
+          <div class="stat-label">Skin Days</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="bar-skin" style="width:0%;background:var(--accent3);"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--accent2);" id="stat-fit-streak">0</div>
+          <div class="stat-label">Fit Days</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="bar-fit" style="width:0%;background:var(--accent2);"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--accent4);" id="stat-supp-streak">0</div>
+          <div class="stat-label">Supp Days</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="bar-supp" style="width:0%;background:var(--accent4);"></div></div>
+        </div>
+      </div>
+
+      <!-- Focus Timer -->
+      <div class="widget">
         <div class="widget-header">
-          <div class="widget-title">Daily Tasks</div>
-          <div class="widget-badge badge-accent" id="task-count">0 remaining</div>
+          <div class="widget-title">Focus Engine</div>
+          <div class="widget-badge badge-purple" id="pomodoro-count">Session 1</div>
         </div>
-        <div class="task-input-row">
-          <input type="text" class="task-input" id="taskInput" placeholder="Add task...">
-          <select class="form-select" id="taskPriority" style="width:90px; padding:8px 28px 8px 8px; font-size:11px;">
-            <option value="high">🔴 High</option>
-            <option value="med" selected>🟠 Med</option>
-            <option value="low">🟢 Low</option>
-          </select>
-          <button class="btn-add" onclick="addTask()">+</button>
+        <div class="focus-display">
+          <div class="timer-circle">
+            <svg class="timer-svg" viewBox="0 0 100 100">
+              <circle class="timer-bg" cx="50" cy="50" r="44"/>
+              <circle class="timer-fill" cx="50" cy="50" r="44" id="timerArc" stroke-dasharray="276.46" stroke-dashoffset="0"/>
+            </svg>
+            <div class="timer-text">
+              <div class="timer-num" id="timerDisplay">25:00</div>
+              <div class="timer-label" id="timerMode">FOCUS</div>
+            </div>
+          </div>
+          <div class="focus-controls">
+            <div class="focus-mode" id="focusStatus">● READY</div>
+            <div class="focus-session" id="focusTask">No task selected</div>
+            <div class="btn-group">
+              <button class="btn-sm btn-accent" id="timerStartBtn" onclick="toggleTimer()">START</button>
+              <button class="btn-sm btn-ghost" onclick="resetTimer()">RESET</button>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:4px;">
+              <button class="btn-sm btn-ghost" onclick="setTimer(25,'FOCUS')" style="font-size:9px;padding:4px 8px;">25m</button>
+              <button class="btn-sm btn-ghost" onclick="setTimer(5,'BREAK')" style="font-size:9px;padding:4px 8px;">5m</button>
+              <button class="btn-sm btn-ghost" onclick="setTimer(90,'DEEP WORK')" style="font-size:9px;padding:4px 8px;">90m</button>
+            </div>
+          </div>
         </div>
-        <div class="task-section-label">PINNED — TODAY</div>
-        <div id="taskList"></div>
+      </div>
+
+      <!-- Skincare Tracker Chart -->
+      <div class="widget" style="flex:1;">
+        <div class="widget-header">
+          <div class="widget-title">Routine Adherence</div>
+          <div class="widget-badge badge-purple" id="routine-streak-badge">0 day streak</div>
+        </div>
+        <div id="routineChart"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right-col">
+      <div class="widget">
+        <div class="widget-header"><div class="widget-title">Biometric State</div></div>
+        <div style="font-size:10px;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px;text-transform:uppercase;">Mood</div>
+        <div class="mood-grid">
+          <div class="mood-btn" onclick="selectMood(this,'😤')"><span>😤</span><span class="mood-label">Drive</span></div>
+          <div class="mood-btn" onclick="selectMood(this,'😌')"><span>😌</span><span class="mood-label">Calm</span></div>
+          <div class="mood-btn" onclick="selectMood(this,'🌀')"><span>🌀</span><span class="mood-label">Flow</span></div>
+          <div class="mood-btn" onclick="selectMood(this,'😴')"><span>😴</span><span class="mood-label">Low</span></div>
+          <div class="mood-btn" onclick="selectMood(this,'⚡')"><span>⚡</span><span class="mood-label">Peak</span></div>
+        </div>
         <div class="sep"></div>
-        <div class="task-section-label">QUICK NOTE</div>
-        <textarea class="note-area" placeholder="Brain dump, thought fragments, ideas…" id="quickNote"></textarea>
-      </div>
-
-      <!-- CENTER -->
-      <div class="center-col">
-
-        <!-- Stats Row -->
-        <div class="stats-row">
-          <div class="stat-card">
-            <div class="stat-value" style="color: var(--accent);" id="stat-tasks-done">0</div>
-            <div class="stat-label">Tasks Done</div>
-            <div class="stat-bar"><div class="stat-bar-fill" id="bar-tasks" style="width:0%; background: var(--accent);"></div></div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" style="color: var(--accent3);" id="stat-habits">0</div>
-            <div class="stat-label">Habits</div>
-            <div class="stat-bar"><div class="stat-bar-fill" id="bar-habits" style="width:0%; background: var(--accent3);"></div></div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" style="color: var(--accent2);">3</div>
-            <div class="stat-label">Focus Hrs</div>
-            <div class="stat-bar"><div class="stat-bar-fill" style="width:37%; background: var(--accent2);"></div></div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" style="color: var(--accent4);">82</div>
-            <div class="stat-label">HRV Score</div>
-            <div class="stat-bar"><div class="stat-bar-fill" style="width:82%; background: var(--accent4);"></div></div>
-          </div>
-        </div>
-
-        <!-- Focus Timer -->
-        <div class="widget">
-          <div class="widget-header">
-            <div class="widget-title">Focus Engine</div>
-            <div class="widget-badge badge-purple" id="pomodoro-count">Session 1</div>
-          </div>
-          <div class="focus-display">
-            <div class="timer-circle">
-              <svg class="timer-svg" viewBox="0 0 100 100">
-                <circle class="timer-bg" cx="50" cy="50" r="44"/>
-                <circle class="timer-fill" cx="50" cy="50" r="44" id="timerArc"
-                  stroke-dasharray="276.46"
-                  stroke-dashoffset="0"/>
-              </svg>
-              <div class="timer-text">
-                <div class="timer-num" id="timerDisplay">25:00</div>
-                <div class="timer-label" id="timerMode">FOCUS</div>
-              </div>
-            </div>
-            <div class="focus-controls">
-              <div class="focus-mode" id="focusStatus">● READY</div>
-              <div class="focus-session" id="focusTask">No task selected</div>
-              <div class="btn-group">
-                <button class="btn-sm btn-accent" id="timerStartBtn" onclick="toggleTimer()">START</button>
-                <button class="btn-sm btn-ghost" onclick="resetTimer()">RESET</button>
-              </div>
-              <div style="display:flex;gap:8px;margin-top:4px;">
-                <button class="btn-sm btn-ghost" onclick="setTimer(25,'FOCUS')" style="font-size:9px;padding:4px 8px;">25m</button>
-                <button class="btn-sm btn-ghost" onclick="setTimer(5,'BREAK')" style="font-size:9px;padding:4px 8px;">5m</button>
-                <button class="btn-sm btn-ghost" onclick="setTimer(90,'DEEP WORK')" style="font-size:9px;padding:4px 8px;">90m</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Daily Habits -->
-        <div class="widget" style="flex:1;">
-          <div class="widget-header">
-            <div class="widget-title">Habit Matrix</div>
-            <div class="widget-badge badge-green" id="habit-progress-badge">0 / 8</div>
-          </div>
-          <div class="habit-grid" id="habitGrid">
-            <!-- Rendered by JS -->
-          </div>
-        </div>
-
-      </div>
-
-      <!-- RIGHT -->
-      <div class="right-col">
-
-        <!-- Mood -->
-        <div class="widget">
-          <div class="widget-header">
-            <div class="widget-title">Biometric State</div>
-          </div>
-          <div style="font-size:10px;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px;text-transform:uppercase;">Mood</div>
-          <div class="mood-grid">
-            <div class="mood-btn" onclick="selectMood(this,'😤')"><span>😤</span><span class="mood-label">Drive</span></div>
-            <div class="mood-btn" onclick="selectMood(this,'😌')"><span>😌</span><span class="mood-label">Calm</span></div>
-            <div class="mood-btn" onclick="selectMood(this,'🌀')"><span>🌀</span><span class="mood-label">Flow</span></div>
-            <div class="mood-btn" onclick="selectMood(this,'😴')"><span>😴</span><span class="mood-label">Low</span></div>
-            <div class="mood-btn" onclick="selectMood(this,'⚡')"><span>⚡</span><span class="mood-label">Peak</span></div>
-          </div>
-          <div class="sep"></div>
-          <div style="font-size:10px;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px;text-transform:uppercase;">Energy</div>
-          <div style="display:flex;gap:6px;">
-            <button class="btn-sm btn-ghost" onclick="setEnergy(this,1)" style="flex:1;font-size:9px;">▪▫▫▫▫</button>
-            <button class="btn-sm btn-ghost" onclick="setEnergy(this,2)" style="flex:1;font-size:9px;">▪▪▫▫▫</button>
-            <button class="btn-sm btn-ghost" onclick="setEnergy(this,3)" style="flex:1;font-size:9px;">▪▪▪▫▫</button>
-            <button class="btn-sm btn-ghost" onclick="setEnergy(this,4)" style="flex:1;font-size:9px;">▪▪▪▪▫</button>
-            <button class="btn-sm btn-ghost" onclick="setEnergy(this,5)" style="flex:1;font-size:9px;">▪▪▪▪▪</button>
-          </div>
-        </div>
-
-        <!-- Insight -->
-        <div class="widget">
-          <div class="widget-header">
-            <div class="widget-title">Daily Insight</div>
-            <button style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:11px;" onclick="cycleInsight()">↻</button>
-          </div>
-          <div class="insight-text" id="insightText"></div>
-          <div class="insight-source" id="insightSource"></div>
-        </div>
-
-        <!-- Nutrition quick -->
-        <div class="widget">
-          <div class="widget-header">
-            <div class="widget-title">Nutrition</div>
-            <div class="widget-badge badge-orange">TODAY</div>
-          </div>
-          <div class="nutrition-bars">
-            <div class="nutrition-row">
-              <span class="nutrition-label">Protein</span>
-              <div class="nutrition-bar"><div class="nutrition-fill" style="width:68%;background:var(--accent);"></div></div>
-              <span class="nutrition-val">136g</span>
-            </div>
-            <div class="nutrition-row">
-              <span class="nutrition-label">Carbs</span>
-              <div class="nutrition-bar"><div class="nutrition-fill" style="width:45%;background:var(--accent2);"></div></div>
-              <span class="nutrition-val">112g</span>
-            </div>
-            <div class="nutrition-row">
-              <span class="nutrition-label">Fats</span>
-              <div class="nutrition-bar"><div class="nutrition-fill" style="width:72%;background:var(--accent4);"></div></div>
-              <span class="nutrition-val">58g</span>
-            </div>
-            <div class="nutrition-row">
-              <span class="nutrition-label">Water</span>
-              <div class="nutrition-bar"><div class="nutrition-fill" style="width:55%;background:var(--accent3);"></div></div>
-              <span class="nutrition-val">1.6L</span>
-            </div>
-            <div class="nutrition-row">
-              <span class="nutrition-label">Sleep</span>
-              <div class="nutrition-bar"><div class="nutrition-fill" style="width:87%;background:#c0a0ff;"></div></div>
-              <span class="nutrition-val">7.2h</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <!-- TO DO LIST PAGE -->
-  <div class="page" id="page-todo">
-    <div class="page-layout" style="max-width:1200px;">
-      <div class="page-header">
-        <div class="page-title"><span>TASK</span> COMMAND</div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:1px;" id="todo-summary">0 tasks</div>
-          <button class="btn-sm btn-ghost" onclick="clearDoneTasks()" style="font-size:10px;padding:5px 10px;">CLEAR DONE</button>
-          <button class="btn-sm btn-ghost" onclick="openColumnModal()" style="font-size:10px;padding:5px 10px;">+ COLUMN</button>
-          <button class="btn-sm btn-accent" onclick="openAddTaskModal()">+ NEW TASK</button>
+        <div style="font-size:10px;letter-spacing:1px;color:var(--text-dim);margin-bottom:8px;text-transform:uppercase;">Energy</div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn-sm btn-ghost" onclick="setEnergy(this,1)" style="flex:1;font-size:9px;">▪▫▫▫▫</button>
+          <button class="btn-sm btn-ghost" onclick="setEnergy(this,2)" style="flex:1;font-size:9px;">▪▪▫▫▫</button>
+          <button class="btn-sm btn-ghost" onclick="setEnergy(this,3)" style="flex:1;font-size:9px;">▪▪▪▫▫</button>
+          <button class="btn-sm btn-ghost" onclick="setEnergy(this,4)" style="flex:1;font-size:9px;">▪▪▪▪▫</button>
+          <button class="btn-sm btn-ghost" onclick="setEnergy(this,5)" style="flex:1;font-size:9px;">▪▪▪▪▪</button>
         </div>
       </div>
-      <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
-        <input type="text" id="todoSearch" class="task-input" placeholder="Search tasks..." oninput="renderKanban()" style="max-width:200px;">
-        <select class="form-select" id="todoFilterPriority" onchange="renderKanban()" style="width:130px;padding:7px 28px 7px 10px;font-size:11px;">
-          <option value="">All priorities</option>
-          <option value="high">High</option>
-          <option value="med">Medium</option>
-          <option value="low">Low</option>
-        </select>
-        <select class="form-select" id="todoSort" onchange="renderKanban()" style="width:140px;padding:7px 28px 7px 10px;font-size:11px;">
-          <option value="manual">Manual order</option>
-          <option value="priority">By priority</option>
-          <option value="alpha">Alphabetical</option>
-          <option value="due">By due date</option>
-        </select>
-        <div style="margin-left:auto;font-family:'Space Mono',monospace;font-size:9px;color:var(--text-dim);">DRAG TO REORDER | DBL-CLICK TO EDIT</div>
-      </div>
-      <div class="todo-columns" id="kanbanBoard" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));"></div>
-    </div>
-  </div>
-
-  <!-- JOB APPLICATIONS PAGE -->
-  <div class="page" id="page-jobs">
-    <div class="page-layout" style="max-width:1000px;">
-      <div class="page-header">
-        <div class="page-title"><span>JOB</span> TRACKER</div>
-        <div style="display:flex;gap:10px;align-items:center;">
-          <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);">PIPELINE</span>
-          <span class="widget-badge badge-accent" id="job-count">0 active</span>
-        </div>
-      </div>
-      <div class="job-form">
-        <div style="font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;color:var(--text-dim);margin-bottom:14px;">LOG APPLICATION</div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Company</label>
-            <input class="form-input" id="j-company" placeholder="e.g. Anthropic">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Role</label>
-            <input class="form-input" id="j-role" placeholder="e.g. ML Engineer">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Location</label>
-            <input class="form-input" id="j-location" placeholder="Remote / City">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Status</label>
-            <select class="form-select" id="j-status">
-              <option value="watching">Watching</option>
-              <option value="applied">Applied</option>
-              <option value="interview">Interview</option>
-              <option value="offer">Offer</option>
-              <option value="rejected">Rejected</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Salary Range</label>
-            <input class="form-input" id="j-salary" placeholder="£60k – £80k">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Date</label>
-            <input class="form-input" type="date" id="j-date">
-          </div>
-        </div>
-        <div class="form-group" style="margin-bottom:12px;">
-          <label class="form-label">Notes</label>
-          <input class="form-input" id="j-notes" placeholder="Referral, culture notes, follow-up...">
-        </div>
-        <button class="btn-sm btn-accent" onclick="addJob()">LOG APPLICATION</button>
-      </div>
-      <div class="job-table-wrap">
-        <table class="job-table">
-          <thead>
-            <tr>
-              <th>Company</th>
-              <th>Role</th>
-              <th>Location</th>
-              <th>Salary</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th>Notes</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="jobTableBody">
-            <tr>
-              <td colspan="8" style="text-align:center;color:var(--text-dim);font-size:12px;padding:30px;">No applications logged yet.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- FITNESS PAGE -->
-  <div class="page" id="page-fitness">
-    <div class="page-layout">
-      <div class="page-header">
-        <div class="page-title"><span>FITNESS</span> PROTOCOL</div>
-        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);" id="fit-date"></div>
-      </div>
-      <div class="fitness-grid">
-        <div>
-          <div class="widget" style="margin-bottom:16px;">
-            <div class="widget-header">
-              <div class="widget-title">Today's Training</div>
-              <div class="widget-badge badge-accent" id="fit-done-count">0 / 6</div>
-            </div>
-            <div id="exerciseList"></div>
-          </div>
-        </div>
-        <div>
-          <div class="widget" style="margin-bottom:16px;">
-            <div class="widget-header">
-              <div class="widget-title">Weekly Rings</div>
-            </div>
-            <div id="weekRings" style="display:flex;flex-direction:column;gap:12px;"></div>
-          </div>
-          <div class="widget">
-            <div class="widget-header">
-              <div class="widget-title">Personal Records</div>
-            </div>
-            <div id="prList"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SKINCARE PAGE -->
-  <div class="page" id="page-skincare">
-    <div class="page-layout">
-      <div class="page-header">
-        <div class="page-title"><span>SKINCARE</span> REGIMEN</div>
-        <div class="widget-badge badge-purple" id="skin-progress">0% complete</div>
-      </div>
-      <div class="skincare-routine">
-        <div class="routine-block">
-          <div class="routine-time">☀ MORNING ROUTINE</div>
-          <div id="skincare-am"></div>
-        </div>
-        <div class="routine-block">
-          <div class="routine-time" style="color:var(--accent2);">🌙 EVENING ROUTINE</div>
-          <div id="skincare-pm"></div>
-        </div>
-      </div>
-      <div class="widget" style="margin-top:16px;">
+      <div class="widget">
         <div class="widget-header">
-          <div class="widget-title">Skin Log</div>
+          <div class="widget-title">Daily Insight</div>
+          <button style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:11px;" onclick="cycleInsight()">↻</button>
         </div>
-        <textarea class="note-area" id="skinNote" placeholder="Observations, reactions, new products to try…" style="min-height:100px;"></textarea>
+        <div class="insight-text" id="insightText"></div>
+        <div class="insight-source" id="insightSource"></div>
+      </div>
+      <!-- Supplement Quick Tracker -->
+      <div class="widget" style="flex:1;overflow-y:auto;">
+        <div class="widget-header">
+          <div class="widget-title">Today's Supplements</div>
+          <div class="widget-badge badge-green" id="dash-supp-progress">0/0</div>
+        </div>
+        <div id="dashSuppList"></div>
       </div>
     </div>
   </div>
+</div>
+<!-- TO DO LIST PAGE -->
+<div class="page" id="page-todo">
+  <div class="page-layout" style="max-width:1200px;">
+    <div class="page-header">
+      <div class="page-title"><span>TASK</span> COMMAND</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:1px;" id="todo-summary">0 tasks</div>
+        <button class="btn-sm btn-ghost" onclick="clearDoneTasks()" style="font-size:10px;padding:5px 10px;">CLEAR DONE</button>
+        <button class="btn-sm btn-ghost" onclick="openColumnModal()" style="font-size:10px;padding:5px 10px;">+ COLUMN</button>
+        <button class="btn-sm btn-accent" onclick="openAddTaskModal()">+ NEW TASK</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
+      <input type="text" id="todoSearch" class="task-input" placeholder="Search tasks..." oninput="renderKanban()" style="max-width:200px;">
+      <select class="form-select" id="todoFilterPriority" onchange="renderKanban()" style="width:130px;padding:7px 28px 7px 10px;font-size:11px;">
+        <option value="">All priorities</option>
+        <option value="high">High</option>
+        <option value="med">Medium</option>
+        <option value="low">Low</option>
+      </select>
+      <select class="form-select" id="todoSort" onchange="renderKanban()" style="width:140px;padding:7px 28px 7px 10px;font-size:11px;">
+        <option value="manual">Manual order</option>
+        <option value="priority">By priority</option>
+        <option value="alpha">Alphabetical</option>
+        <option value="due">By due date</option>
+      </select>
+      <div style="margin-left:auto;font-family:'Space Mono',monospace;font-size:9px;color:var(--text-dim);">DRAG TO REORDER | DBL-CLICK TO EDIT</div>
+    </div>
+    <div class="todo-columns" id="kanbanBoard"></div>
+  </div>
+</div>
 
-  <!-- VITAMINS PAGE -->
-  <div class="page" id="page-vitamins">
-    <div class="page-layout">
-      <div class="page-header">
-        <div class="page-title"><span>SUPPLEMENT</span> STACK</div>
-        <div class="widget-badge badge-green" id="vit-progress">0 / 0 taken</div>
+<!-- JOB APPLICATIONS PAGE -->
+<div class="page" id="page-jobs">
+  <div class="page-layout" style="max-width:1000px;">
+    <div class="page-header">
+      <div class="page-title"><span>JOB</span> TRACKER</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);">PIPELINE</span>
+        <span class="widget-badge badge-accent" id="job-count">0 active</span>
       </div>
-      <div class="vitamin-grid" id="vitaminGrid"></div>
+    </div>
+    <div class="job-form">
+      <div style="font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;color:var(--text-dim);margin-bottom:14px;">LOG APPLICATION</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Company</label><input class="form-input" id="j-company" placeholder="e.g. Anthropic"></div>
+        <div class="form-group"><label class="form-label">Role</label><input class="form-input" id="j-role" placeholder="e.g. ML Engineer"></div>
+        <div class="form-group"><label class="form-label">Location</label><input class="form-input" id="j-location" placeholder="Remote / City"></div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-select" id="j-status">
+            <option value="watching">Watching</option><option value="applied">Applied</option>
+            <option value="interview">Interview</option><option value="offer">Offer</option><option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Salary Range</label><input class="form-input" id="j-salary" placeholder="£60k – £80k"></div>
+        <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="j-date"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Notes</label><input class="form-input" id="j-notes" placeholder="Referral, culture notes, follow-up..."></div>
+      <button class="btn-sm btn-accent" onclick="addJob()">LOG APPLICATION</button>
+    </div>
+    <div class="job-table-wrap">
+      <table class="job-table">
+        <thead><tr><th>Company</th><th>Role</th><th>Location</th><th>Salary</th><th>Status</th><th>Date</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="jobTableBody"><tr><td colspan="8" style="text-align:center;color:var(--text-dim);font-size:12px;padding:30px;">No applications logged yet.</td></tr></tbody>
+      </table>
     </div>
   </div>
+</div>
+
+<!-- FITNESS PAGE -->
+<div class="page" id="page-fitness">
+  <div class="page-layout">
+    <div class="page-header">
+      <div class="page-title"><span>FITNESS</span> PROTOCOL</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);" id="fit-date"></div>
+        <button class="btn-sm btn-accent" onclick="openEditFitnessModal()" style="font-size:10px;padding:5px 12px;">✎ EDIT ROUTINE</button>
+      </div>
+    </div>
+    <div class="fitness-grid">
+      <div>
+        <div class="widget" style="margin-bottom:16px;">
+          <div class="widget-header">
+            <div class="widget-title">Today's Training</div>
+            <div class="widget-badge badge-accent" id="fit-done-count">0 / 0</div>
+          </div>
+          <div id="exerciseList"></div>
+          <button class="btn-full" onclick="logFitnessDay()" style="margin-top:12px;border-color:var(--accent3);color:var(--accent3);">✓ LOG TODAY AS COMPLETE</button>
+        </div>
+        <div class="widget">
+          <div class="widget-header"><div class="widget-title">Personal Records</div></div>
+          <div id="prList"></div>
+        </div>
+      </div>
+      <div>
+        <div class="widget">
+          <div class="widget-header">
+            <div class="widget-title">Fitness Tracker — Last 14 Days</div>
+          </div>
+          <div id="fitnessTrackerChart"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SKINCARE PAGE -->
+<div class="page" id="page-skincare">
+  <div class="page-layout">
+    <div class="page-header">
+      <div class="page-title"><span>SKINCARE</span> REGIMEN</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="widget-badge badge-purple" id="skin-progress">0% complete</div>
+        <button class="btn-sm btn-accent" onclick="openSkincareEditModal('am')" style="font-size:10px;padding:5px 12px;">✎ EDIT AM</button>
+        <button class="btn-sm btn-accent" onclick="openSkincareEditModal('pm')" style="font-size:10px;padding:5px 12px;">✎ EDIT PM</button>
+        <button class="btn-sm btn-ghost" onclick="logSkincareDay()" style="font-size:10px;padding:5px 12px;border-color:var(--accent3);color:var(--accent3);">✓ LOG DAY</button>
+      </div>
+    </div>
+    <div class="skincare-routine">
+      <div class="routine-block">
+        <div class="routine-time">☀ MORNING ROUTINE</div>
+        <div id="skincare-am"></div>
+      </div>
+      <div class="routine-block">
+        <div class="routine-time" style="color:var(--accent2);">🌙 EVENING ROUTINE</div>
+        <div id="skincare-pm"></div>
+      </div>
+    </div>
+    <div class="widget" style="margin-top:16px;">
+      <div class="widget-header">
+        <div class="widget-title">Adherence Tracker — Last 30 Days</div>
+        <div class="widget-badge badge-green" id="skin-streak-badge">0 day streak</div>
+      </div>
+      <div id="skincareTrackerChart"></div>
+    </div>
+    <div class="widget" style="margin-top:16px;">
+      <div class="widget-header"><div class="widget-title">Skin Log</div></div>
+      <textarea class="note-area" id="skinNote" placeholder="Observations, reactions, new products to try…" style="min-height:100px;"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- SUPPLEMENTS PAGE -->
+<div class="page" id="page-vitamins">
+  <div class="page-layout">
+    <div class="page-header">
+      <div class="page-title"><span>SUPPLEMENT</span> STACK</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="widget-badge badge-green" id="vit-progress">0 / 0 taken</div>
+        <button class="btn-sm btn-accent" onclick="openAddVitaminModal()" style="font-size:10px;padding:5px 12px;">+ ADD SUPPLEMENT</button>
+        <button class="btn-sm btn-ghost" onclick="logSupplementDay()" style="font-size:10px;padding:5px 12px;border-color:var(--accent3);color:var(--accent3);">✓ LOG DAY</button>
+      </div>
+    </div>
+    <div class="vitamin-grid" id="vitaminGrid"></div>
+    <div class="widget" style="margin-top:16px;">
+      <div class="widget-header">
+        <div class="widget-title">Supplement Adherence — Last 30 Days</div>
+        <div class="widget-badge badge-orange" id="supp-streak-badge">0 day streak</div>
+      </div>
+      <div id="suppTrackerChart"></div>
+    </div>
+  </div>
+</div>
 
 </main>
-
-<!-- MODAL: Add / Edit Task -->
+<!-- MODAL: Add/Edit Task -->
 <div class="modal-backdrop" id="addTaskModal">
   <div class="modal" style="width:520px;">
     <div class="modal-title" id="taskModalTitle">// NEW TASK</div>
     <input type="hidden" id="modal-task-id" value="">
-    <div class="form-group" style="margin-bottom:12px;">
-      <label class="form-label">Task title</label>
-      <input class="form-input" id="modal-task-text" placeholder="What needs to be done?">
-    </div>
-    <div class="form-group" style="margin-bottom:12px;">
-      <label class="form-label">Notes / detail</label>
-      <textarea class="note-area" id="modal-task-notes" placeholder="Additional context, links, sub-steps..." style="min-height:60px;"></textarea>
-    </div>
+    <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Task title</label><input class="form-input" id="modal-task-text" placeholder="What needs to be done?"></div>
+    <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Notes / detail</label><textarea class="note-area" id="modal-task-notes" placeholder="Additional context..." style="min-height:60px;"></textarea></div>
     <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">Priority</label>
-        <select class="form-select" id="modal-task-priority">
-          <option value="high">High</option>
-          <option value="med" selected>Medium</option>
-          <option value="low">Low</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Column</label>
-        <select class="form-select" id="modal-task-col"></select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Due date</label>
-        <input class="form-input" type="date" id="modal-task-due">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Tag / category</label>
-        <input class="form-input" id="modal-task-tag" placeholder="e.g. work, health, study">
-      </div>
+      <div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="modal-task-priority"><option value="high">High</option><option value="med" selected>Medium</option><option value="low">Low</option></select></div>
+      <div class="form-group"><label class="form-label">Column</label><select class="form-select" id="modal-task-col"></select></div>
+      <div class="form-group"><label class="form-label">Due date</label><input class="form-input" type="date" id="modal-task-due"></div>
+      <div class="form-group"><label class="form-label">Tag / category</label><input class="form-input" id="modal-task-tag" placeholder="e.g. work, health"></div>
+      <div class="form-group"><label class="form-label">Urgency</label><select class="form-select" id="modal-task-urgent"><option value="no">Not urgent</option><option value="yes">🔴 Urgent</option></select></div>
     </div>
     <div class="modal-footer">
       <button class="btn-sm btn-ghost" onclick="closeModal('addTaskModal')">Cancel</button>
@@ -1638,24 +574,11 @@
 <div class="modal-backdrop" id="addColumnModal">
   <div class="modal" style="width:400px;">
     <div class="modal-title">// NEW COLUMN</div>
-    <div class="form-group" style="margin-bottom:12px;">
-      <label class="form-label">Column name</label>
-      <input class="form-input" id="modal-col-name" placeholder="e.g. Blocked, Review, Someday">
+    <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Column name</label><input class="form-input" id="modal-col-name" placeholder="e.g. Blocked, Review"></div>
+    <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Accent colour</label>
+      <select class="form-select" id="modal-col-color"><option value="var(--accent)">Cyan</option><option value="var(--accent2)">Purple</option><option value="var(--accent3)">Green</option><option value="var(--accent4)">Orange</option><option value="var(--danger)">Red</option></select>
     </div>
-    <div class="form-group" style="margin-bottom:12px;">
-      <label class="form-label">Accent colour</label>
-      <select class="form-select" id="modal-col-color">
-        <option value="var(--accent)">Cyan</option>
-        <option value="var(--accent2)">Purple</option>
-        <option value="var(--accent3)">Green</option>
-        <option value="var(--accent4)">Orange</option>
-        <option value="var(--danger)">Red</option>
-      </select>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-sm btn-ghost" onclick="closeModal('addColumnModal')">Cancel</button>
-      <button class="btn-sm btn-accent" onclick="addColumn()">CREATE COLUMN</button>
-    </div>
+    <div class="modal-footer"><button class="btn-sm btn-ghost" onclick="closeModal('addColumnModal')">Cancel</button><button class="btn-sm btn-accent" onclick="addColumn()">CREATE COLUMN</button></div>
   </div>
 </div>
 
@@ -1663,1101 +586,417 @@
 <div class="modal-backdrop" id="addTabModal">
   <div class="modal">
     <div class="modal-title">// ADD PAGE</div>
-    <div class="form-group" style="margin-bottom:12px;">
-      <label class="form-label">Page Name</label>
-      <input class="form-input" id="modal-tab-name" placeholder="e.g. Reading List">
-    </div>
-    <div class="form-group" style="margin-bottom:12px;">
-      <label class="form-label">Icon</label>
-      <input class="form-input" id="modal-tab-icon" placeholder="e.g. 📚">
-    </div>
-    <div class="modal-footer">
-      <button class="btn-sm btn-ghost" onclick="closeModal('addTabModal')">Cancel</button>
-      <button class="btn-sm btn-accent" onclick="addCustomTab()">CREATE PAGE</button>
-    </div>
+    <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Page Name</label><input class="form-input" id="modal-tab-name" placeholder="e.g. Reading List"></div>
+    <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Icon</label><input class="form-input" id="modal-tab-icon" placeholder="e.g. 📚"></div>
+    <div class="modal-footer"><button class="btn-sm btn-ghost" onclick="closeModal('addTabModal')">Cancel</button><button class="btn-sm btn-accent" onclick="addCustomTab()">CREATE PAGE</button></div>
   </div>
 </div>
 
-<script>
-// =====================
-// DATA
-// =====================
-const STATE = {
-  tasks: [
-    { id: 1, text: 'Review quarterly goals and adjust OKRs', priority: 'high', done: false },
-    { id: 2, text: 'Deep work block: system design', priority: 'high', done: false },
-    { id: 3, text: 'Read 30 pages', priority: 'med', done: false },
-    { id: 4, text: 'Journal — reflection + gratitude', priority: 'low', done: false },
-    { id: 5, text: 'Evening walk 30 min', priority: 'low', done: false },
-  ],
-  habits: [
-    { id: 1, icon: '💧', name: 'Hydration', target: '3L water', streak: 12, done: false },
-    { id: 2, icon: '🧘', name: 'Meditation', target: '15 min', streak: 7, done: false },
-    { id: 3, icon: '📖', name: 'Reading', target: '30 pages', streak: 21, done: false },
-    { id: 4, icon: '🏃', name: 'Movement', target: '8000 steps', streak: 5, done: false },
-    { id: 5, icon: '🧠', name: 'No Doom Scroll', target: 'Before 9am', streak: 3, done: false },
-    { id: 6, icon: '✍️', name: 'Journaling', target: 'Daily entry', streak: 14, done: false },
-    { id: 7, icon: '🥗', name: 'Clean Eating', target: '80/20 rule', streak: 9, done: false },
-    { id: 8, icon: '😴', name: 'Sleep by 11pm', target: '7h+', streak: 4, done: false },
-  ],
-  kanban: {
-    columns: [
-      { id: 'todo', label: 'QUEUED', color: 'var(--accent4)' },
-      { id: 'inprogress', label: 'IN PROGRESS', color: 'var(--accent)' },
-      { id: 'done', label: 'COMPLETE', color: 'var(--accent3)' },
-    ],
-    tasks: {
-      todo: [
-        { id: 10, text: 'Build personal brand website', priority: 'high', notes: '', due: '', tag: 'projects' },
-        { id: 11, text: 'Research grad school options', priority: 'med', notes: '', due: '', tag: 'education' },
-      ],
-      inprogress: [
-        { id: 12, text: 'Complete online course module 4', priority: 'high', notes: 'Module on transformers', due: '', tag: 'education' },
-      ],
-      done: [
-        { id: 13, text: 'Set up J.A.R.V.I.S dashboard', priority: 'low', notes: '', due: '', tag: '' },
-      ],
-    },
-  },
-  jobs: [],
-  exercises: [
-    { id: 1, icon: '🏃', name: 'Cardio Run', detail: '5km / Zone 2', done: false },
-    { id: 2, icon: '💪', name: 'Push (Chest/Shoulders)', detail: '4 sets × 8-12 reps', done: false },
-    { id: 3, icon: '🏋️', name: 'Pull (Back/Biceps)', detail: '4 sets × 8-12 reps', done: false },
-    { id: 4, icon: '🦵', name: 'Legs (Squats, RDL)', detail: '3 sets × 10 reps', done: false },
-    { id: 5, icon: '🧘', name: 'Mobility & Stretch', detail: '15 min', done: false },
-    { id: 6, icon: '🧊', name: 'Cold Exposure', detail: '3 min cold shower', done: false },
-  ],
-  skincareAM: [
-    { step: 1, name: 'Gentle Cleanser', detail: 'Lukewarm water, 60 sec', done: false },
-    { step: 2, name: 'Vitamin C Serum', detail: 'L-ascorbic acid 15%', done: false },
-    { step: 3, name: 'Moisturiser', detail: 'Lightweight gel-cream', done: false },
-    { step: 4, name: 'SPF 50', detail: 'Reapply every 2hr outdoors', done: false },
-  ],
-  skincareAMNote: '',
-  skincareAMHydrogel: false,
-  skincarePM: [
-    { step: 1, name: 'Oil Cleanser', detail: 'Double cleanse first', done: false },
-    { step: 2, name: 'Gentle Cleanser', detail: 'Second cleanse', done: false },
-    { step: 3, name: 'Retinol 0.5%', detail: '2–3× per week only', done: false },
-    { step: 4, name: 'Niacinamide', detail: '10% — pore minimiser', done: false },
-    { step: 5, name: 'Rich Moisturiser', detail: 'Occlusive layer to seal', done: false },
-  ],
-  vitamins: [
-    { id: 1, emoji: '☀️', name: 'Vitamin D3+K2', dose: '5000 IU / 100mcg', benefit: 'Bone density, immunity, mood', taken: false },
-    { id: 2, emoji: '🐟', name: 'Omega-3', dose: '2g EPA/DHA', benefit: 'Cognitive function, inflammation', taken: false },
-    { id: 3, emoji: '🧠', name: 'Magnesium L-Threonate', dose: '2g', benefit: 'Deep sleep, memory encoding', taken: false },
-    { id: 4, emoji: '🔬', name: 'NMN', dose: '500mg', benefit: 'NAD+ pathway, longevity', taken: false },
-    { id: 5, emoji: '🫐', name: 'Ashwagandha KSM-66', dose: '600mg', benefit: 'Cortisol modulation, resilience', taken: false },
-    { id: 6, emoji: '🧬', name: 'Creatine Monohydrate', dose: '5g', benefit: 'Strength, cognitive reserve', taken: false },
-    { id: 7, emoji: '🌿', name: 'B-Complex', dose: '1 capsule', benefit: 'Energy metabolism, CNS', taken: false },
-    { id: 8, emoji: '⚡', name: 'Coenzyme Q10', dose: '200mg', benefit: 'Mitochondrial function', taken: false },
-    { id: 9, emoji: '🔩', name: 'Zinc Picolinate', dose: '30mg', benefit: 'Testosterone, immune, skin', taken: false },
-  ],
-  tabs: [
-    { id: 'dashboard', label: 'Dashboard', icon: '⬡' },
-    { id: 'todo', label: 'To Do', icon: '◈' },
-    { id: 'jobs', label: 'Job Applications', icon: '◉' },
-    { id: 'fitness', label: 'Fitness', icon: '△' },
-    { id: 'skincare', label: 'Skincare', icon: '◇' },
-    { id: 'vitamins', label: 'Supplements', icon: '○' },
-  ],
-  currentPage: 'dashboard',
-  timerRunning: false,
-  timerSeconds: 1500,
-  timerTotal: 1500,
-  timerMode: 'FOCUS',
-  timerInterval: null,
-  pomodoroCount: 1,
-  insightIndex: 0,
-};
-
-const INSIGHTS = [
-  { text: "The measure of intelligence is the ability to change.", source: "— Albert Einstein" },
-  { text: "All of humanity's problems stem from man's inability to sit quietly in a room alone.", source: "— Blaise Pascal" },
-  { text: "What you do every day matters more than what you do once in a while.", source: "— Gretchen Rubin" },
-  { text: "The key is not to prioritise what's on your schedule, but to schedule your priorities.", source: "— Stephen Covey" },
-  { text: "An investment in knowledge pays the best interest.", source: "— Benjamin Franklin" },
-  { text: "The first principle is that you must not fool yourself, and you are the easiest person to fool.", source: "— Richard Feynman" },
-  { text: "You do not rise to the level of your goals. You fall to the level of your systems.", source: "— James Clear" },
-  { text: "Time is the scarcest resource, and unless it is managed nothing else can be managed.", source: "— Peter Drucker" },
-];
-
-// =====================
-// NAV TABS
-// =====================
-let dragSrcIdx = null;
-
-function renderNav() {
-  const nav = document.getElementById('navContainer');
-  nav.innerHTML = '';
-  STATE.tabs.forEach((tab, i) => {
-    const el = document.createElement('div');
-    el.className = 'nav-tab' + (tab.id === STATE.currentPage ? ' active' : '');
-    el.draggable = true;
-    el.dataset.index = i;
-    el.innerHTML = `
-      <div class="drag-handle"><span></span><span></span></div>
-      <span class="tab-icon">${tab.icon}</span>
-      ${tab.label}
-      ${tab.custom ? `<span onclick="removeTab('${tab.id}',event)" style="margin-left:4px;opacity:0.4;font-size:10px;cursor:pointer;">×</span>` : ''}
-    `;
-    el.addEventListener('click', () => navigateTo(tab.id));
-    el.addEventListener('dragstart', e => { dragSrcIdx = i; el.style.opacity = '0.5'; });
-    el.addEventListener('dragend', e => { el.style.opacity = ''; renderNav(); });
-    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
-    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
-    el.addEventListener('drop', e => {
-      e.preventDefault();
-      if (dragSrcIdx !== null && dragSrcIdx !== i) {
-        const moved = STATE.tabs.splice(dragSrcIdx, 1)[0];
-        STATE.tabs.splice(i, 0, moved);
-        dragSrcIdx = null;
-        renderNav();
-      }
-    });
-    nav.appendChild(el);
-  });
-  const addBtn = document.createElement('button');
-  addBtn.className = 'nav-add-btn';
-  addBtn.textContent = '+';
-  addBtn.title = 'Add page';
-  addBtn.onclick = () => openModal('addTabModal');
-  nav.appendChild(addBtn);
-}
-
-function navigateTo(id) {
-  STATE.currentPage = id;
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const target = document.getElementById('page-' + id);
-  if (target) target.classList.add('active');
-  else {
-    document.getElementById('page-dashboard').classList.add('active');
-  }
-  renderNav();
-}
-
-function removeTab(id, e) {
-  e.stopPropagation();
-  STATE.tabs = STATE.tabs.filter(t => t.id !== id);
-  if (STATE.currentPage === id) navigateTo('dashboard');
-  else renderNav();
-}
-
-function addCustomTab() {
-  const name = document.getElementById('modal-tab-name').value.trim();
-  const icon = document.getElementById('modal-tab-icon').value.trim() || '◻';
-  if (!name) return;
-  const id = 'custom-' + Date.now();
-  STATE.tabs.push({ id, label: name, icon, custom: true });
-  closeModal('addTabModal');
-  renderNav();
-  document.getElementById('modal-tab-name').value = '';
-  document.getElementById('modal-tab-icon').value = '';
-}
-
-// =====================
-// TASKS
-// =====================
-function renderTasks() {
-  const list = document.getElementById('taskList');
-  list.innerHTML = '';
-  STATE.tasks.forEach((task, i) => {
-    const div = document.createElement('div');
-    div.className = 'task-item' + (task.done ? ' done' : '');
-    div.innerHTML = `
-      <div class="task-checkbox">${task.done ? '✓' : ''}</div>
-      <div class="task-priority priority-${task.priority}"></div>
-      <div class="task-text">${task.text}</div>
-      <div class="task-delete" onclick="deleteTask(${i})">✕</div>
-    `;
-    div.addEventListener('click', e => {
-      if (!e.target.classList.contains('task-delete')) {
-        task.done = !task.done;
-        renderTasks();
-        updateStats();
-        updateKanban();
-      }
-    });
-    list.appendChild(div);
-  });
-  updateStats();
-}
-
-function addTask() {
-  const input = document.getElementById('taskInput');
-  const priority = document.getElementById('taskPriority').value;
-  const text = input.value.trim();
-  if (!text) return;
-  STATE.tasks.unshift({ id: Date.now(), text, priority, done: false });
-  input.value = '';
-  renderTasks();
-}
-
-document.getElementById('taskInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') addTask();
-});
-
-function deleteTask(i) {
-  STATE.tasks.splice(i, 1);
-  renderTasks();
-}
-
-function updateStats() {
-  const done = STATE.tasks.filter(t => t.done).length;
-  const total = STATE.tasks.length;
-  const remaining = total - done;
-  document.getElementById('task-count').textContent = `${remaining} remaining`;
-  document.getElementById('stat-tasks-done').textContent = done;
-  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-  document.getElementById('bar-tasks').style.width = pct + '%';
-}
-
-// =====================
-// HABITS
-// =====================
-function renderHabits() {
-  const grid = document.getElementById('habitGrid');
-  grid.innerHTML = '';
-  STATE.habits.forEach(h => {
-    const div = document.createElement('div');
-    div.className = 'habit-item' + (h.done ? ' done' : '');
-    div.innerHTML = `
-      <div class="habit-icon">${h.icon}</div>
-      <div class="habit-info">
-        <div class="habit-name">${h.name}</div>
-        <div class="habit-streak">🔥 ${h.streak}d streak · ${h.target}</div>
-      </div>
-      <div class="habit-check">${h.done ? '✓' : ''}</div>
-    `;
-    div.addEventListener('click', () => {
-      h.done = !h.done;
-      renderHabits();
-    });
-    grid.appendChild(div);
-  });
-  const done = STATE.habits.filter(h => h.done).length;
-  const total = STATE.habits.length;
-  document.getElementById('habit-progress-badge').textContent = `${done} / ${total}`;
-  document.getElementById('stat-habits').textContent = done;
-  document.getElementById('bar-habits').style.width = Math.round((done/total)*100) + '%';
-}
-
-// =====================
-// FOCUS TIMER
-// =====================
-function toggleTimer() {
-  if (STATE.timerRunning) {
-    clearInterval(STATE.timerInterval);
-    STATE.timerRunning = false;
-    document.getElementById('timerStartBtn').textContent = 'RESUME';
-    document.getElementById('focusStatus').innerHTML = '⏸ PAUSED';
-  } else {
-    STATE.timerRunning = true;
-    document.getElementById('timerStartBtn').textContent = 'PAUSE';
-    document.getElementById('focusStatus').innerHTML = '● RUNNING';
-    STATE.timerInterval = setInterval(() => {
-      STATE.timerSeconds--;
-      if (STATE.timerSeconds <= 0) {
-        clearInterval(STATE.timerInterval);
-        STATE.timerRunning = false;
-        document.getElementById('timerStartBtn').textContent = 'START';
-        document.getElementById('focusStatus').innerHTML = '✓ COMPLETE';
-        STATE.pomodoroCount++;
-        document.getElementById('pomodoro-count').textContent = `Session ${STATE.pomodoroCount}`;
-      }
-      updateTimerDisplay();
-    }, 1000);
-  }
-}
-
-function resetTimer() {
-  clearInterval(STATE.timerInterval);
-  STATE.timerRunning = false;
-  STATE.timerSeconds = STATE.timerTotal;
-  document.getElementById('timerStartBtn').textContent = 'START';
-  document.getElementById('focusStatus').innerHTML = '● READY';
-  updateTimerDisplay();
-}
-
-function setTimer(minutes, mode) {
-  clearInterval(STATE.timerInterval);
-  STATE.timerRunning = false;
-  STATE.timerSeconds = minutes * 60;
-  STATE.timerTotal = minutes * 60;
-  STATE.timerMode = mode;
-  document.getElementById('timerMode').textContent = mode;
-  document.getElementById('timerStartBtn').textContent = 'START';
-  document.getElementById('focusStatus').innerHTML = '● READY';
-  updateTimerDisplay();
-}
-
-function updateTimerDisplay() {
-  const m = Math.floor(STATE.timerSeconds / 60);
-  const s = STATE.timerSeconds % 60;
-  document.getElementById('timerDisplay').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  const circumference = 276.46;
-  const pct = STATE.timerSeconds / STATE.timerTotal;
-  document.getElementById('timerArc').style.strokeDashoffset = circumference * (1 - pct);
-}
-
-// =====================
-// KANBAN — FULLY CUSTOMISABLE
-// =====================
-let kanbanDragTask = null;
-let kanbanDragCol = null;
-let kanbanEditingId = null;
-
-function getFilteredTasks(colId) {
-  const search = (document.getElementById('todoSearch') || {}).value || '';
-  const filterPri = (document.getElementById('todoFilterPriority') || {}).value || '';
-  const sortMode = (document.getElementById('todoSort') || {}).value || 'manual';
-  let tasks = [...(STATE.kanban.tasks[colId] || [])];
-  if (search) tasks = tasks.filter(t => t.text.toLowerCase().includes(search.toLowerCase()) || (t.tag||'').toLowerCase().includes(search.toLowerCase()));
-  if (filterPri) tasks = tasks.filter(t => t.priority === filterPri);
-  if (sortMode === 'priority') {
-    const ord = {high:0,med:1,low:2};
-    tasks.sort((a,b) => ord[a.priority] - ord[b.priority]);
-  } else if (sortMode === 'alpha') {
-    tasks.sort((a,b) => a.text.localeCompare(b.text));
-  } else if (sortMode === 'due') {
-    tasks.sort((a,b) => (a.due||'9999') < (b.due||'9999') ? -1 : 1);
-  }
-  return tasks;
-}
-
-function renderKanban() {
-  const board = document.getElementById('kanbanBoard');
-  if (!board) return;
-  board.innerHTML = '';
-
-  let totalTasks = 0;
-  STATE.kanban.columns.forEach(col => {
-    totalTasks += (STATE.kanban.tasks[col.id] || []).length;
-    const colEl = document.createElement('div');
-    colEl.className = 'kanban-col';
-    colEl.dataset.col = col.id;
-
-    // Column header with rename + delete
-    colEl.innerHTML = `
-      <div class="kanban-header">
-        <span style="color:${col.color};cursor:pointer;" ondblclick="renameColumn('${col.id}')" title="Double-click to rename">${col.label}</span>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <span class="kanban-count">${(STATE.kanban.tasks[col.id]||[]).length}</span>
-          ${STATE.kanban.columns.length > 1 ? `<span onclick="deleteColumn('${col.id}')" style="cursor:pointer;color:var(--text-dim);font-size:10px;opacity:0.5;" title="Remove column">✕</span>` : ''}
-        </div>
-      </div>
-      <div class="kanban-task-list" id="ktasks-${col.id}" style="min-height:40px;"></div>
-      <button class="btn-full" style="border-color:${col.color};color:${col.color};background:transparent;margin-top:8px;" onclick="openAddTaskModal('${col.id}')">+ Add task</button>
-    `;
-
-    board.appendChild(colEl);
-
-    const taskList = colEl.querySelector(`#ktasks-${col.id}`);
-    const tasks = getFilteredTasks(col.id);
-
-    tasks.forEach((t) => {
-      const card = buildTaskCard(t, col.id);
-      taskList.appendChild(card);
-    });
-
-    // Drop zone events on task list
-    taskList.addEventListener('dragover', e => { e.preventDefault(); taskList.style.background = 'rgba(0,200,255,0.04)'; });
-    taskList.addEventListener('dragleave', () => { taskList.style.background = ''; });
-    taskList.addEventListener('drop', e => {
-      e.preventDefault();
-      taskList.style.background = '';
-      if (kanbanDragTask === null) return;
-      // Remove from source
-      const srcTasks = STATE.kanban.tasks[kanbanDragCol];
-      const idx = srcTasks.findIndex(t => t.id === kanbanDragTask.id);
-      if (idx > -1) srcTasks.splice(idx, 1);
-      // Add to dest
-      if (!STATE.kanban.tasks[col.id]) STATE.kanban.tasks[col.id] = [];
-      STATE.kanban.tasks[col.id].push(kanbanDragTask);
-      kanbanDragTask = null;
-      kanbanDragCol = null;
-      renderKanban();
-    });
-  });
-
-  // Summary
-  const sumEl = document.getElementById('todo-summary');
-  if (sumEl) {
-    const allDone = (STATE.kanban.tasks['done'] || []).length;
-    sumEl.textContent = `${totalTasks} tasks · ${allDone} complete`;
-  }
-  // Sync column dropdown in modal
-  syncColumnDropdown();
-}
-
-function buildTaskCard(t, colId) {
-  const card = document.createElement('div');
-  card.className = 'task-item';
-  card.draggable = true;
-  card.style.cursor = 'grab';
-  card.style.marginBottom = '6px';
-  card.style.flexDirection = 'column';
-  card.style.alignItems = 'flex-start';
-  card.style.gap = '4px';
-
-  const isOverdue = t.due && t.due < new Date().toISOString().split('T')[0];
-  const dueStr = t.due ? `<span style="font-family:'Space Mono',monospace;font-size:9px;color:${isOverdue ? 'var(--danger)' : 'var(--text-dim)'};">📅 ${t.due}</span>` : '';
-  const tagStr = t.tag ? `<span style="font-size:9px;padding:1px 7px;border-radius:2px;border:1px solid var(--border);color:var(--text-dim);">${t.tag}</span>` : '';
-  const notesStr = t.notes ? `<div style="font-size:11px;color:var(--text-dim);margin-top:2px;line-height:1.4;">${t.notes}</div>` : '';
-
-  card.innerHTML = `
-    <div style="display:flex;align-items:center;gap:8px;width:100%;">
-      <div class="task-priority priority-${t.priority}" style="flex-shrink:0;"></div>
-      <div class="task-text" style="flex:1;font-size:13px;">${t.text}</div>
-      <div style="display:flex;gap:4px;flex-shrink:0;">
-        <span onclick="openEditTaskModal('${colId}',${t.id})" style="font-size:10px;color:var(--text-dim);cursor:pointer;padding:2px 4px;" title="Edit">✎</span>
-        <span onclick="removeKanbanTask('${colId}',${t.id})" style="font-size:10px;color:var(--text-dim);cursor:pointer;padding:2px 4px;" title="Delete">✕</span>
-      </div>
+<!-- MODAL: Edit Skincare Routine -->
+<div class="modal-backdrop" id="skincareEditModal">
+  <div class="modal" style="width:560px;">
+    <div class="modal-title" id="skincareEditTitle">// EDIT ROUTINE</div>
+    <div id="skincareEditList"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <input class="form-input" id="skincare-add-name" placeholder="Product name" style="flex:1;">
+      <input class="form-input" id="skincare-add-detail" placeholder="Instructions" style="flex:1;">
+      <button class="btn-sm btn-accent" onclick="addSkincareStep()">+</button>
     </div>
-    ${notesStr}
-    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-      ${dueStr}${tagStr}
+    <div class="modal-footer"><button class="btn-sm btn-ghost" onclick="closeModal('skincareEditModal')">Done</button></div>
+  </div>
+</div>
+
+<!-- MODAL: Edit Fitness Routine -->
+<div class="modal-backdrop" id="fitnessEditModal">
+  <div class="modal" style="width:560px;">
+    <div class="modal-title">// EDIT FITNESS ROUTINE</div>
+    <div id="fitnessEditList"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <input class="form-input" id="fit-add-icon" placeholder="🏋️" style="width:50px;">
+      <input class="form-input" id="fit-add-name" placeholder="Exercise name" style="flex:1;">
+      <input class="form-input" id="fit-add-detail" placeholder="Sets / reps" style="flex:1;">
+      <button class="btn-sm btn-accent" onclick="addExerciseItem()">+</button>
     </div>
-  `;
+    <div class="modal-footer"><button class="btn-sm btn-ghost" onclick="closeModal('fitnessEditModal')">Done</button></div>
+  </div>
+</div>
 
-  card.addEventListener('dragstart', () => {
-    kanbanDragTask = t;
-    kanbanDragCol = colId;
-    card.style.opacity = '0.4';
-  });
-  card.addEventListener('dragend', () => { card.style.opacity = ''; });
-
-  card.addEventListener('dblclick', () => openEditTaskModal(colId, t.id));
-
-  return card;
-}
-
-function syncColumnDropdown() {
-  const sel = document.getElementById('modal-task-col');
-  if (!sel) return;
-  sel.innerHTML = STATE.kanban.columns.map(c => `<option value="${c.id}">${c.label}</option>`).join('');
-}
-
-function openAddTaskModal(colId) {
-  kanbanEditingId = null;
-  document.getElementById('taskModalTitle').textContent = '// NEW TASK';
-  document.getElementById('taskModalSaveBtn').textContent = 'ADD TASK';
-  document.getElementById('modal-task-id').value = '';
-  document.getElementById('modal-task-text').value = '';
-  document.getElementById('modal-task-notes').value = '';
-  document.getElementById('modal-task-priority').value = 'med';
-  document.getElementById('modal-task-due').value = '';
-  document.getElementById('modal-task-tag').value = '';
-  syncColumnDropdown();
-  if (colId) document.getElementById('modal-task-col').value = colId;
-  openModal('addTaskModal');
-}
-
-function openEditTaskModal(colId, taskId) {
-  const task = (STATE.kanban.tasks[colId] || []).find(t => t.id === taskId);
-  if (!task) return;
-  kanbanEditingId = { colId, taskId };
-  document.getElementById('taskModalTitle').textContent = '// EDIT TASK';
-  document.getElementById('taskModalSaveBtn').textContent = 'SAVE CHANGES';
-  document.getElementById('modal-task-id').value = taskId;
-  document.getElementById('modal-task-text').value = task.text;
-  document.getElementById('modal-task-notes').value = task.notes || '';
-  document.getElementById('modal-task-priority').value = task.priority;
-  document.getElementById('modal-task-due').value = task.due || '';
-  document.getElementById('modal-task-tag').value = task.tag || '';
-  syncColumnDropdown();
-  document.getElementById('modal-task-col').value = colId;
-  openModal('addTaskModal');
-}
-
-function saveKanbanTask() {
-  const text = document.getElementById('modal-task-text').value.trim();
-  if (!text) return;
-  const priority = document.getElementById('modal-task-priority').value;
-  const col = document.getElementById('modal-task-col').value;
-  const notes = document.getElementById('modal-task-notes').value.trim();
-  const due = document.getElementById('modal-task-due').value;
-  const tag = document.getElementById('modal-task-tag').value.trim();
-
-  if (kanbanEditingId) {
-    // Edit mode — remove from old col
-    const { colId, taskId } = kanbanEditingId;
-    const oldTasks = STATE.kanban.tasks[colId] || [];
-    const idx = oldTasks.findIndex(t => t.id === taskId);
-    const existing = idx > -1 ? oldTasks.splice(idx, 1)[0] : { id: taskId };
-    if (!STATE.kanban.tasks[col]) STATE.kanban.tasks[col] = [];
-    STATE.kanban.tasks[col].push({ ...existing, text, priority, notes, due, tag });
-  } else {
-    if (!STATE.kanban.tasks[col]) STATE.kanban.tasks[col] = [];
-    STATE.kanban.tasks[col].push({ id: Date.now(), text, priority, notes, due, tag });
-  }
-
-  kanbanEditingId = null;
-  closeModal('addTaskModal');
-  renderKanban();
-}
-
-// Legacy alias
-function addKanbanTask() { saveKanbanTask(); }
-
-function updateKanban() { renderKanban(); }
-
-function removeKanbanTask(colId, taskId) {
-  const tasks = STATE.kanban.tasks[colId] || [];
-  const idx = tasks.findIndex(t => t.id === taskId);
-  if (idx > -1) tasks.splice(idx, 1);
-  renderKanban();
-}
-
-function clearDoneTasks() {
-  STATE.kanban.columns.forEach(col => {
-    if (col.id === 'done') STATE.kanban.tasks[col.id] = [];
-  });
-  renderKanban();
-}
-
-function renameColumn(colId) {
-  const col = STATE.kanban.columns.find(c => c.id === colId);
-  if (!col) return;
-  const newName = prompt('Rename column:', col.label);
-  if (newName && newName.trim()) { col.label = newName.trim().toUpperCase(); renderKanban(); }
-}
-
-function deleteColumn(colId) {
-  if (STATE.kanban.columns.length <= 1) return;
-  if (!confirm('Delete this column and all its tasks?')) return;
-  STATE.kanban.columns = STATE.kanban.columns.filter(c => c.id !== colId);
-  delete STATE.kanban.tasks[colId];
-  renderKanban();
-}
-
-function openColumnModal() { openModal('addColumnModal'); }
-
-function addColumn() {
-  const name = document.getElementById('modal-col-name').value.trim();
-  if (!name) return;
-  const color = document.getElementById('modal-col-color').value;
-  const id = 'col_' + Date.now();
-  STATE.kanban.columns.push({ id, label: name.toUpperCase(), color });
-  STATE.kanban.tasks[id] = [];
-  closeModal('addColumnModal');
-  document.getElementById('modal-col-name').value = '';
-  renderKanban();
-}
-
-// =====================
-// JOBS
-// =====================
-function addJob() {
-  const company = document.getElementById('j-company').value.trim();
-  const role = document.getElementById('j-role').value.trim();
-  if (!company || !role) return;
-  STATE.jobs.push({
-    id: Date.now(),
-    company,
-    role,
-    location: document.getElementById('j-location').value.trim() || '—',
-    salary: document.getElementById('j-salary').value.trim() || '—',
-    status: document.getElementById('j-status').value,
-    date: document.getElementById('j-date').value || new Date().toISOString().split('T')[0],
-    notes: document.getElementById('j-notes').value.trim() || '—',
-  });
-  ['j-company','j-role','j-location','j-salary','j-notes'].forEach(id => document.getElementById(id).value = '');
-  renderJobs();
-}
-
-function renderJobs() {
-  const tbody = document.getElementById('jobTableBody');
-  if (STATE.jobs.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-dim);font-size:12px;padding:30px;">No applications logged yet.</td></tr>';
-    document.getElementById('job-count').textContent = '0 active';
-    return;
-  }
-  const active = STATE.jobs.filter(j => !['rejected'].includes(j.status)).length;
-  document.getElementById('job-count').textContent = `${active} active`;
-  tbody.innerHTML = STATE.jobs.map((j, i) => `
-    <tr>
-      <td style="font-weight:600;color:var(--text-bright);">${j.company}</td>
-      <td>${j.role}</td>
-      <td style="color:var(--text-dim);">${j.location}</td>
-      <td style="font-family:'Space Mono',monospace;font-size:11px;">${j.salary}</td>
-      <td><span class="status-pill status-${j.status}">${j.status}</span></td>
-      <td style="color:var(--text-dim);font-size:11px;">${j.date}</td>
-      <td style="color:var(--text-dim);font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${j.notes}</td>
-      <td><button style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:11px;" onclick="deleteJob(${i})">✕</button></td>
-    </tr>
-  `).join('');
-}
-
-function deleteJob(i) {
-  STATE.jobs.splice(i, 1);
-  renderJobs();
-}
-
-// =====================
-// FITNESS
-// =====================
-function renderFitness() {
-  const date = new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const fitDate = document.getElementById('fit-date');
-  if (fitDate) fitDate.textContent = date;
-
-  const list = document.getElementById('exerciseList');
-  if (list) {
-    list.innerHTML = '';
-    STATE.exercises.forEach((ex, i) => {
-      const div = document.createElement('div');
-      div.className = 'exercise-item' + (ex.done ? ' done' : '');
-      div.innerHTML = `
-        <div class="exercise-icon">${ex.icon}</div>
-        <div>
-          <div class="exercise-name">${ex.name}</div>
-          <div class="exercise-detail">${ex.detail}</div>
-        </div>
-        <div class="exercise-check-box">${ex.done ? '✓' : ''}</div>
-      `;
-      div.addEventListener('click', () => {
-        ex.done = !ex.done;
-        renderFitness();
-      });
-      list.appendChild(div);
-    });
-    const done = STATE.exercises.filter(e => e.done).length;
-    document.getElementById('fit-done-count').textContent = `${done} / ${STATE.exercises.length}`;
-  }
-
-  // Weekly rings
-  const rings = document.getElementById('weekRings');
-  if (rings) {
-    const days = [
-      { label: 'Move', pct: 85, color: 'var(--danger)' },
-      { label: 'Exercise', pct: 60, color: 'var(--accent2)' },
-      { label: 'Stand', pct: 92, color: 'var(--accent3)' },
-    ];
-    rings.innerHTML = days.map(d => {
-      const r = 30; const circ = 2 * Math.PI * r;
-      return `
-        <div class="progress-section">
-          <div class="ring-wrap" style="width:70px;height:70px;">
-            <svg class="ring-svg" width="70" height="70" viewBox="0 0 70 70">
-              <circle class="ring-bg" cx="35" cy="35" r="${r}"/>
-              <circle class="ring-fill" cx="35" cy="35" r="${r}" stroke="${d.color}"
-                stroke-dasharray="${circ}" stroke-dashoffset="${circ*(1-d.pct/100)}" stroke-linecap="round"/>
-            </svg>
-            <div class="ring-center" style="color:${d.color};font-size:12px;">${d.pct}%</div>
-          </div>
-          <div class="progress-info">
-            <div class="progress-title">${d.label}</div>
-            <div class="progress-sub">Weekly average · ${d.pct}% goal</div>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  const prList = document.getElementById('prList');
-  if (prList) {
-    const prs = [
-      { lift: 'Deadlift', record: '140kg', date: '2 weeks ago' },
-      { lift: 'Bench Press', record: '90kg', date: '1 month ago' },
-      { lift: 'Squat', record: '110kg', date: '3 weeks ago' },
-      { lift: '5km Run', record: '23:14', date: '10 days ago' },
-    ];
-    prList.innerHTML = prs.map(p => `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
-        <div style="font-size:13px;font-weight:600;color:var(--text-bright);">${p.lift}</div>
-        <div style="font-family:'Orbitron',monospace;font-size:13px;color:var(--accent3);">${p.record}</div>
-        <div style="font-size:10px;color:var(--text-dim);">${p.date}</div>
-      </div>
-    `).join('');
-  }
-}
-
-// =====================
-// SKINCARE
-// =====================
-function renderSkincare() {
-  function buildSteps(containerId, steps) {
-    const el = document.getElementById(containerId);
-    if (!el) return;
-    el.innerHTML = '';
-    steps.forEach(s => {
-      const div = document.createElement('div');
-      div.className = 'skincare-step' + (s.done ? ' done' : '');
-      div.innerHTML = `
-        <div class="step-num">${s.done ? '✓' : s.step}</div>
-        <div>
-          <div class="step-name">${s.name}</div>
-          <div class="step-detail">${s.detail}</div>
-        </div>
-      `;
-      div.addEventListener('click', () => { s.done = !s.done; renderSkincare(); });
-      el.appendChild(div);
-    });
-  }
-  buildSteps('skincare-am', STATE.skincareAM);
-  buildSteps('skincare-pm', STATE.skincarePM);
-  const allSteps = [...STATE.skincareAM, ...STATE.skincarePM];
-  const done = allSteps.filter(s => s.done).length;
-  const pct = Math.round((done / allSteps.length) * 100);
-  const prog = document.getElementById('skin-progress');
-  if (prog) prog.textContent = `${pct}% complete`;
-}
-
-// =====================
-// VITAMINS
-// =====================
-function renderVitamins() {
-  const grid = document.getElementById('vitaminGrid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  STATE.vitamins.forEach(v => {
-    const card = document.createElement('div');
-    card.className = 'vitamin-card' + (v.taken ? ' taken' : '');
-    card.innerHTML = `
-      <div class="vitamin-emoji">${v.emoji}</div>
-      <div class="vitamin-name">${v.name}</div>
-      <div class="vitamin-dose">${v.dose}</div>
-      <div class="vitamin-benefit">${v.benefit}</div>
-    `;
-    card.addEventListener('click', () => { v.taken = !v.taken; renderVitamins(); });
-    grid.appendChild(card);
-  });
-  const taken = STATE.vitamins.filter(v => v.taken).length;
-  const prog = document.getElementById('vit-progress');
-  if (prog) prog.textContent = `${taken} / ${STATE.vitamins.length} taken`;
-}
-
-// =====================
-// MOOD
-// =====================
-function selectMood(el, mood) {
-  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-}
-
-function setEnergy(el, level) {
-  document.querySelectorAll('.btn-group .btn-ghost').forEach(b => b.style.borderColor = '');
-  el.style.borderColor = 'var(--accent)';
-  el.style.color = 'var(--accent)';
-}
-
-// =====================
-// INSIGHTS
-// =====================
-function cycleInsight() {
-  STATE.insightIndex = (STATE.insightIndex + 1) % INSIGHTS.length;
-  renderInsight();
-}
-
-function renderInsight() {
-  const ins = INSIGHTS[STATE.insightIndex];
-  document.getElementById('insightText').textContent = ins.text;
-  document.getElementById('insightSource').textContent = ins.source;
-}
-
-// =====================
-// MODAL
-// =====================
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
-
-document.querySelectorAll('.modal-backdrop').forEach(modal => {
-  modal.addEventListener('click', e => {
-    if (e.target === modal) modal.classList.remove('open');
-  });
-});
-
-// =====================
-// INIT
-// =====================
-// =====================
-// GOOGLE DRIVE SYNC
-// =====================
-// Replace CLIENT_ID below with your own from console.cloud.google.com
-// (Create a project → Enable Drive API → OAuth 2.0 Client ID → Web application)
-// Add your dashboard URL to "Authorised JavaScript origins"
-const GDRIVE_CLIENT_ID = '651803114273-kriebf4th77p8chp37cgkgrdinfc1d9o.apps.googleusercontent.com';
-const GDRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file';
-const GDRIVE_FILENAME = 'jarvis-dashboard-data.json';
-const GDRIVE_FOLDER = 'appDataFolder'; // hidden app folder, private to this app
-
-let driveAccessToken = null;
-let driveFileId = null;
-let driveConnected = false;
-let autoSaveTimer = null;
-
-function setDriveStatus(connected, label, color) {
-  driveConnected = connected;
-  document.getElementById('drive-dot').style.background = color;
-  document.getElementById('drive-label').textContent = label;
-  document.getElementById('drive-btn').textContent = connected ? 'DISCONNECT' : 'CONNECT DRIVE';
-  document.getElementById('drive-btn').style.borderColor = connected ? 'var(--accent3)' : 'var(--border)';
-  document.getElementById('drive-btn').style.color = connected ? 'var(--accent3)' : 'var(--text-dim)';
-  document.getElementById('save-btn').style.display = connected ? 'inline-block' : 'none';
-}
-
-function toggleDriveConnection() {
-  if (driveConnected) {
-    driveAccessToken = null;
-    driveFileId = null;
-    clearInterval(autoSaveTimer);
-    setDriveStatus(false, 'NOT CONNECTED', 'var(--text-dim)');
-    return;
-  }
-  initDriveAuth();
-}
-
-function initDriveAuth() {
-  if (typeof google === 'undefined' || !google.accounts) {
-    setDriveStatus(false, 'API NOT LOADED', 'var(--danger)');
-    return;
-  }
-  setDriveStatus(false, 'CONNECTING...', 'var(--accent4)');
-  const tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: GDRIVE_CLIENT_ID,
-    scope: GDRIVE_SCOPES,
-    callback: (response) => {
-      if (response.error) {
-        setDriveStatus(false, 'AUTH FAILED', 'var(--danger)');
-        return;
-      }
-      driveAccessToken = response.access_token;
-      setDriveStatus(true, 'SYNCING...', 'var(--accent4)');
-      loadFromDrive().then(() => {
-        setDriveStatus(true, 'SYNCED ✓', 'var(--accent3)');
-        // Auto-save every 60 seconds
-        autoSaveTimer = setInterval(() => saveToDrive(true), 60000);
-      });
-    },
-  });
-  tokenClient.requestAccessToken();
-}
-
-async function saveToDrive(silent = false) {
-  if (!driveAccessToken) return;
-  if (!silent) setDriveStatus(true, 'SAVING...', 'var(--accent4)');
-
-  const payload = buildExportPayload();
-  const body = JSON.stringify(payload, null, 2);
-  const metadata = { name: GDRIVE_FILENAME, parents: [GDRIVE_FOLDER], mimeType: 'application/json' };
-
-  try {
-    let url, method;
-    if (driveFileId) {
-      url = `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=multipart`;
-      method = 'PATCH';
-    } else {
-      url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-      method = 'POST';
-    }
-
-    const boundary = 'jarvis_boundary_' + Date.now();
-    const multipart = [
-      '--' + boundary,
-      'Content-Type: application/json',
-      '',
-      JSON.stringify(driveFileId ? { name: GDRIVE_FILENAME } : metadata),
-      '--' + boundary,
-      'Content-Type: application/json',
-      '',
-      body,
-      '--' + boundary + '--'
-    ].join('\r\n');
-
-    const res = await fetch(url, {
-      method,
-      headers: {
-        'Authorization': 'Bearer ' + driveAccessToken,
-        'Content-Type': 'multipart/related; boundary=' + boundary,
-      },
-      body: multipart,
-    });
-
-    if (!res.ok) throw new Error('Save failed: ' + res.status);
-    const result = await res.json();
-    driveFileId = result.id;
-    setDriveStatus(true, 'SAVED ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}), 'var(--accent3)');
-  } catch(err) {
-    setDriveStatus(true, 'SAVE ERROR', 'var(--danger)');
-    console.error('Drive save error:', err);
-  }
-}
-
-async function loadFromDrive() {
-  if (!driveAccessToken) return;
-  try {
-    // Search for existing file in appDataFolder
-    const searchRes = await fetch(
-      `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D%27${GDRIVE_FILENAME}%27&fields=files(id%2Cname)`,
-      { headers: { 'Authorization': 'Bearer ' + driveAccessToken } }
-    );
-    if (!searchRes.ok) throw new Error('Search failed: ' + searchRes.status);
-    const searchData = await searchRes.json();
-
-    if (searchData.files && searchData.files.length > 0) {
-      driveFileId = searchData.files[0].id;
-      // Download file content
-      const fileRes = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,
-        { headers: { 'Authorization': 'Bearer ' + driveAccessToken } }
-      );
-      if (!fileRes.ok) throw new Error('Download failed: ' + fileRes.status);
-      const data = await fileRes.json();
-      applyImportedData(data);
-      setDriveStatus(true, 'LOADED \u2713', 'var(--accent3)');
-    } else {
-      // No existing file \u2014 save current state as first save
-      await saveToDrive(true);
-      setDriveStatus(true, 'FIRST SAVE \u2713', 'var(--accent3)');
-    }
-  } catch(err) {
-    setDriveStatus(true, 'LOAD ERROR', 'var(--danger)');
-    console.error('Drive load error:', err);
-  }
-}
-
-function manualSave() { saveToDrive(false); }
-
-function showDriveSetupModal() {
-  openModal('driveSetupModal');
-}
-
-function applyClientId() {
-  const id = document.getElementById('modal-client-id').value.trim();
-  if (!id) return;
-  // Patch the constant at runtime
-  window._GDRIVE_CLIENT_ID_OVERRIDE = id;
-  closeModal('driveSetupModal');
-  // Re-init with new client ID
-  const orig = GDRIVE_CLIENT_ID;
-  Object.defineProperty(window, 'GDRIVE_CLIENT_ID', { get: () => window._GDRIVE_CLIENT_ID_OVERRIDE || orig });
-  initDriveAuth();
-}
-
-// =====================
-// EXPORT / IMPORT
-// =====================
-function buildExportPayload() {
-  return {
-    _version: 1,
-    _exported: new Date().toISOString(),
-    tasks: STATE.tasks,
-    habits: STATE.habits,
-    kanban: STATE.kanban,
-    jobs: STATE.jobs,
-    exercises: STATE.exercises,
-    skincareAM: STATE.skincareAM,
-    skincarePM: STATE.skincarePM,
-    vitamins: STATE.vitamins,
-    quickNote: document.getElementById('quickNote') ? document.getElementById('quickNote').value : '',
-    skinNote: document.getElementById('skinNote') ? document.getElementById('skinNote').value : '',
-  };
-}
-
-function exportData() {
-  const exportable = buildExportPayload();
-  const blob = new Blob([JSON.stringify(exportable, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'jarvis-data-' + new Date().toISOString().split('T')[0] + '.json';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function applyImportedData(data) {
-  if (!data._version) throw new Error('Unrecognised file format');
-  if (data.tasks)      STATE.tasks      = data.tasks;
-  if (data.habits)     STATE.habits     = data.habits;
-  if (data.kanban)     STATE.kanban     = data.kanban;
-  if (data.jobs)       STATE.jobs       = data.jobs;
-  if (data.exercises)  STATE.exercises  = data.exercises;
-  if (data.skincareAM) STATE.skincareAM = data.skincareAM;
-  if (data.skincarePM) STATE.skincarePM = data.skincarePM;
-  if (data.vitamins)   STATE.vitamins   = data.vitamins;
-  renderTasks(); renderHabits(); renderKanban(); renderJobs();
-  renderFitness(); renderSkincare(); renderVitamins();
-  if (data.quickNote) { const qn = document.getElementById('quickNote'); if (qn) qn.value = data.quickNote; }
-  if (data.skinNote)  { const sn = document.getElementById('skinNote');  if (sn) sn.value = data.skinNote; }
-}
-
-function importData(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = JSON.parse(e.target.result);
-      applyImportedData(data);
-      const btn = document.querySelector('.header-right label');
-      if (btn) {
-        btn.style.color = 'var(--accent3)';
-        btn.style.borderColor = 'var(--accent3)';
-        setTimeout(() => { btn.style.color = ''; btn.style.borderColor = ''; }, 2000);
-      }
-    } catch(err) { alert('Import failed: ' + err.message); }
-    event.target.value = '';
-  };
-  reader.readAsText(file);
-}
-
-function init() {
-  renderNav();
-  renderTasks();
-  renderHabits();
-  renderKanban();
-  renderJobs();
-  renderFitness();
-  renderSkincare();
-  renderVitamins();
-  renderInsight();
-  updateTimerDisplay();
-  document.getElementById('j-date').valueAsDate = new Date();
-  STATE.insightIndex = Math.floor(Math.random() * INSIGHTS.length);
-  renderInsight();
-}
-
-init();
-</script>
+<!-- MODAL: Add/Edit Supplement -->
+<div class="modal-backdrop" id="vitaminEditModal">
+  <div class="modal" style="width:500px;">
+    <div class="modal-title" id="vitModalTitle">// ADD SUPPLEMENT</div>
+    <input type="hidden" id="vit-edit-id" value="">
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Emoji</label><input class="form-input" id="vit-emoji" placeholder="☀️"></div>
+      <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="vit-name" placeholder="Vitamin D3"></div>
+      <div class="form-group"><label class="form-label">Dose (e.g. 5g, 200mg)</label><input class="form-input" id="vit-dose" placeholder="5000 IU"></div>
+      <div class="form-group"><label class="form-label">Benefit</label><input class="form-input" id="vit-benefit" placeholder="Immunity, mood"></div>
+    </div>
+    <div class="modal-footer"><button class="btn-sm btn-ghost" onclick="closeModal('vitaminEditModal')">Cancel</button><button class="btn-sm btn-accent" onclick="saveVitamin()">SAVE</button></div>
+  </div>
+</div>
 
 <!-- MODAL: Google Drive Setup -->
 <div class="modal-backdrop" id="driveSetupModal">
   <div class="modal" style="width:560px;">
     <div class="modal-title">// CONNECT GOOGLE DRIVE</div>
-    <div style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:16px;">
-      To sync your data across devices, you need a free Google OAuth Client ID.<br>
-      It takes about 3 minutes to set up:
-    </div>
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:16px;font-family:'Space Mono',monospace;font-size:11px;line-height:2;color:var(--text-dim);">
-      1. Go to <span style="color:var(--accent);">console.cloud.google.com</span><br>
-      2. Create a new project (name it anything, e.g. "JARVIS")<br>
-      3. Go to <span style="color:var(--accent);">APIs &amp; Services → Library</span> → enable <span style="color:var(--accent3);">Google Drive API</span><br>
-      4. Go to <span style="color:var(--accent);">APIs &amp; Services → OAuth consent screen</span> → External → fill in app name<br>
-      5. Go to <span style="color:var(--accent);">Credentials → Create Credentials → OAuth 2.0 Client ID</span><br>
-      6. Choose <span style="color:var(--accent3);">Web application</span> → add your dashboard URL to <span style="color:var(--accent3);">Authorised JavaScript origins</span><br>
-      7. Copy your <span style="color:var(--accent);">Client ID</span> and paste it below
-    </div>
-    <div class="form-group" style="margin-bottom:16px;">
-      <label class="form-label">Your Google OAuth Client ID</label>
-      <input class="form-input" id="modal-client-id" placeholder="xxxxxxxxxx.apps.googleusercontent.com">
-    </div>
-    <div style="font-size:11px;color:var(--text-dim);margin-bottom:16px;line-height:1.6;">
-      Your data is saved privately to your own Google Drive under a hidden app folder.<br>
-      J.A.R.V.I.S never sees your credentials — authentication happens directly with Google.
-    </div>
-    <div class="modal-footer">
-      <button class="btn-sm btn-ghost" onclick="closeModal('driveSetupModal')">Cancel</button>
-      <button class="btn-sm btn-accent" onclick="applyClientId()">CONNECT</button>
-    </div>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:16px;">To sync your data across devices, you need a free Google OAuth Client ID.</div>
+    <div class="form-group" style="margin-bottom:16px;"><label class="form-label">Your Google OAuth Client ID</label><input class="form-input" id="modal-client-id" placeholder="xxxxxxxxxx.apps.googleusercontent.com"></div>
+    <div class="modal-footer"><button class="btn-sm btn-ghost" onclick="closeModal('driveSetupModal')">Cancel</button><button class="btn-sm btn-accent" onclick="applyClientId()">CONNECT</button></div>
   </div>
 </div>
+<script>
+const SYS_VERSION_BASE = 7.4;
+const STATE = {
+  sysVersion: 7.4,
+  tasks: [
+    { id:1, text:'Review quarterly goals and adjust OKRs', priority:'high', done:false, repeat:false, urgent:true },
+    { id:2, text:'Deep work block: system design', priority:'high', done:false, repeat:false, urgent:false },
+    { id:3, text:'Read 30 pages', priority:'med', done:false, repeat:true, urgent:false },
+    { id:4, text:'Journal — reflection + gratitude', priority:'low', done:false, repeat:true, urgent:false },
+    { id:5, text:'Evening walk 30 min', priority:'low', done:false, repeat:true, urgent:false },
+  ],
+  kanban: {
+    columns: [
+      { id:'todo', label:'QUEUED', color:'var(--accent4)' },
+      { id:'inprogress', label:'IN PROGRESS', color:'var(--accent)' },
+      { id:'done', label:'COMPLETE', color:'var(--accent3)' },
+    ],
+    tasks: {
+      todo: [
+        { id:10, text:'Build personal brand website', priority:'high', notes:'', due:'', tag:'projects', urgent:true },
+        { id:11, text:'Research grad school options', priority:'med', notes:'', due:'', tag:'education', urgent:false },
+      ],
+      inprogress: [
+        { id:12, text:'Complete online course module 4', priority:'high', notes:'Module on transformers', due:'', tag:'education', urgent:false },
+      ],
+      done: [
+        { id:13, text:'Set up J.A.R.V.I.S dashboard', priority:'low', notes:'', due:'', tag:'', urgent:false },
+      ],
+    },
+  },
+  jobs: [],
+  exercises: [
+    { id:1, icon:'🏃', name:'Cardio Run', detail:'5km / Zone 2', done:false },
+    { id:2, icon:'💪', name:'Push (Chest/Shoulders)', detail:'4 sets × 8-12 reps', done:false },
+    { id:3, icon:'🏋️', name:'Pull (Back/Biceps)', detail:'4 sets × 8-12 reps', done:false },
+    { id:4, icon:'🦵', name:'Legs (Squats, RDL)', detail:'3 sets × 10 reps', done:false },
+    { id:5, icon:'🧘', name:'Mobility & Stretch', detail:'15 min', done:false },
+    { id:6, icon:'🧊', name:'Cold Exposure', detail:'3 min cold shower', done:false },
+  ],
+  skincareAM: [
+    { step:1, name:'Gentle Cleanser', detail:'Lukewarm water, 60 sec', done:false },
+    { step:2, name:'Vitamin C Serum', detail:'L-ascorbic acid 15%', done:false },
+    { step:3, name:'Moisturiser', detail:'Lightweight gel-cream', done:false },
+    { step:4, name:'SPF 50', detail:'Reapply every 2hr outdoors', done:false },
+  ],
+  skincarePM: [
+    { step:1, name:'Oil Cleanser', detail:'Double cleanse first', done:false },
+    { step:2, name:'Gentle Cleanser', detail:'Second cleanse', done:false },
+    { step:3, name:'Retinol 0.5%', detail:'2–3× per week only', done:false },
+    { step:4, name:'Niacinamide', detail:'10% — pore minimiser', done:false },
+    { step:5, name:'Rich Moisturiser', detail:'Occlusive layer to seal', done:false },
+  ],
+  vitamins: [
+    { id:1, emoji:'☀️', name:'Vitamin D3+K2', dose:'5000 IU / 100mcg', benefit:'Bone density, immunity, mood', taken:false },
+    { id:2, emoji:'🐟', name:'Omega-3', dose:'2g EPA/DHA', benefit:'Cognitive function, inflammation', taken:false },
+    { id:3, emoji:'🧠', name:'Magnesium L-Threonate', dose:'2g', benefit:'Deep sleep, memory encoding', taken:false },
+    { id:4, emoji:'🔬', name:'NMN', dose:'500mg', benefit:'NAD+ pathway, longevity', taken:false },
+    { id:5, emoji:'🫐', name:'Ashwagandha KSM-66', dose:'600mg', benefit:'Cortisol modulation, resilience', taken:false },
+    { id:6, emoji:'🧬', name:'Creatine Monohydrate', dose:'5g', benefit:'Strength, cognitive reserve', taken:false },
+    { id:7, emoji:'🌿', name:'B-Complex', dose:'1 capsule', benefit:'Energy metabolism, CNS', taken:false },
+    { id:8, emoji:'⚡', name:'Coenzyme Q10', dose:'200mg', benefit:'Mitochondrial function', taken:false },
+    { id:9, emoji:'🔩', name:'Zinc Picolinate', dose:'30mg', benefit:'Testosterone, immune, skin', taken:false },
+  ],
+  tabs: [
+    { id:'dashboard', label:'Dashboard', icon:'⬡' },
+    { id:'todo', label:'To Do', icon:'◈' },
+    { id:'jobs', label:'Job Applications', icon:'◉' },
+    { id:'fitness', label:'Fitness', icon:'△' },
+    { id:'skincare', label:'Skincare', icon:'◇' },
+    { id:'vitamins', label:'Supplements', icon:'○' },
+  ],
+  currentPage:'dashboard',
+  timerRunning:false, timerSeconds:1500, timerTotal:1500, timerMode:'FOCUS', timerInterval:null, pomodoroCount:1,
+  insightIndex:0,
+  // Tracker histories — arrays of {date:'YYYY-MM-DD', pct:0-100}
+  skincareHistory: [],
+  fitnessHistory: [],
+  supplementHistory: [],
+  lastDayReset: null,
+};
 
+const INSIGHTS = [
+  { text:"The measure of intelligence is the ability to change.", source:"— Albert Einstein" },
+  { text:"All of humanity's problems stem from man's inability to sit quietly in a room alone.", source:"— Blaise Pascal" },
+  { text:"What you do every day matters more than what you do once in a while.", source:"— Gretchen Rubin" },
+  { text:"The key is not to prioritise what's on your schedule, but to schedule your priorities.", source:"— Stephen Covey" },
+  { text:"An investment in knowledge pays the best interest.", source:"— Benjamin Franklin" },
+  { text:"The first principle is that you must not fool yourself, and you are the easiest person to fool.", source:"— Richard Feynman" },
+  { text:"You do not rise to the level of your goals. You fall to the level of your systems.", source:"— James Clear" },
+  { text:"Time is the scarcest resource, and unless it is managed nothing else can be managed.", source:"— Peter Drucker" },
+];
+
+function bumpVersion() {
+  STATE.sysVersion = Math.round((STATE.sysVersion + 0.1) * 10) / 10;
+  const el = document.getElementById('sysVersion');
+  if (el) el.textContent = STATE.sysVersion.toFixed(1);
+}
+
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+// Day reset: if date changed, reset repeat tasks to undone, remove non-repeat tasks
+function checkDayReset() {
+  const today = todayStr();
+  if (STATE.lastDayReset && STATE.lastDayReset !== today) {
+    STATE.tasks = STATE.tasks.filter(t => {
+      if (t.repeat) { t.done = false; return true; }
+      return !t.done; // keep undone non-repeat tasks, remove done non-repeat
+    });
+  }
+  STATE.lastDayReset = today;
+}
+// ===================== NAV =====================
+let dragSrcIdx = null;
+function renderNav() {
+  const nav = document.getElementById('navContainer');
+  nav.innerHTML = '';
+  STATE.tabs.forEach((tab,i) => {
+    const el = document.createElement('div');
+    el.className = 'nav-tab' + (tab.id===STATE.currentPage?' active':'');
+    el.draggable = true; el.dataset.index = i;
+    el.innerHTML = '<div class="drag-handle"><span></span><span></span></div><span class="tab-icon">'+tab.icon+'</span> '+tab.label+(tab.custom?'<span onclick="removeTab(\''+tab.id+'\',event)" style="margin-left:4px;opacity:0.4;font-size:10px;cursor:pointer;">×</span>':'');
+    el.addEventListener('click', () => navigateTo(tab.id));
+    el.addEventListener('dragstart', e => { dragSrcIdx=i; el.style.opacity='0.5'; });
+    el.addEventListener('dragend', () => { el.style.opacity=''; renderNav(); });
+    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over'); });
+    el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+    el.addEventListener('drop', e => { e.preventDefault(); if(dragSrcIdx!==null&&dragSrcIdx!==i){const m=STATE.tabs.splice(dragSrcIdx,1)[0];STATE.tabs.splice(i,0,m);dragSrcIdx=null;renderNav();} });
+    nav.appendChild(el);
+  });
+  const addBtn = document.createElement('button'); addBtn.className='nav-add-btn'; addBtn.textContent='+'; addBtn.title='Add page'; addBtn.onclick=()=>openModal('addTabModal'); nav.appendChild(addBtn);
+}
+function navigateTo(id) { STATE.currentPage=id; document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); const t=document.getElementById('page-'+id); if(t)t.classList.add('active'); else document.getElementById('page-dashboard').classList.add('active'); renderNav(); }
+function removeTab(id,e) { e.stopPropagation(); STATE.tabs=STATE.tabs.filter(t=>t.id!==id); if(STATE.currentPage===id)navigateTo('dashboard'); else renderNav(); }
+function addCustomTab() { const n=document.getElementById('modal-tab-name').value.trim(); const ic=document.getElementById('modal-tab-icon').value.trim()||'◻'; if(!n)return; STATE.tabs.push({id:'custom-'+Date.now(),label:n,icon:ic,custom:true}); closeModal('addTabModal'); renderNav(); document.getElementById('modal-tab-name').value=''; document.getElementById('modal-tab-icon').value=''; }
+
+// ===================== TASKS =====================
+function renderTasks() {
+  const list = document.getElementById('taskList');
+  list.innerHTML = '';
+  STATE.tasks.forEach((task,i) => {
+    const isUrgentHigh = task.urgent && task.priority === 'high';
+    const div = document.createElement('div');
+    div.className = 'task-item' + (task.done?' done':'') + (isUrgentHigh&&!task.done?' urgent-important':'');
+    let badges = '';
+    if (task.repeat) badges += '<span class="task-repeat-badge">↻ DAILY</span>';
+    div.innerHTML = '<div class="task-checkbox">'+(task.done?'✓':'')+'</div><div class="task-priority priority-'+task.priority+'"></div><div class="task-text">'+task.text+'</div>'+badges+'<div class="task-actions"><button class="task-act-btn" onclick="toggleRepeat('+i+',event)" title="Toggle daily repeat">'+(task.repeat?'↻':'↻')+'</button><button class="task-act-btn del" onclick="deleteTask('+i+',event)">✕</button></div>';
+    div.addEventListener('click', e => { if(e.target.closest('.task-actions'))return; task.done=!task.done; renderTasks(); updateStats(); });
+    list.appendChild(div);
+  });
+  updateStats();
+}
+function addTask() {
+  const input=document.getElementById('taskInput'); const pri=document.getElementById('taskPriority').value;
+  const rep=document.getElementById('taskRepeat').checked; const urg=document.getElementById('taskUrgent').checked;
+  const text=input.value.trim(); if(!text)return;
+  STATE.tasks.unshift({id:Date.now(),text,priority:pri,done:false,repeat:rep,urgent:urg});
+  input.value=''; document.getElementById('taskRepeat').checked=false; document.getElementById('taskUrgent').checked=false;
+  bumpVersion(); renderTasks();
+}
+document.getElementById('taskInput').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
+function deleteTask(i,e) { if(e)e.stopPropagation(); STATE.tasks.splice(i,1); bumpVersion(); renderTasks(); }
+function toggleRepeat(i,e) { if(e)e.stopPropagation(); STATE.tasks[i].repeat=!STATE.tasks[i].repeat; bumpVersion(); renderTasks(); }
+function updateStats() {
+  const done=STATE.tasks.filter(t=>t.done).length; const total=STATE.tasks.length; const rem=total-done;
+  document.getElementById('task-count').textContent=rem+' remaining';
+  document.getElementById('stat-tasks-done').textContent=done;
+  const pct=total>0?Math.round((done/total)*100):0;
+  document.getElementById('bar-tasks').style.width=pct+'%';
+}
+
+// ===================== FOCUS TIMER =====================
+function toggleTimer() {
+  if(STATE.timerRunning){clearInterval(STATE.timerInterval);STATE.timerRunning=false;document.getElementById('timerStartBtn').textContent='RESUME';document.getElementById('focusStatus').innerHTML='⏸ PAUSED';} else {STATE.timerRunning=true;document.getElementById('timerStartBtn').textContent='PAUSE';document.getElementById('focusStatus').innerHTML='● RUNNING';STATE.timerInterval=setInterval(()=>{STATE.timerSeconds--;if(STATE.timerSeconds<=0){clearInterval(STATE.timerInterval);STATE.timerRunning=false;document.getElementById('timerStartBtn').textContent='START';document.getElementById('focusStatus').innerHTML='✓ COMPLETE';STATE.pomodoroCount++;document.getElementById('pomodoro-count').textContent='Session '+STATE.pomodoroCount;}updateTimerDisplay();},1000);}
+}
+function resetTimer(){clearInterval(STATE.timerInterval);STATE.timerRunning=false;STATE.timerSeconds=STATE.timerTotal;document.getElementById('timerStartBtn').textContent='START';document.getElementById('focusStatus').innerHTML='● READY';updateTimerDisplay();}
+function setTimer(m,mode){clearInterval(STATE.timerInterval);STATE.timerRunning=false;STATE.timerSeconds=m*60;STATE.timerTotal=m*60;STATE.timerMode=mode;document.getElementById('timerMode').textContent=mode;document.getElementById('timerStartBtn').textContent='START';document.getElementById('focusStatus').innerHTML='● READY';updateTimerDisplay();}
+function updateTimerDisplay(){const m=Math.floor(STATE.timerSeconds/60);const s=STATE.timerSeconds%60;document.getElementById('timerDisplay').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');const c=276.46;const p=STATE.timerSeconds/STATE.timerTotal;document.getElementById('timerArc').style.strokeDashoffset=c*(1-p);}
+// ===================== KANBAN =====================
+let kanbanDragTask=null,kanbanDragCol=null,kanbanEditingId=null;
+function getFilteredTasks(colId){const s=(document.getElementById('todoSearch')||{}).value||'';const fp=(document.getElementById('todoFilterPriority')||{}).value||'';const sm=(document.getElementById('todoSort')||{}).value||'manual';let t=[...(STATE.kanban.tasks[colId]||[])];if(s)t=t.filter(x=>x.text.toLowerCase().includes(s.toLowerCase())||(x.tag||'').toLowerCase().includes(s.toLowerCase()));if(fp)t=t.filter(x=>x.priority===fp);if(sm==='priority'){const o={high:0,med:1,low:2};t.sort((a,b)=>o[a.priority]-o[b.priority]);}else if(sm==='alpha')t.sort((a,b)=>a.text.localeCompare(b.text));else if(sm==='due')t.sort((a,b)=>(a.due||'9999')<(b.due||'9999')?-1:1);return t;}
+function renderKanban(){
+  const board=document.getElementById('kanbanBoard');if(!board)return;board.innerHTML='';let totalTasks=0;
+  STATE.kanban.columns.forEach(col=>{
+    totalTasks+=(STATE.kanban.tasks[col.id]||[]).length;
+    const colEl=document.createElement('div');colEl.className='kanban-col';colEl.dataset.col=col.id;
+    colEl.innerHTML='<div class="kanban-header"><span style="color:'+col.color+';cursor:pointer;" ondblclick="renameColumn(\''+col.id+'\')">'+col.label+'</span><div style="display:flex;gap:6px;align-items:center;"><span class="kanban-count">'+(STATE.kanban.tasks[col.id]||[]).length+'</span>'+(STATE.kanban.columns.length>1?'<span onclick="deleteColumn(\''+col.id+'\') " style="cursor:pointer;color:var(--text-dim);font-size:10px;opacity:0.5;">✕</span>':'')+'</div></div><div class="kanban-task-list" id="ktasks-'+col.id+'" style="min-height:40px;"></div><button class="btn-full" style="border-color:'+col.color+';color:'+col.color+';background:transparent;margin-top:8px;" onclick="openAddTaskModal(\''+col.id+'\')">+ Add task</button>';
+    board.appendChild(colEl);
+    const taskList=colEl.querySelector('#ktasks-'+col.id);
+    getFilteredTasks(col.id).forEach(t=>{taskList.appendChild(buildTaskCard(t,col.id));});
+    taskList.addEventListener('dragover',e=>{e.preventDefault();taskList.style.background='rgba(0,200,255,0.04)';});
+    taskList.addEventListener('dragleave',()=>{taskList.style.background='';});
+    taskList.addEventListener('drop',e=>{e.preventDefault();taskList.style.background='';if(!kanbanDragTask)return;const src=STATE.kanban.tasks[kanbanDragCol];const idx=src.findIndex(x=>x.id===kanbanDragTask.id);if(idx>-1)src.splice(idx,1);if(!STATE.kanban.tasks[col.id])STATE.kanban.tasks[col.id]=[];STATE.kanban.tasks[col.id].push(kanbanDragTask);kanbanDragTask=null;kanbanDragCol=null;renderKanban();});
+  });
+  const sumEl=document.getElementById('todo-summary');if(sumEl){sumEl.textContent=totalTasks+' tasks · '+(STATE.kanban.tasks['done']||[]).length+' complete';}
+  syncColumnDropdown();
+}
+function buildTaskCard(t,colId){
+  const card=document.createElement('div');const isUI=t.urgent&&t.priority==='high';
+  card.className='task-item'+(isUI?' urgent-important':'');card.draggable=true;card.style.cursor='grab';card.style.marginBottom='6px';card.style.flexDirection='column';card.style.alignItems='flex-start';card.style.gap='4px';
+  const isOverdue=t.due&&t.due<todayStr();
+  const dueStr=t.due?'<span style="font-family:\'Space Mono\',monospace;font-size:9px;color:'+(isOverdue?'var(--danger)':'var(--text-dim)')+';">📅 '+t.due+'</span>':'';
+  const tagStr=t.tag?'<span style="font-size:9px;padding:1px 7px;border-radius:2px;border:1px solid var(--border);color:var(--text-dim);">'+t.tag+'</span>':'';
+  const notesStr=t.notes?'<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">'+t.notes+'</div>':'';
+  const urgBadge=t.urgent?'<span style="font-size:8px;padding:1px 6px;border-radius:2px;background:rgba(255,51,102,0.15);color:var(--danger);border:1px solid rgba(255,51,102,0.4);font-family:\'Space Mono\',monospace;">URGENT</span>':'';
+  card.innerHTML='<div style="display:flex;align-items:center;gap:8px;width:100%;"><div class="task-priority priority-'+t.priority+'"></div><div class="task-text" style="flex:1;">'+t.text+'</div>'+urgBadge+'<div style="display:flex;gap:4px;flex-shrink:0;"><span onclick="openEditTaskModal(\''+colId+'\','+t.id+')" style="font-size:10px;color:var(--text-dim);cursor:pointer;padding:2px 4px;">✎</span><span onclick="removeKanbanTask(\''+colId+'\','+t.id+')" style="font-size:10px;color:var(--text-dim);cursor:pointer;padding:2px 4px;">✕</span></div></div>'+notesStr+'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'+dueStr+tagStr+'</div>';
+  card.addEventListener('dragstart',()=>{kanbanDragTask=t;kanbanDragCol=colId;card.style.opacity='0.4';});
+  card.addEventListener('dragend',()=>{card.style.opacity='';});
+  card.addEventListener('dblclick',()=>openEditTaskModal(colId,t.id));
+  return card;
+}
+function syncColumnDropdown(){const s=document.getElementById('modal-task-col');if(!s)return;s.innerHTML=STATE.kanban.columns.map(c=>'<option value="'+c.id+'">'+c.label+'</option>').join('');}
+function openAddTaskModal(colId){kanbanEditingId=null;document.getElementById('taskModalTitle').textContent='// NEW TASK';document.getElementById('taskModalSaveBtn').textContent='ADD TASK';document.getElementById('modal-task-id').value='';document.getElementById('modal-task-text').value='';document.getElementById('modal-task-notes').value='';document.getElementById('modal-task-priority').value='med';document.getElementById('modal-task-due').value='';document.getElementById('modal-task-tag').value='';document.getElementById('modal-task-urgent').value='no';syncColumnDropdown();if(colId)document.getElementById('modal-task-col').value=colId;openModal('addTaskModal');}
+function openEditTaskModal(colId,taskId){const task=(STATE.kanban.tasks[colId]||[]).find(t=>t.id===taskId);if(!task)return;kanbanEditingId={colId,taskId};document.getElementById('taskModalTitle').textContent='// EDIT TASK';document.getElementById('taskModalSaveBtn').textContent='SAVE CHANGES';document.getElementById('modal-task-id').value=taskId;document.getElementById('modal-task-text').value=task.text;document.getElementById('modal-task-notes').value=task.notes||'';document.getElementById('modal-task-priority').value=task.priority;document.getElementById('modal-task-due').value=task.due||'';document.getElementById('modal-task-tag').value=task.tag||'';document.getElementById('modal-task-urgent').value=task.urgent?'yes':'no';syncColumnDropdown();document.getElementById('modal-task-col').value=colId;openModal('addTaskModal');}
+function saveKanbanTask(){const text=document.getElementById('modal-task-text').value.trim();if(!text)return;const pri=document.getElementById('modal-task-priority').value;const col=document.getElementById('modal-task-col').value;const notes=document.getElementById('modal-task-notes').value.trim();const due=document.getElementById('modal-task-due').value;const tag=document.getElementById('modal-task-tag').value.trim();const urgent=document.getElementById('modal-task-urgent').value==='yes';if(kanbanEditingId){const{colId,taskId}=kanbanEditingId;const old=STATE.kanban.tasks[colId]||[];const idx=old.findIndex(t=>t.id===taskId);const ex=idx>-1?old.splice(idx,1)[0]:{id:taskId};if(!STATE.kanban.tasks[col])STATE.kanban.tasks[col]=[];STATE.kanban.tasks[col].push({...ex,text,priority:pri,notes,due,tag,urgent});}else{if(!STATE.kanban.tasks[col])STATE.kanban.tasks[col]=[];STATE.kanban.tasks[col].push({id:Date.now(),text,priority:pri,notes,due,tag,urgent});}kanbanEditingId=null;closeModal('addTaskModal');bumpVersion();renderKanban();}
+function removeKanbanTask(colId,taskId){const t=STATE.kanban.tasks[colId]||[];const i=t.findIndex(x=>x.id===taskId);if(i>-1)t.splice(i,1);renderKanban();}
+function clearDoneTasks(){STATE.kanban.columns.forEach(c=>{if(c.id==='done')STATE.kanban.tasks[c.id]=[];});renderKanban();}
+function renameColumn(colId){const c=STATE.kanban.columns.find(x=>x.id===colId);if(!c)return;const n=prompt('Rename column:',c.label);if(n&&n.trim()){c.label=n.trim().toUpperCase();bumpVersion();renderKanban();}}
+function deleteColumn(colId){if(STATE.kanban.columns.length<=1)return;if(!confirm('Delete this column and all its tasks?'))return;STATE.kanban.columns=STATE.kanban.columns.filter(c=>c.id!==colId);delete STATE.kanban.tasks[colId];renderKanban();}
+function openColumnModal(){openModal('addColumnModal');}
+function addColumn(){const n=document.getElementById('modal-col-name').value.trim();if(!n)return;const col=document.getElementById('modal-col-color').value;const id='col_'+Date.now();STATE.kanban.columns.push({id,label:n.toUpperCase(),color:col});STATE.kanban.tasks[id]=[];closeModal('addColumnModal');document.getElementById('modal-col-name').value='';bumpVersion();renderKanban();}
+// ===================== JOBS =====================
+function addJob(){const co=document.getElementById('j-company').value.trim();const ro=document.getElementById('j-role').value.trim();if(!co||!ro)return;STATE.jobs.push({id:Date.now(),company:co,role:ro,location:document.getElementById('j-location').value.trim()||'—',salary:document.getElementById('j-salary').value.trim()||'—',status:document.getElementById('j-status').value,date:document.getElementById('j-date').value||todayStr(),notes:document.getElementById('j-notes').value.trim()||'—'});['j-company','j-role','j-location','j-salary','j-notes'].forEach(id=>document.getElementById(id).value='');bumpVersion();renderJobs();}
+function renderJobs(){const tb=document.getElementById('jobTableBody');if(!STATE.jobs.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text-dim);font-size:12px;padding:30px;">No applications logged yet.</td></tr>';document.getElementById('job-count').textContent='0 active';return;}const active=STATE.jobs.filter(j=>j.status!=='rejected').length;document.getElementById('job-count').textContent=active+' active';tb.innerHTML=STATE.jobs.map((j,i)=>'<tr><td style="font-weight:600;color:var(--text-bright);">'+j.company+'</td><td>'+j.role+'</td><td style="color:var(--text-dim);">'+j.location+'</td><td style="font-family:\'Space Mono\',monospace;font-size:11px;">'+j.salary+'</td><td><span class="status-pill status-'+j.status+'">'+j.status+'</span></td><td style="color:var(--text-dim);font-size:11px;">'+j.date+'</td><td style="color:var(--text-dim);font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+j.notes+'</td><td><button style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:11px;" onclick="deleteJob('+i+')">✕</button></td></tr>').join('');}
+function deleteJob(i){STATE.jobs.splice(i,1);renderJobs();}
+
+// ===================== FITNESS =====================
+function renderFitness(){
+  const date=new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const fitDate=document.getElementById('fit-date');if(fitDate)fitDate.textContent=date;
+  const list=document.getElementById('exerciseList');
+  if(list){list.innerHTML='';STATE.exercises.forEach((ex,i)=>{const div=document.createElement('div');div.className='exercise-item'+(ex.done?' done':'');div.innerHTML='<div class="exercise-icon">'+ex.icon+'</div><div><div class="exercise-name">'+ex.name+'</div><div class="exercise-detail">'+ex.detail+'</div></div><div class="exercise-check-box">'+(ex.done?'✓':'')+'</div>';div.addEventListener('click',()=>{ex.done=!ex.done;renderFitness();});list.appendChild(div);});const done=STATE.exercises.filter(e=>e.done).length;document.getElementById('fit-done-count').textContent=done+' / '+STATE.exercises.length;}
+  const prList=document.getElementById('prList');
+  if(prList){const prs=[{lift:'Deadlift',record:'140kg',date:'2 weeks ago'},{lift:'Bench Press',record:'90kg',date:'1 month ago'},{lift:'Squat',record:'110kg',date:'3 weeks ago'},{lift:'5km Run',record:'23:14',date:'10 days ago'}];prList.innerHTML=prs.map(p=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);"><div style="font-size:13px;font-weight:600;color:var(--text-bright);">'+p.lift+'</div><div style="font-family:\'Orbitron\',monospace;font-size:13px;color:var(--accent3);">'+p.record+'</div><div style="font-size:10px;color:var(--text-dim);">'+p.date+'</div></div>').join('');}
+  renderTrackerChart('fitnessTrackerChart', STATE.fitnessHistory, 'var(--accent2)', 14);
+  updateDashStreaks();
+}
+function openEditFitnessModal(){
+  const list=document.getElementById('fitnessEditList');
+  list.innerHTML=STATE.exercises.map((ex,i)=>'<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;padding:8px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;"><span style="font-size:16px;">'+ex.icon+'</span><span style="flex:1;color:var(--text-bright);font-size:13px;">'+ex.name+' — '+ex.detail+'</span><button onclick="removeExercise('+i+')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:11px;">✕</button></div>').join('');
+  openModal('fitnessEditModal');
+}
+function removeExercise(i){STATE.exercises.splice(i,1);bumpVersion();openEditFitnessModal();renderFitness();}
+function addExerciseItem(){const ic=document.getElementById('fit-add-icon').value.trim()||'🏋️';const n=document.getElementById('fit-add-name').value.trim();const d=document.getElementById('fit-add-detail').value.trim();if(!n)return;STATE.exercises.push({id:Date.now(),icon:ic,name:n,detail:d,done:false});document.getElementById('fit-add-icon').value='';document.getElementById('fit-add-name').value='';document.getElementById('fit-add-detail').value='';bumpVersion();openEditFitnessModal();renderFitness();}
+function logFitnessDay(){const done=STATE.exercises.filter(e=>e.done).length;const total=STATE.exercises.length;const pct=total>0?Math.round((done/total)*100):0;const today=todayStr();const existing=STATE.fitnessHistory.findIndex(h=>h.date===today);if(existing>-1)STATE.fitnessHistory[existing].pct=pct;else STATE.fitnessHistory.push({date:today,pct});STATE.fitnessHistory=STATE.fitnessHistory.slice(-60);renderFitness();bumpVersion();}
+
+// ===================== SKINCARE =====================
+let editingSkinPeriod='am';
+function renderSkincare(){
+  function buildSteps(containerId,steps){const el=document.getElementById(containerId);if(!el)return;el.innerHTML='';steps.forEach((s,i)=>{const div=document.createElement('div');div.className='skincare-step'+(s.done?' done':'');div.innerHTML='<div class="step-num">'+(s.done?'✓':s.step)+'</div><div><div class="step-name">'+s.name+'</div><div class="step-detail">'+s.detail+'</div></div>';div.addEventListener('click',()=>{s.done=!s.done;renderSkincare();});el.appendChild(div);});}
+  buildSteps('skincare-am',STATE.skincareAM);buildSteps('skincare-pm',STATE.skincarePM);
+  const all=[...STATE.skincareAM,...STATE.skincarePM];const done=all.filter(s=>s.done).length;const pct=Math.round((done/all.length)*100);
+  const prog=document.getElementById('skin-progress');if(prog)prog.textContent=pct+'% complete';
+  renderTrackerChart('skincareTrackerChart',STATE.skincareHistory,'var(--accent3)',30);
+  updateDashStreaks();
+}
+function openSkincareEditModal(period){
+  editingSkinPeriod=period;
+  document.getElementById('skincareEditTitle').textContent='// EDIT '+(period==='am'?'MORNING':'EVENING')+' ROUTINE';
+  const steps=period==='am'?STATE.skincareAM:STATE.skincarePM;
+  const list=document.getElementById('skincareEditList');
+  list.innerHTML=steps.map((s,i)=>'<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;padding:8px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;"><span style="color:var(--text-dim);font-size:11px;width:20px;text-align:center;">'+(i+1)+'</span><span style="flex:1;color:var(--text-bright);font-size:13px;">'+s.name+' — '+s.detail+'</span><button onclick="removeSkincareStep('+i+')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:11px;">✕</button></div>').join('');
+  openModal('skincareEditModal');
+}
+function removeSkincareStep(i){const steps=editingSkinPeriod==='am'?STATE.skincareAM:STATE.skincarePM;steps.splice(i,1);steps.forEach((s,idx)=>s.step=idx+1);bumpVersion();openSkincareEditModal(editingSkinPeriod);renderSkincare();}
+function addSkincareStep(){const n=document.getElementById('skincare-add-name').value.trim();const d=document.getElementById('skincare-add-detail').value.trim();if(!n)return;const steps=editingSkinPeriod==='am'?STATE.skincareAM:STATE.skincarePM;steps.push({step:steps.length+1,name:n,detail:d||'',done:false});document.getElementById('skincare-add-name').value='';document.getElementById('skincare-add-detail').value='';bumpVersion();openSkincareEditModal(editingSkinPeriod);renderSkincare();}
+function logSkincareDay(){const all=[...STATE.skincareAM,...STATE.skincarePM];const done=all.filter(s=>s.done).length;const pct=Math.round((done/all.length)*100);const today=todayStr();const ex=STATE.skincareHistory.findIndex(h=>h.date===today);if(ex>-1)STATE.skincareHistory[ex].pct=pct;else STATE.skincareHistory.push({date:today,pct});STATE.skincareHistory=STATE.skincareHistory.slice(-60);renderSkincare();bumpVersion();}
+// ===================== VITAMINS / SUPPLEMENTS =====================
+function renderVitamins(){
+  const grid=document.getElementById('vitaminGrid');if(!grid)return;grid.innerHTML='';
+  STATE.vitamins.forEach(v=>{const card=document.createElement('div');card.className='vitamin-card'+(v.taken?' taken':'');card.innerHTML='<div class="vitamin-emoji">'+v.emoji+'</div><div class="vitamin-name">'+v.name+'</div><div class="vitamin-dose">'+v.dose+'</div><div class="vitamin-benefit">'+v.benefit+'</div><div style="display:flex;gap:6px;justify-content:center;margin-top:10px;"><button class="pill-btn" onclick="event.stopPropagation();editVitamin('+v.id+')" title="Edit">✎</button><button class="pill-btn" onclick="event.stopPropagation();deleteVitamin('+v.id+')" title="Delete" style="border-color:var(--danger);color:var(--danger);">✕</button></div>';card.addEventListener('click',()=>{v.taken=!v.taken;renderVitamins();});grid.appendChild(card);});
+  const taken=STATE.vitamins.filter(v=>v.taken).length;const prog=document.getElementById('vit-progress');if(prog)prog.textContent=taken+' / '+STATE.vitamins.length+' taken';
+  renderTrackerChart('suppTrackerChart',STATE.supplementHistory,'var(--accent4)',30);
+  renderDashSupplements();
+  updateDashStreaks();
+}
+function openAddVitaminModal(){document.getElementById('vitModalTitle').textContent='// ADD SUPPLEMENT';document.getElementById('vit-edit-id').value='';document.getElementById('vit-emoji').value='';document.getElementById('vit-name').value='';document.getElementById('vit-dose').value='';document.getElementById('vit-benefit').value='';openModal('vitaminEditModal');}
+function editVitamin(id){const v=STATE.vitamins.find(x=>x.id===id);if(!v)return;document.getElementById('vitModalTitle').textContent='// EDIT SUPPLEMENT';document.getElementById('vit-edit-id').value=id;document.getElementById('vit-emoji').value=v.emoji;document.getElementById('vit-name').value=v.name;document.getElementById('vit-dose').value=v.dose;document.getElementById('vit-benefit').value=v.benefit;openModal('vitaminEditModal');}
+function saveVitamin(){const emoji=document.getElementById('vit-emoji').value.trim()||'💊';const name=document.getElementById('vit-name').value.trim();const dose=document.getElementById('vit-dose').value.trim();const benefit=document.getElementById('vit-benefit').value.trim();if(!name)return;const eid=document.getElementById('vit-edit-id').value;if(eid){const v=STATE.vitamins.find(x=>x.id===parseInt(eid));if(v){v.emoji=emoji;v.name=name;v.dose=dose;v.benefit=benefit;}}else{STATE.vitamins.push({id:Date.now(),emoji,name,dose,benefit,taken:false});}closeModal('vitaminEditModal');bumpVersion();renderVitamins();}
+function deleteVitamin(id){STATE.vitamins=STATE.vitamins.filter(x=>x.id!==id);bumpVersion();renderVitamins();}
+function logSupplementDay(){const taken=STATE.vitamins.filter(v=>v.taken).length;const total=STATE.vitamins.length;const pct=total>0?Math.round((taken/total)*100):0;const today=todayStr();const ex=STATE.supplementHistory.findIndex(h=>h.date===today);if(ex>-1)STATE.supplementHistory[ex].pct=pct;else STATE.supplementHistory.push({date:today,pct});STATE.supplementHistory=STATE.supplementHistory.slice(-60);renderVitamins();bumpVersion();}
+function renderDashSupplements(){
+  const el=document.getElementById('dashSuppList');if(!el)return;
+  el.innerHTML=STATE.vitamins.map(v=>'<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="toggleDashSupp('+v.id+')"><span style="font-size:14px;">'+v.emoji+'</span><span style="flex:1;font-size:11px;color:'+(v.taken?'var(--accent3)':'var(--text-dim)')+';">'+(v.taken?'✓ ':'')+v.name+'</span><span style="font-family:\'Space Mono\',monospace;font-size:8px;color:var(--text-dim);">'+v.dose+'</span></div>').join('');
+  const taken=STATE.vitamins.filter(v=>v.taken).length;const dp=document.getElementById('dash-supp-progress');if(dp)dp.textContent=taken+'/'+STATE.vitamins.length;
+}
+function toggleDashSupp(id){const v=STATE.vitamins.find(x=>x.id===id);if(v){v.taken=!v.taken;renderVitamins();}}
+
+// ===================== TRACKER CHART =====================
+function renderTrackerChart(containerId, history, color, days) {
+  const el=document.getElementById(containerId);if(!el)return;
+  const today=new Date();const data=[];
+  for(let i=days-1;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);const ds=d.toISOString().split('T')[0];const entry=history.find(h=>h.date===ds);data.push({date:ds,pct:entry?entry.pct:0,label:d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'}).replace(' ','\n')});}
+  const shortLabel = days<=14;
+  el.innerHTML=data.map((d,i)=>{
+    const dayLabel=shortLabel?new Date(d.date).toLocaleDateString('en-GB',{weekday:'short'}).substring(0,2):((i%5===0||i===data.length-1)?new Date(d.date).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}):'');
+    return '<div class="tracker-bar-row"><span class="tracker-day-label">'+dayLabel+'</span><div class="tracker-bar"><div class="tracker-bar-fill" style="width:'+d.pct+'%;background:'+color+';"></div></div><span class="tracker-pct">'+(d.pct>0?d.pct+'%':'—')+'</span></div>';
+  }).join('');
+}
+function updateDashStreaks(){
+  // Calculate streaks
+  function getStreak(history){let streak=0;const today=new Date();for(let i=0;i<60;i++){const d=new Date(today);d.setDate(d.getDate()-i);const ds=d.toISOString().split('T')[0];const entry=history.find(h=>h.date===ds);if(entry&&entry.pct>0)streak++;else break;}return streak;}
+  const skinStreak=getStreak(STATE.skincareHistory);
+  const fitStreak=getStreak(STATE.fitnessHistory);
+  const suppStreak=getStreak(STATE.supplementHistory);
+  document.getElementById('stat-skin-streak').textContent=skinStreak;
+  document.getElementById('stat-fit-streak').textContent=fitStreak;
+  document.getElementById('stat-supp-streak').textContent=suppStreak;
+  document.getElementById('bar-skin').style.width=Math.min(skinStreak*10,100)+'%';
+  document.getElementById('bar-fit').style.width=Math.min(fitStreak*10,100)+'%';
+  document.getElementById('bar-supp').style.width=Math.min(suppStreak*10,100)+'%';
+  const rsb=document.getElementById('routine-streak-badge');if(rsb)rsb.textContent=skinStreak+' day streak';
+  const ssb=document.getElementById('skin-streak-badge');if(ssb)ssb.textContent=skinStreak+' day streak';
+  const sub=document.getElementById('supp-streak-badge');if(sub)sub.textContent=suppStreak+' day streak';
+  // Dashboard routine chart (skincare for dashboard)
+  renderTrackerChart('routineChart',STATE.skincareHistory,'var(--accent3)',14);
+}
+
+// ===================== MOOD =====================
+function selectMood(el){document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
+function setEnergy(el){document.querySelectorAll('.btn-group .btn-ghost').forEach(b=>{b.style.borderColor='';b.style.color='';});el.style.borderColor='var(--accent)';el.style.color='var(--accent)';}
+function cycleInsight(){STATE.insightIndex=(STATE.insightIndex+1)%INSIGHTS.length;renderInsight();}
+function renderInsight(){const ins=INSIGHTS[STATE.insightIndex];document.getElementById('insightText').textContent=ins.text;document.getElementById('insightSource').textContent=ins.source;}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-backdrop').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});});
+// ===================== GOOGLE DRIVE SYNC =====================
+const GDRIVE_CLIENT_ID = '651803114273-kriebf4th77p8chp37cgkgrdinfc1d9o.apps.googleusercontent.com';
+const GDRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file';
+const GDRIVE_FILENAME = 'jarvis-dashboard-data.json';
+const GDRIVE_FOLDER = 'appDataFolder';
+let driveAccessToken=null,driveFileId=null,driveConnected=false,autoSaveTimer=null;
+function setDriveStatus(connected,label,color){driveConnected=connected;document.getElementById('drive-dot').style.background=color;document.getElementById('drive-label').textContent=label;document.getElementById('drive-btn').textContent=connected?'DISCONNECT':'CONNECT DRIVE';document.getElementById('drive-btn').style.borderColor=connected?'var(--accent3)':'var(--border)';document.getElementById('drive-btn').style.color=connected?'var(--accent3)':'var(--text-dim)';document.getElementById('save-btn').style.display=connected?'inline-block':'none';}
+function toggleDriveConnection(){if(driveConnected){driveAccessToken=null;driveFileId=null;clearInterval(autoSaveTimer);setDriveStatus(false,'NOT CONNECTED','var(--text-dim)');return;}initDriveAuth();}
+function initDriveAuth(){if(typeof google==='undefined'||!google.accounts){setDriveStatus(false,'API NOT LOADED','var(--danger)');return;}setDriveStatus(false,'CONNECTING...','var(--accent4)');const tc=google.accounts.oauth2.initTokenClient({client_id:GDRIVE_CLIENT_ID,scope:GDRIVE_SCOPES,callback:(r)=>{if(r.error){setDriveStatus(false,'AUTH FAILED','var(--danger)');return;}driveAccessToken=r.access_token;setDriveStatus(true,'SYNCING...','var(--accent4)');loadFromDrive().then(()=>{setDriveStatus(true,'SYNCED ✓','var(--accent3)');autoSaveTimer=setInterval(()=>saveToDrive(true),60000);});}});tc.requestAccessToken();}
+function saveToDrive(silent){if(!driveAccessToken)return;if(!silent)setDriveStatus(true,'SAVING...','var(--accent4)');const payload=buildExportPayload();const body=JSON.stringify(payload,null,2);const metadata={name:GDRIVE_FILENAME,parents:[GDRIVE_FOLDER],mimeType:'application/json'};const boundary='jarvis_boundary_'+Date.now();const mp=['--'+boundary,'Content-Type: application/json','',JSON.stringify(driveFileId?{name:GDRIVE_FILENAME}:metadata),'--'+boundary,'Content-Type: application/json','',body,'--'+boundary+'--'].join('\r\n');let url,method;if(driveFileId){url='https://www.googleapis.com/upload/drive/v3/files/'+driveFileId+'?uploadType=multipart';method='PATCH';}else{url='https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';method='POST';}fetch(url,{method,headers:{'Authorization':'Bearer '+driveAccessToken,'Content-Type':'multipart/related; boundary='+boundary},body:mp}).then(r=>{if(!r.ok)throw new Error('Save failed: '+r.status);return r.json();}).then(result=>{driveFileId=result.id;setDriveStatus(true,'SAVED '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),'var(--accent3)');}).catch(err=>{setDriveStatus(true,'SAVE ERROR','var(--danger)');console.error('Drive save error:',err);});}
+function loadFromDrive(){if(!driveAccessToken)return Promise.resolve();return fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D%27'+GDRIVE_FILENAME+'%27&fields=files(id%2Cname)',{headers:{'Authorization':'Bearer '+driveAccessToken}}).then(r=>{if(!r.ok)throw new Error('Search failed: '+r.status);return r.json();}).then(data=>{if(data.files&&data.files.length>0){driveFileId=data.files[0].id;return fetch('https://www.googleapis.com/drive/v3/files/'+driveFileId+'?alt=media',{headers:{'Authorization':'Bearer '+driveAccessToken}}).then(r=>{if(!r.ok)throw new Error('Download failed: '+r.status);return r.json();}).then(d=>{applyImportedData(d);setDriveStatus(true,'LOADED ✓','var(--accent3)');});}else{return saveToDrive(true).then?saveToDrive(true):Promise.resolve();}}).catch(err=>{setDriveStatus(true,'LOAD ERROR','var(--danger)');console.error('Drive load error:',err);});}
+function manualSave(){saveToDrive(false);}
+
+// ===================== EXPORT / IMPORT =====================
+function buildExportPayload(){return{_version:2,_exported:new Date().toISOString(),sysVersion:STATE.sysVersion,tasks:STATE.tasks,kanban:STATE.kanban,jobs:STATE.jobs,exercises:STATE.exercises,skincareAM:STATE.skincareAM,skincarePM:STATE.skincarePM,vitamins:STATE.vitamins,skincareHistory:STATE.skincareHistory,fitnessHistory:STATE.fitnessHistory,supplementHistory:STATE.supplementHistory,lastDayReset:STATE.lastDayReset,quickNote:document.getElementById('quickNote')?document.getElementById('quickNote').value:'',skinNote:document.getElementById('skinNote')?document.getElementById('skinNote').value:''};}
+function exportData(){const d=buildExportPayload();const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='jarvis-data-'+todayStr()+'.json';a.click();URL.revokeObjectURL(url);}
+function applyImportedData(data){if(!data._version)throw new Error('Unrecognised file format');if(data.sysVersion)STATE.sysVersion=data.sysVersion;if(data.tasks)STATE.tasks=data.tasks;if(data.kanban)STATE.kanban=data.kanban;if(data.jobs)STATE.jobs=data.jobs;if(data.exercises)STATE.exercises=data.exercises;if(data.skincareAM)STATE.skincareAM=data.skincareAM;if(data.skincarePM)STATE.skincarePM=data.skincarePM;if(data.vitamins)STATE.vitamins=data.vitamins;if(data.skincareHistory)STATE.skincareHistory=data.skincareHistory;if(data.fitnessHistory)STATE.fitnessHistory=data.fitnessHistory;if(data.supplementHistory)STATE.supplementHistory=data.supplementHistory;if(data.lastDayReset)STATE.lastDayReset=data.lastDayReset;
+// Ensure backwards compat: add missing fields to tasks
+STATE.tasks.forEach(t=>{if(t.repeat===undefined)t.repeat=false;if(t.urgent===undefined)t.urgent=false;});
+Object.values(STATE.kanban.tasks).forEach(arr=>arr.forEach(t=>{if(t.urgent===undefined)t.urgent=false;}));
+renderAll();if(data.quickNote){const qn=document.getElementById('quickNote');if(qn)qn.value=data.quickNote;}if(data.skinNote){const sn=document.getElementById('skinNote');if(sn)sn.value=data.skinNote;}const ve=document.getElementById('sysVersion');if(ve)ve.textContent=STATE.sysVersion.toFixed(1);}
+function importData(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(e){try{const data=JSON.parse(e.target.result);applyImportedData(data);const btn=document.querySelector('.header-right label');if(btn){btn.style.color='var(--accent3)';btn.style.borderColor='var(--accent3)';setTimeout(()=>{btn.style.color='';btn.style.borderColor='';},2000);}}catch(err){alert('Import failed: '+err.message);}event.target.value='';};reader.readAsText(file);}
+function applyClientId(){const id=document.getElementById('modal-client-id').value.trim();if(!id)return;closeModal('driveSetupModal');initDriveAuth();}
+
+function renderAll(){renderTasks();renderKanban();renderJobs();renderFitness();renderSkincare();renderVitamins();renderInsight();updateTimerDisplay();updateStats();updateDashStreaks();}
+function init(){checkDayReset();renderNav();renderAll();document.getElementById('j-date').valueAsDate=new Date();STATE.insightIndex=Math.floor(Math.random()*INSIGHTS.length);renderInsight();const ve=document.getElementById('sysVersion');if(ve)ve.textContent=STATE.sysVersion.toFixed(1);}
+init();
+</script>
 </body>
 </html>
