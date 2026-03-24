@@ -2595,9 +2595,10 @@ async function loadFromDrive() {
   try {
     // Search for existing file in appDataFolder
     const searchRes = await fetch(
-      `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${GDRIVE_FILENAME}'&fields=files(id,name,modifiedTime)`,
+      `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D%27${GDRIVE_FILENAME}%27&fields=files(id%2Cname)`,
       { headers: { 'Authorization': 'Bearer ' + driveAccessToken } }
     );
+    if (!searchRes.ok) throw new Error('Search failed: ' + searchRes.status);
     const searchData = await searchRes.json();
 
     if (searchData.files && searchData.files.length > 0) {
@@ -2607,13 +2608,14 @@ async function loadFromDrive() {
         `https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`,
         { headers: { 'Authorization': 'Bearer ' + driveAccessToken } }
       );
+      if (!fileRes.ok) throw new Error('Download failed: ' + fileRes.status);
       const data = await fileRes.json();
       applyImportedData(data);
-      setDriveStatus(true, 'LOADED ✓', 'var(--accent3)');
+      setDriveStatus(true, 'LOADED \u2713', 'var(--accent3)');
     } else {
-      // No existing file — save current state as first save
+      // No existing file \u2014 save current state as first save
       await saveToDrive(true);
-      setDriveStatus(true, 'FIRST SAVE ✓', 'var(--accent3)');
+      setDriveStatus(true, 'FIRST SAVE \u2713', 'var(--accent3)');
     }
   } catch(err) {
     setDriveStatus(true, 'LOAD ERROR', 'var(--danger)');
