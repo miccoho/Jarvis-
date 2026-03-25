@@ -227,6 +227,47 @@ body::before { content:''; position:fixed; inset:0; background-image:linear-grad
 .task-popup-item .tpi-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
 .task-popup-item .tpi-text { flex:1; color:var(--text-bright); }
 .task-popup-item.tpi-done .tpi-text { text-decoration:line-through; color:var(--text-dim); }
+
+/* Task Control Panel */
+.tcp-widget { grid-row:1/3; display:flex; flex-direction:column; overflow:hidden; }
+.tcp-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; text-align:center; flex:1; }
+.tcp-empty-icon { font-size:40px; margin-bottom:16px; opacity:0.15; color:var(--accent); }
+.tcp-empty-text { font-family:'Space Mono',monospace; font-size:11px; letter-spacing:1.5px; color:var(--text-dim); margin-bottom:20px; text-transform:uppercase; }
+.tcp-add-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:14px 20px; border-radius:4px; border:1px solid var(--accent); background:rgba(0,200,255,0.06); color:var(--accent); font-family:'Rajdhani',sans-serif; font-size:16px; font-weight:700; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:all 0.25s ease; }
+.tcp-add-btn:hover { background:rgba(0,200,255,0.18); box-shadow:0 0 30px rgba(0,200,255,0.35), inset 0 0 20px rgba(0,200,255,0.05); transform:translateY(-1px); }
+.tcp-add-btn .tcp-plus { font-size:20px; font-weight:300; }
+.tcp-focus-list { flex:1; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+.tcp-focus-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:4px; margin-bottom:6px; border:1px solid var(--border); background:var(--surface2); transition:all 0.2s ease; cursor:pointer; position:relative; }
+.tcp-focus-item:hover { border-color:var(--border-active); box-shadow:0 0 15px rgba(0,200,255,0.12); transform:translateX(2px); }
+.tcp-focus-item.tcp-done { opacity:0.5; }
+.tcp-focus-item.tcp-done .tcp-focus-text { text-decoration:line-through; color:var(--text-dim); }
+.tcp-focus-check { width:16px; height:16px; border:1px solid var(--text-dim); border-radius:3px; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all 0.2s; font-size:10px; color:transparent; }
+.tcp-focus-item.tcp-done .tcp-focus-check { border-color:var(--accent3); background:rgba(0,255,163,0.1); color:var(--accent3); }
+.tcp-focus-text { font-size:16px; font-weight:500; flex:1; line-height:1.4; color:var(--text-bright); }
+.tcp-focus-col { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:1px; color:var(--text-dim); padding:1px 6px; border:1px solid var(--border); border-radius:2px; flex-shrink:0; }
+.tcp-focus-remove { opacity:0; font-size:11px; color:var(--text-dim); cursor:pointer; padding:2px 5px; border:none; background:none; transition:all 0.15s; flex-shrink:0; }
+.tcp-focus-item:hover .tcp-focus-remove { opacity:1; }
+.tcp-focus-remove:hover { color:var(--danger); }
+.tcp-focus-count { font-family:'Space Mono',monospace; font-size:10px; color:var(--text-dim); text-align:center; padding:6px; letter-spacing:1px; }
+
+/* Task Control Panel Modal */
+.tcp-modal-search { background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:10px 14px; color:var(--text-bright); font-family:'Rajdhani',sans-serif; font-size:16px; outline:none; width:100%; transition:border-color 0.2s; margin-bottom:12px; }
+.tcp-modal-search:focus { border-color:var(--accent); }
+.tcp-modal-search::placeholder { color:var(--text-dim); }
+.tcp-modal-section { margin-bottom:16px; }
+.tcp-modal-section-title { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; margin-bottom:8px; padding-bottom:4px; border-bottom:1px solid var(--border); }
+.tcp-task-option { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:4px; border:1px solid transparent; cursor:pointer; transition:all 0.15s; margin-bottom:3px; }
+.tcp-task-option:hover { background:rgba(0,200,255,0.06); border-color:var(--border); }
+.tcp-task-option.tcp-selected { background:rgba(0,200,255,0.1); border-color:var(--accent); box-shadow:0 0 10px rgba(0,200,255,0.1); }
+.tcp-opt-check { width:14px; height:14px; border:1px solid var(--text-dim); border-radius:3px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:9px; color:transparent; transition:all 0.2s; }
+.tcp-task-option.tcp-selected .tcp-opt-check { border-color:var(--accent); color:var(--accent); background:rgba(0,200,255,0.1); }
+.tcp-opt-text { flex:1; font-size:15px; color:var(--text-bright); }
+.tcp-opt-meta { font-family:'Space Mono',monospace; font-size:9px; color:var(--text-dim); letter-spacing:0.5px; }
+.tcp-opt-priority { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.tcp-quick-add-row { display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+.tcp-quick-input { flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:10px 14px; color:var(--text-bright); font-family:'Rajdhani',sans-serif; font-size:16px; outline:none; transition:border-color 0.2s; }
+.tcp-quick-input:focus { border-color:var(--accent3); }
+.tcp-quick-input::placeholder { color:var(--text-dim); }
 </style>
 </head>
 <body>
@@ -255,37 +296,28 @@ body::before { content:''; position:fixed; inset:0; background-image:linear-grad
 <!-- DASHBOARD -->
 <div class="page active" id="page-dashboard">
   <div class="dashboard-grid">
-    <!-- LEFT: Task Pane -->
-    <div class="widget task-pane">
+    <!-- LEFT: Task Control Panel -->
+    <div class="widget tcp-widget">
       <div class="widget-header">
-        <div class="widget-title">Daily Tasks</div>
-        <div class="widget-badge badge-accent" id="task-count">0 remaining</div>
+        <div class="widget-title">Task Control</div>
+        <div class="widget-badge badge-accent" id="tcp-focus-badge">0 focus</div>
       </div>
-      <div class="task-input-row">
-        <input type="text" class="task-input" id="taskInput" placeholder="Add task...">
-        <select class="form-select" id="taskPriority" style="width:90px;padding:8px 28px 8px 8px;font-size:11px;">
-          <option value="high">🔴 High</option>
-          <option value="med" selected>🟠 Med</option>
-          <option value="low">🟢 Low</option>
-        </select>
-        <button class="btn-add" onclick="addTask()">+</button>
+      <div id="tcpFocusList" class="tcp-focus-list"></div>
+      <div id="tcpEmptyState" class="tcp-empty">
+        <div class="tcp-empty-icon">◇</div>
+        <div class="tcp-empty-text">No focus tasks selected</div>
       </div>
-      <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;">
-        <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-dim);cursor:pointer;">
-          <input type="checkbox" id="taskRepeat" style="accent-color:var(--accent2);"> <span style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;">REPEATS DAILY</span>
-        </label>
-        <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-dim);cursor:pointer;margin-left:8px;">
-          <input type="checkbox" id="taskUrgent" style="accent-color:var(--danger);"> <span style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;">URGENT</span>
-        </label>
+      <div style="padding-top:8px;margin-top:auto;">
+        <button class="tcp-add-btn" onclick="openTaskControlModal()">
+          <span class="tcp-plus">+</span> Add Task
+        </button>
       </div>
-      <div class="task-section-label">TODAY'S TASKS</div>
-      <div class="critical-note">3 critical tasks for today — <span>everything else is noise</span></div>
-      <div id="taskList"></div>
-      <div class="sep"></div>
-      <div class="task-section-label">QUICK NOTE</div>
-      <textarea class="note-area" placeholder="Brain dump, thought fragments, ideas…" id="quickNote"></textarea>
+      <div class="sep" style="margin:10px 0 6px;"></div>
+      <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--text-dim);text-transform:uppercase;margin-bottom:6px;">Quick Note</div>
+      <textarea class="note-area" placeholder="Brain dump, thought fragments, ideas…" id="quickNote" style="min-height:70px;flex-shrink:0;"></textarea>
     </div>
 
+    
     <!-- CENTER -->
     <div class="center-col">
       <div class="stats-row">
@@ -665,17 +697,37 @@ body::before { content:''; position:fixed; inset:0; background-image:linear-grad
     <div class="modal-footer"><button class="btn-sm btn-ghost" onclick="closeModal('driveSetupModal')">Cancel</button><button class="btn-sm btn-accent" onclick="applyClientId()">CONNECT</button></div>
   </div>
 </div>
+</div>
+</div>
+
+<!-- MODAL: Task Control Panel -->
+<div class="modal-backdrop" id="taskControlModal">
+  <div class="modal" style="width:560px;">
+    <div class="modal-title">// TASK CONTROL PANEL</div>
+    <input type="text" class="tcp-modal-search" id="tcpSearch" placeholder="Search tasks..." oninput="renderTaskControlModal()">
+    <div class="tcp-modal-section">
+      <div class="tcp-modal-section-title">Select from To-Do List</div>
+      <div id="tcpTaskOptions" style="max-height:260px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;"></div>
+    </div>
+    <div class="tcp-quick-add-row">
+      <input type="text" class="tcp-quick-input" id="tcpQuickInput" placeholder="Quick add new task... (Enter to add)">
+      <select class="form-select" id="tcpQuickPriority" style="width:90px;padding:8px 28px 8px 8px;font-size:11px;">
+        <option value="high">🔴 High</option>
+        <option value="med" selected>🟠 Med</option>
+        <option value="low">🟢 Low</option>
+      </select>
+      <button class="btn-add" onclick="tcpQuickAddTask()">+</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-ghost" onclick="closeModal('taskControlModal')">Done</button>
+    </div>
+  </div>
+</div>
 <script>
 const SYS_VERSION_BASE = 7.4;
 const STATE = {
   sysVersion: 7.4,
-  tasks: [
-    { id:1, text:'Review quarterly goals and adjust OKRs', priority:'high', done:false, repeat:false, urgent:true },
-    { id:2, text:'Deep work block: system design', priority:'high', done:false, repeat:false, urgent:false },
-    { id:3, text:'Read 30 pages', priority:'med', done:false, repeat:true, urgent:false },
-    { id:4, text:'Journal — reflection + gratitude', priority:'low', done:false, repeat:true, urgent:false },
-    { id:5, text:'Evening walk 30 min', priority:'low', done:false, repeat:true, urgent:false },
-  ],
+  focusTasks: [],
   kanban: {
     columns: [
       { id:'todo', label:'QUEUED', color:'var(--accent4)' },
@@ -769,10 +821,8 @@ function todayStr() { return new Date().toISOString().split('T')[0]; }
 function checkDayReset() {
   const today = todayStr();
   if (STATE.lastDayReset && STATE.lastDayReset !== today) {
-    STATE.tasks = STATE.tasks.filter(t => {
-      if (t.repeat) { t.done = false; return true; }
-      return !t.done; // keep undone non-repeat tasks, remove done non-repeat
-    });
+    // Reset focus task completion status daily
+    STATE.focusTasks.forEach(ft => { ft.done = false; });
   }
   STATE.lastDayReset = today;
 }
@@ -800,49 +850,215 @@ function navigateTo(id) { STATE.currentPage=id; document.querySelectorAll('.page
 function removeTab(id,e) { e.stopPropagation(); STATE.tabs=STATE.tabs.filter(t=>t.id!==id); if(STATE.currentPage===id)navigateTo('dashboard'); else renderNav(); }
 function addCustomTab() { const n=document.getElementById('modal-tab-name').value.trim(); const ic=document.getElementById('modal-tab-icon').value.trim()||'◻'; if(!n)return; STATE.tabs.push({id:'custom-'+Date.now(),label:n,icon:ic,custom:true}); closeModal('addTabModal'); renderNav(); document.getElementById('modal-tab-name').value=''; document.getElementById('modal-tab-icon').value=''; }
 
-// ===================== TASKS =====================
-function renderTasks() {
-  const list = document.getElementById('taskList');
-  list.innerHTML = '';
-  STATE.tasks.forEach((task,i) => {
-    const isUrgentHigh = task.urgent && task.priority === 'high';
-    const div = document.createElement('div');
-    div.className = 'task-item' + (task.done?' done':'') + (isUrgentHigh&&!task.done?' urgent-important':'');
-    let badges = '';
-    if (task.repeat) badges += '<span class="task-repeat-badge">↻ DAILY</span>';
-    div.innerHTML = '<div class="task-checkbox">'+(task.done?'✓':'')+'</div><div class="task-priority priority-'+task.priority+'"></div><div class="task-text">'+task.text+'</div>'+badges+'<div class="task-actions"><button class="task-act-btn" onclick="toggleRepeat('+i+',event)" title="Toggle daily repeat">'+(task.repeat?'↻':'↻')+'</button><button class="task-act-btn del" onclick="deleteTask('+i+',event)">✕</button></div>';
-    div.addEventListener('click', e => { if(e.target.closest('.task-actions'))return; task.done=!task.done; renderTasks(); updateStats(); });
-    list.appendChild(div);
+// ===================== TASK CONTROL PANEL =====================
+// All tasks reference STATE.kanban as the single source of truth.
+// STATE.focusTasks is an array of {taskId, colId} referencing kanban tasks.
+
+function getAllKanbanTasks() {
+  const all = [];
+  STATE.kanban.columns.forEach(col => {
+    (STATE.kanban.tasks[col.id] || []).forEach(t => {
+      all.push({ ...t, colId: col.id, colLabel: col.label });
+    });
   });
-  updateStats();
+  return all;
 }
-function addTask() {
-  const input=document.getElementById('taskInput'); const pri=document.getElementById('taskPriority').value;
-  const rep=document.getElementById('taskRepeat').checked; const urg=document.getElementById('taskUrgent').checked;
-  const text=input.value.trim(); if(!text)return;
-  STATE.tasks.unshift({id:Date.now(),text,priority:pri,done:false,repeat:rep,urgent:urg});
-  input.value=''; document.getElementById('taskRepeat').checked=false; document.getElementById('taskUrgent').checked=false;
-  bumpVersion(); renderTasks();
+
+function getFocusTaskData() {
+  return STATE.focusTasks.map(ft => {
+    const tasks = STATE.kanban.tasks[ft.colId] || [];
+    const task = tasks.find(t => t.id === ft.taskId);
+    if (!task) return null;
+    const col = STATE.kanban.columns.find(c => c.id === ft.colId);
+    return { ...task, colId: ft.colId, colLabel: col ? col.label : ft.colId, focusDone: ft.done || false };
+  }).filter(Boolean);
 }
-document.getElementById('taskInput').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
-function deleteTask(i,e) { if(e)e.stopPropagation(); STATE.tasks.splice(i,1); bumpVersion(); renderTasks(); }
-function toggleRepeat(i,e) { if(e)e.stopPropagation(); STATE.tasks[i].repeat=!STATE.tasks[i].repeat; bumpVersion(); renderTasks(); }
-function updateStats() {
-  const done=STATE.tasks.filter(t=>t.done).length; const total=STATE.tasks.length; const rem=total-done;
-  document.getElementById('task-count').textContent=rem+' remaining';
-  const pct=total>0?Math.round((done/total)*100):0;
-  // Update ring
-  const circ=175.93;
-  const arc=document.getElementById('taskRingArc');
-  if(arc)arc.style.strokeDashoffset=circ*(1-pct/100);
-  const pctEl=document.getElementById('taskRingPct');
-  if(pctEl)pctEl.textContent=pct+'%';
+
+function renderTaskControlPanel() {
+  const focusData = getFocusTaskData();
+  const listEl = document.getElementById('tcpFocusList');
+  const emptyEl = document.getElementById('tcpEmptyState');
+  const badgeEl = document.getElementById('tcp-focus-badge');
+  
+  if (!listEl || !emptyEl) return;
+  
+  // Clean up stale focus tasks (tasks that no longer exist in kanban)
+  STATE.focusTasks = STATE.focusTasks.filter(ft => {
+    const tasks = STATE.kanban.tasks[ft.colId] || [];
+    return tasks.some(t => t.id === ft.taskId);
+  });
+  
+  const data = getFocusTaskData();
+  
+  if (data.length === 0) {
+    listEl.innerHTML = '';
+    listEl.style.display = 'none';
+    emptyEl.style.display = 'flex';
+    if (badgeEl) badgeEl.textContent = '0 focus';
+  } else {
+    emptyEl.style.display = 'none';
+    listEl.style.display = 'block';
+    const doneCount = data.filter(d => d.focusDone).length;
+    if (badgeEl) badgeEl.textContent = doneCount + '/' + data.length + ' done';
+    
+    listEl.innerHTML = data.map((t, i) => {
+      const isDone = t.focusDone;
+      const priColor = t.priority === 'high' ? 'var(--danger)' : t.priority === 'med' ? 'var(--accent4)' : 'var(--accent3)';
+      return '<div class="tcp-focus-item' + (isDone ? ' tcp-done' : '') + '" onclick="toggleFocusTaskDone(' + i + ')">' +
+        '<div class="tcp-focus-check">' + (isDone ? '✓' : '') + '</div>' +
+        '<div class="tcp-opt-priority" style="background:' + priColor + ';box-shadow:0 0 6px ' + priColor + ';"></div>' +
+        '<div class="tcp-focus-text">' + t.text + '</div>' +
+        '<div class="tcp-focus-col">' + t.colLabel + '</div>' +
+        '<button class="tcp-focus-remove" onclick="event.stopPropagation();removeFocusTask(' + i + ')">✕</button>' +
+      '</div>';
+    }).join('');
+  }
+  
+  updateTaskRing();
+}
+
+function toggleFocusTaskDone(idx) {
+  if (STATE.focusTasks[idx]) {
+    STATE.focusTasks[idx].done = !STATE.focusTasks[idx].done;
+    renderTaskControlPanel();
+  }
+}
+
+function removeFocusTask(idx) {
+  STATE.focusTasks.splice(idx, 1);
+  renderTaskControlPanel();
+}
+
+function addFocusTask(taskId, colId) {
+  const exists = STATE.focusTasks.some(ft => ft.taskId === taskId && ft.colId === colId);
+  if (exists) return;
+  if (STATE.focusTasks.length >= 5) return; // Max 5 focus tasks
+  STATE.focusTasks.push({ taskId, colId, done: false });
+  renderTaskControlPanel();
+}
+
+function removeFocusTaskByRef(taskId, colId) {
+  STATE.focusTasks = STATE.focusTasks.filter(ft => !(ft.taskId === taskId && ft.colId === colId));
+  renderTaskControlPanel();
+}
+
+function isFocusTask(taskId, colId) {
+  return STATE.focusTasks.some(ft => ft.taskId === taskId && ft.colId === colId);
+}
+
+function openTaskControlModal() {
+  document.getElementById('tcpSearch').value = '';
+  renderTaskControlModal();
+  openModal('taskControlModal');
+  setTimeout(() => document.getElementById('tcpSearch').focus(), 100);
+}
+
+function renderTaskControlModal() {
+  const search = (document.getElementById('tcpSearch') || {}).value || '';
+  const container = document.getElementById('tcpTaskOptions');
+  if (!container) return;
+  
+  let allTasks = getAllKanbanTasks();
+  if (search) {
+    const s = search.toLowerCase();
+    allTasks = allTasks.filter(t => t.text.toLowerCase().includes(s) || (t.tag || '').toLowerCase().includes(s) || t.colLabel.toLowerCase().includes(s));
+  }
+  
+  // Group by column
+  const grouped = {};
+  allTasks.forEach(t => {
+    if (!grouped[t.colId]) grouped[t.colId] = { label: t.colLabel, tasks: [] };
+    grouped[t.colId].tasks.push(t);
+  });
+  
+  let html = '';
+  Object.keys(grouped).forEach(colId => {
+    const g = grouped[colId];
+    html += '<div style="font-family:\'Space Mono\',monospace;font-size:9px;letter-spacing:1.5px;color:var(--text-dim);margin:8px 0 4px;text-transform:uppercase;">' + g.label + '</div>';
+    g.tasks.forEach(t => {
+      const selected = isFocusTask(t.id, colId);
+      const priColor = t.priority === 'high' ? 'var(--danger)' : t.priority === 'med' ? 'var(--accent4)' : 'var(--accent3)';
+      html += '<div class="tcp-task-option' + (selected ? ' tcp-selected' : '') + '" onclick="toggleTaskSelection(' + t.id + ',\'' + colId + '\')">' +
+        '<div class="tcp-opt-check">' + (selected ? '✓' : '') + '</div>' +
+        '<div class="tcp-opt-priority" style="background:' + priColor + ';box-shadow:0 0 4px ' + priColor + ';"></div>' +
+        '<div class="tcp-opt-text">' + t.text + '</div>' +
+        (t.tag ? '<div class="tcp-opt-meta">' + t.tag + '</div>' : '') +
+      '</div>';
+    });
+  });
+  
+  if (allTasks.length === 0) {
+    html = '<div style="text-align:center;padding:20px;color:var(--text-dim);font-size:13px;">No tasks found</div>';
+  }
+  
+  container.innerHTML = html;
+}
+
+function toggleTaskSelection(taskId, colId) {
+  if (isFocusTask(taskId, colId)) {
+    removeFocusTaskByRef(taskId, colId);
+  } else {
+    addFocusTask(taskId, colId);
+  }
+  renderTaskControlModal();
+}
+
+function tcpQuickAddTask() {
+  const input = document.getElementById('tcpQuickInput');
+  const pri = document.getElementById('tcpQuickPriority').value;
+  const text = input.value.trim();
+  if (!text) return;
+  
+  // Add to kanban "todo" column (or first column) as the source of truth
+  const targetCol = STATE.kanban.columns[0] ? STATE.kanban.columns[0].id : 'todo';
+  if (!STATE.kanban.tasks[targetCol]) STATE.kanban.tasks[targetCol] = [];
+  const newTask = { id: Date.now(), text, priority: pri, notes: '', due: '', tag: '', urgent: pri === 'high' };
+  STATE.kanban.tasks[targetCol].push(newTask);
+  
+  // Auto-add to focus tasks
+  addFocusTask(newTask.id, targetCol);
+  
+  input.value = '';
+  bumpVersion();
+  renderTaskControlModal();
+  renderKanban();
+}
+
+function updateTaskRing() {
+  const focusData = getFocusTaskData();
+  const total = focusData.length;
+  const done = focusData.filter(d => d.focusDone).length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  
+  const circ = 175.93;
+  const arc = document.getElementById('taskRingArc');
+  if (arc) arc.style.strokeDashoffset = circ * (1 - pct / 100);
+  const pctEl = document.getElementById('taskRingPct');
+  if (pctEl) pctEl.textContent = pct + '%';
+  
   // Update popup list
-  const popList=document.getElementById('taskPopupList');
-  if(popList){popList.innerHTML=STATE.tasks.map(t=>'<div class="task-popup-item'+(t.done?' tpi-done':'')+'"><div class="tpi-dot" style="background:'+(t.priority==='high'?'var(--danger)':t.priority==='med'?'var(--accent4)':'var(--accent3)')+';"></div><div class="tpi-text">'+t.text+'</div></div>').join('');}
+  const popList = document.getElementById('taskPopupList');
+  if (popList) {
+    if (total === 0) {
+      popList.innerHTML = '<div style="font-size:11px;color:var(--text-dim);padding:4px 0;">No focus tasks selected</div>';
+    } else {
+      popList.innerHTML = focusData.map(t => '<div class="task-popup-item' + (t.focusDone ? ' tpi-done' : '') + '">' +
+        '<div class="tpi-dot" style="background:' + (t.priority === 'high' ? 'var(--danger)' : t.priority === 'med' ? 'var(--accent4)' : 'var(--accent3)') + ';"></div>' +
+        '<div class="tpi-text">' + t.text + '</div></div>').join('');
+    }
+  }
 }
-function showTaskPopup(){const p=document.getElementById('taskPopup');const card=document.getElementById('taskRingCard');if(p&&card){const r=card.getBoundingClientRect();p.style.top=(r.bottom+4)+'px';p.style.left=(r.left+r.width/2)+'px';p.style.transform='translateX(-50%)';p.classList.add('visible');}}
-function hideTaskPopup(){const p=document.getElementById('taskPopup');if(p)p.classList.remove('visible');}
+
+// Quick input enter key handler
+document.addEventListener('DOMContentLoaded', function() {
+  const tcpInput = document.getElementById('tcpQuickInput');
+  if (tcpInput) tcpInput.addEventListener('keydown', e => { if (e.key === 'Enter') tcpQuickAddTask(); });
+});
+// Also bind immediately in case DOM is already loaded
+setTimeout(function() {
+  const tcpInput = document.getElementById('tcpQuickInput');
+  if (tcpInput) tcpInput.addEventListener('keydown', e => { if (e.key === 'Enter') tcpQuickAddTask(); });
+}, 0);
 
 // ===================== FOCUS TIMER =====================
 function toggleTimer() {
@@ -1013,17 +1229,18 @@ function loadFromDrive(){if(!driveAccessToken)return Promise.resolve();return fe
 function manualSave(){saveToDrive(false);}
 
 // ===================== EXPORT / IMPORT =====================
-function buildExportPayload(){return{_version:2,_exported:new Date().toISOString(),sysVersion:STATE.sysVersion,tasks:STATE.tasks,kanban:STATE.kanban,jobs:STATE.jobs,exercises:STATE.exercises,skincareAM:STATE.skincareAM,skincarePM:STATE.skincarePM,vitamins:STATE.vitamins,skincareHistory:STATE.skincareHistory,fitnessHistory:STATE.fitnessHistory,supplementHistory:STATE.supplementHistory,lastDayReset:STATE.lastDayReset,quickNote:document.getElementById('quickNote')?document.getElementById('quickNote').value:'',skinNote:document.getElementById('skinNote')?document.getElementById('skinNote').value:''};}
+function buildExportPayload(){return{_version:2,_exported:new Date().toISOString(),sysVersion:STATE.sysVersion,focusTasks:STATE.focusTasks,kanban:STATE.kanban,jobs:STATE.jobs,exercises:STATE.exercises,skincareAM:STATE.skincareAM,skincarePM:STATE.skincarePM,vitamins:STATE.vitamins,skincareHistory:STATE.skincareHistory,fitnessHistory:STATE.fitnessHistory,supplementHistory:STATE.supplementHistory,lastDayReset:STATE.lastDayReset,quickNote:document.getElementById('quickNote')?document.getElementById('quickNote').value:'',skinNote:document.getElementById('skinNote')?document.getElementById('skinNote').value:''};}
 function exportData(){const d=buildExportPayload();const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='jarvis-data-'+todayStr()+'.json';a.click();URL.revokeObjectURL(url);}
-function applyImportedData(data){if(!data._version)throw new Error('Unrecognised file format');if(data.sysVersion)STATE.sysVersion=data.sysVersion;if(data.tasks)STATE.tasks=data.tasks;if(data.kanban)STATE.kanban=data.kanban;if(data.jobs)STATE.jobs=data.jobs;if(data.exercises)STATE.exercises=data.exercises;if(data.skincareAM)STATE.skincareAM=data.skincareAM;if(data.skincarePM)STATE.skincarePM=data.skincarePM;if(data.vitamins)STATE.vitamins=data.vitamins;if(data.skincareHistory)STATE.skincareHistory=data.skincareHistory;if(data.fitnessHistory)STATE.fitnessHistory=data.fitnessHistory;if(data.supplementHistory)STATE.supplementHistory=data.supplementHistory;if(data.lastDayReset)STATE.lastDayReset=data.lastDayReset;
+function applyImportedData(data){if(!data._version)throw new Error('Unrecognised file format');if(data.sysVersion)STATE.sysVersion=data.sysVersion;if(data.focusTasks)STATE.focusTasks=data.focusTasks;if(data.kanban)STATE.kanban=data.kanban;if(data.jobs)STATE.jobs=data.jobs;if(data.exercises)STATE.exercises=data.exercises;if(data.skincareAM)STATE.skincareAM=data.skincareAM;if(data.skincarePM)STATE.skincarePM=data.skincarePM;if(data.vitamins)STATE.vitamins=data.vitamins;if(data.skincareHistory)STATE.skincareHistory=data.skincareHistory;if(data.fitnessHistory)STATE.fitnessHistory=data.fitnessHistory;if(data.supplementHistory)STATE.supplementHistory=data.supplementHistory;if(data.lastDayReset)STATE.lastDayReset=data.lastDayReset;
 // Ensure backwards compat: add missing fields to tasks
-STATE.tasks.forEach(t=>{if(t.repeat===undefined)t.repeat=false;if(t.urgent===undefined)t.urgent=false;});
+// Focus tasks backwards compat
+if(!Array.isArray(STATE.focusTasks))STATE.focusTasks=[];
 Object.values(STATE.kanban.tasks).forEach(arr=>arr.forEach(t=>{if(t.urgent===undefined)t.urgent=false;}));
 renderAll();if(data.quickNote){const qn=document.getElementById('quickNote');if(qn)qn.value=data.quickNote;}if(data.skinNote){const sn=document.getElementById('skinNote');if(sn)sn.value=data.skinNote;}const ve=document.getElementById('sysVersion');if(ve)ve.textContent=STATE.sysVersion.toFixed(1);}
 function importData(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(e){try{const data=JSON.parse(e.target.result);applyImportedData(data);const btn=document.querySelector('.header-right label');if(btn){btn.style.color='var(--accent3)';btn.style.borderColor='var(--accent3)';setTimeout(()=>{btn.style.color='';btn.style.borderColor='';},2000);}}catch(err){alert('Import failed: '+err.message);}event.target.value='';};reader.readAsText(file);}
 function applyClientId(){const id=document.getElementById('modal-client-id').value.trim();if(!id)return;closeModal('driveSetupModal');initDriveAuth();}
 
-function renderAll(){renderTasks();renderKanban();renderJobs();renderFitness();renderSkincare();renderVitamins();renderInsight();updateTimerDisplay();updateStats();updateDashStreaks();}
+function renderAll(){renderTaskControlPanel();renderKanban();renderJobs();renderFitness();renderSkincare();renderVitamins();renderInsight();updateTimerDisplay();updateTaskRing();updateDashStreaks();}
 function init(){checkDayReset();renderNav();renderAll();document.getElementById('j-date').valueAsDate=new Date();STATE.insightIndex=Math.floor(Math.random()*INSIGHTS.length);renderInsight();const ve=document.getElementById('sysVersion');if(ve)ve.textContent=STATE.sysVersion.toFixed(1);}
 init();
 </script>
