@@ -1083,6 +1083,9 @@ function updateTaskRing() {
   }
 }
 
+function showTaskPopup(){var p=document.getElementById('taskPopup');var card=document.getElementById('taskRingCard');if(p&&card){var r=card.getBoundingClientRect();p.style.top=(r.bottom+4)+'px';p.style.left=(r.left+r.width/2)+'px';p.style.transform='translateX(-50%)';p.classList.add('visible');}}
+function hideTaskPopup(){var p=document.getElementById('taskPopup');if(p)p.classList.remove('visible');}
+
 // Quick input enter key handler
 document.addEventListener('DOMContentLoaded', function() {
   const tcpInput = document.getElementById('tcpQuickInput');
@@ -1177,14 +1180,16 @@ function editJobCell(idx,field,td){
   var inp=td.querySelector('input');
   inp.focus();
   inp.select();
+  var saved=false;
   function save(){
+    if(saved)return;saved=true;
     var nv=inp.value.trim()||'—';
     STATE.jobs[idx][field]=nv;
     bumpVersion();
     renderJobs();
   }
   inp.addEventListener('blur',save);
-  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();save();}if(e.key==='Escape'){renderJobs();}});
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();save();}if(e.key==='Escape'){saved=true;renderJobs();}});
 }
 function editJobStatus(idx,td){
   if(td.classList.contains('editing'))return;
@@ -1195,13 +1200,15 @@ function editJobStatus(idx,td){
   td.innerHTML='<select>'+optHtml+'</select>';
   var sel=td.querySelector('select');
   sel.focus();
+  var saved=false;
   function save(){
+    if(saved)return;saved=true;
     STATE.jobs[idx].status=sel.value;
     bumpVersion();
     renderJobs();
   }
   sel.addEventListener('change',save);
-  sel.addEventListener('blur',save);
+  sel.addEventListener('blur',function(){setTimeout(save,50);});
 }
 function editJobDate(idx,td){
   if(td.classList.contains('editing'))return;
@@ -1210,7 +1217,9 @@ function editJobDate(idx,td){
   td.innerHTML='<input type="date" value="'+oldVal+'">';
   var inp=td.querySelector('input');
   inp.focus();
+  var saved=false;
   function save(){
+    if(saved)return;saved=true;
     var nv=inp.value||oldVal;
     STATE.jobs[idx].date=nv;
     bumpVersion();
@@ -1218,7 +1227,7 @@ function editJobDate(idx,td){
   }
   inp.addEventListener('blur',save);
   inp.addEventListener('change',save);
-  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();save();}if(e.key==='Escape'){renderJobs();}});
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();save();}if(e.key==='Escape'){saved=true;renderJobs();}});
 }
 function deleteJob(i){STATE.jobs.splice(i,1);bumpVersion();renderJobs();}
 
