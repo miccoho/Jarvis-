@@ -1512,7 +1512,31 @@ function importData(event){const file=event.target.files[0];if(!file)return;cons
 function applyClientId(){const id=document.getElementById('modal-client-id').value.trim();if(!id)return;closeModal('driveSetupModal');initDriveAuth();}
 
 function renderAll(){renderTaskControlPanel();renderKanban();renderJobs();renderFitness();renderSkincare();renderVitamins();renderInsight();updateTimerDisplay();updateTaskRing();updateDashStreaks();}
-function init(){checkDayReset();renderNav();renderAll();document.getElementById('j-date').valueAsDate=new Date();STATE.insightIndex=Math.floor(Math.random()*INSIGHTS.length);renderInsight();const ve=document.getElementById('sysVersion');if(ve)ve.textContent=STATE.sysVersion.toFixed(1);}
+
+    // ===================== ESCAPE KEY = SAVE & CLOSE MODAL =====================
+    document.addEventListener('keydown', function(e) {
+      if (e.key !== 'Escape') return;
+      var modalSaveMap = {
+        'addTaskModal':       function() { saveKanbanTask(); },
+        'addColumnModal':     function() { addColumn(); },
+        'addTabModal':        function() { addCustomTab(); },
+        'skincareEditModal':  function() { closeModal('skincareEditModal'); },
+        'fitnessEditModal':   function() { closeModal('fitnessEditModal'); },
+        'vitaminEditModal':   function() { saveVitamin(); },
+        'driveSetupModal':    function() { closeModal('driveSetupModal'); },
+        'taskControlModal':   function() { closeModal('taskControlModal'); },
+        'workoutDetailModal': function() { saveWorkoutDetail(); },
+        'skincareStepModal':  function() { saveSkincareStepDetail(); },
+        'jobModal':           function() { addJob(); closeJobModal(); }
+      };
+      var openModal = document.querySelector('.modal-backdrop.open');
+      if (!openModal) return;
+      e.preventDefault(); e.stopPropagation();
+      var saveFn = modalSaveMap[openModal.id];
+      if (saveFn) saveFn(); else openModal.classList.remove('open');
+    });
+
+    function init(){checkDayReset();renderNav();renderAll();document.getElementById('j-date').valueAsDate=new Date();STATE.insightIndex=Math.floor(Math.random()*INSIGHTS.length);renderInsight();const ve=document.getElementById('sysVersion');if(ve)ve.textContent=STATE.sysVersion.toFixed(1);}
 init();
 </script>
   <div id="jobModal" class="modal-backdrop" onclick="if(event.target===this)closeJobModal()">
