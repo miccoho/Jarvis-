@@ -144,7 +144,14 @@ body::before { content:''; position:fixed; inset:0; background-image:linear-grad
 .kanban-col { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:16px; min-height:400px; }
 .kanban-header { font-family:'Orbitron',monospace; font-size:13px; letter-spacing:2px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; }
 .kanban-count { font-size:9px; padding:1px 7px; border-radius:10px; border:1px solid var(--border); color:var(--text-dim); }
-.job-form { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:20px; margin-bottom:20px; }
+.job-add-btn {
+  width:36px;height:36px;border-radius:8px;border:1.5px solid var(--accent);
+  background:rgba(0,232,255,0.07);color:var(--accent);font-size:22px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;transition:all .2s;
+}
+.job-add-btn:hover { background:rgba(0,232,255,0.18);box-shadow:0 0 12px rgba(0,232,255,0.3); }
+.job-modal { max-width:560px; }
 .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
 .form-group { display:flex; flex-direction:column; gap:5px; }
 .form-label { font-family:'Space Mono',monospace; font-size:13px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; }
@@ -506,30 +513,33 @@ body::before { content:''; position:fixed; inset:0; background-image:linear-grad
 <div class="page" id="page-jobs">
   <div class="page-layout" style="max-width:1000px;">
     <div class="page-header">
-      <div class="page-title"><span>JOB</span> TRACKER</div>
+      <div style="display:flex;align-items:center;gap:14px;"><div class="page-title"><span>JOB</span> TRACKER</div><button class="job-add-btn" onclick="openJobModal()" title="Log new application">+</button></div>
       <div style="display:flex;gap:10px;align-items:center;">
         <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);">PIPELINE</span>
         <span class="widget-badge badge-accent" id="job-count">0 active</span>
       </div>
     </div>
-    <div class="job-form">
-      <div style="font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;color:var(--text-dim);margin-bottom:14px;">LOG APPLICATION</div>
-      <div class="form-grid">
-        <div class="form-group"><label class="form-label">Company</label><input class="form-input" id="j-company" placeholder="e.g. Anthropic"></div>
-        <div class="form-group"><label class="form-label">Role</label><input class="form-input" id="j-role" placeholder="e.g. ML Engineer"></div>
-        <div class="form-group"><label class="form-label">Location</label><input class="form-input" id="j-location" placeholder="Remote / City"></div>
-        <div class="form-group"><label class="form-label">Status</label>
-          <select class="form-select" id="j-status">
-            <option value="watching">Watching</option><option value="applied">Applied</option>
-            <option value="interview">Interview</option><option value="offer">Offer</option><option value="rejected">Rejected</option>
-          </select>
+    <div id="jobModal" class="tcp-modal-overlay" style="display:none;" onclick="if(event.target===this)closeJobModal()">
+      <div class="tcp-modal job-modal">
+        <div class="tcp-modal-header">
+          <span>LOG APPLICATION</span>
+          <button class="tcp-modal-close" onclick="closeJobModal()">&times;</button>
         </div>
-        <div class="form-group"><label class="form-label">Salary Range</label><input class="form-input" id="j-salary" placeholder="£60k – £80k"></div>
-        <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="j-date"></div>
+        <div class="tcp-modal-body" style="padding:18px;">
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Company</label><input id="j-company" class="form-input" placeholder="e.g. Anthropic"></div>
+            <div class="form-group"><label class="form-label">Role</label><input id="j-role" class="form-input" placeholder="e.g. ML Engineer"></div>
+            <div class="form-group"><label class="form-label">Location</label><input id="j-location" class="form-input" placeholder="Remote / City"></div>
+            <div class="form-group"><label class="form-label">Status</label><select id="j-status" class="form-select"><option>Watching</option><option>Applied</option><option>Interview</option><option>Offer</option><option>Rejected</option></select></div>
+            <div class="form-group"><label class="form-label">Salary Range</label><input id="j-salary" class="form-input" placeholder="\u00a360k \u2013 \u00a380k"></div>
+            <div class="form-group"><label class="form-label">Date</label><input id="j-date" class="form-input" type="date"></div>
+          </div>
+          <div class="form-group" style="margin-top:10px;"><label class="form-label">Notes</label><input id="j-notes" class="form-input" placeholder="Referral, culture notes, follow-up..."></div>
+          <button class="btn-sm btn-accent" style="margin-top:14px;" onclick="addJob();closeJobModal()">LOG APPLICATION</button>
+        </div>
       </div>
-      <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Notes</label><input class="form-input" id="j-notes" placeholder="Referral, culture notes, follow-up..."></div>
-      <button class="btn-sm btn-accent" onclick="addJob()">LOG APPLICATION</button>
     </div>
+    
     <div class="job-table-wrap">
       <table class="job-table">
         <thead><tr><th>Company</th><th>Role</th><th>Location</th><th>Salary</th><th>Status</th><th>Date</th><th>Notes</th><th></th></tr></thead>
@@ -1148,6 +1158,21 @@ function deleteColumn(colId){if(STATE.kanban.columns.length<=1)return;if(!confir
 function openColumnModal(){openModal('addColumnModal');}
 function addColumn(){const n=document.getElementById('modal-col-name').value.trim();if(!n)return;const col=document.getElementById('modal-col-color').value;const id='col_'+Date.now();STATE.kanban.columns.push({id,label:n.toUpperCase(),color:col});STATE.kanban.tasks[id]=[];closeModal('addColumnModal');document.getElementById('modal-col-name').value='';bumpVersion();renderKanban();}
 // ===================== JOBS =====================
+function openJobModal() {
+  var m = document.getElementById('jobModal');
+  m.style.display = 'flex';
+  var d = document.getElementById('j-date');
+  if (d && !d.value) d.value = new Date().toISOString().slice(0,10);
+}
+function closeJobModal() {
+  document.getElementById('jobModal').style.display = 'none';
+  ['j-company','j-role','j-location','j-salary','j-notes'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  var sel = document.getElementById('j-status');
+  if (sel) sel.selectedIndex = 0;
+}
 function addJob(){const co=document.getElementById('j-company').value.trim();const ro=document.getElementById('j-role').value.trim();if(!co||!ro)return;STATE.jobs.push({id:Date.now(),company:co,role:ro,location:document.getElementById('j-location').value.trim()||'—',salary:document.getElementById('j-salary').value.trim()||'—',status:document.getElementById('j-status').value,date:document.getElementById('j-date').value||todayStr(),notes:document.getElementById('j-notes').value.trim()||'—'});['j-company','j-role','j-location','j-salary','j-notes'].forEach(id=>document.getElementById(id).value='');bumpVersion();renderJobs();}
 function renderJobs(){
   const tb=document.getElementById('jobTableBody');
