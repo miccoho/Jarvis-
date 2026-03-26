@@ -310,6 +310,44 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1) brightn
 .job-table td.editing select { background:var(--surface2); border:1px solid var(--accent); border-radius:3px; color:var(--text-bright); font-family:'Rajdhani',sans-serif; font-size:16px; padding:6px 10px; outline:none; width:100%; }
 .job-table td.editing select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235f84a6' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; padding-right:28px; cursor:pointer; }
 .job-table td.editing select option { background:var(--surface2); }
+
+/* ===== SUBTASKS CHECKLIST IN EDIT MODAL ===== */
+.subtask-section { margin-top: 12px; margin-bottom: 12px; }
+.subtask-section-label { font-family:'Space Mono',monospace; font-size:12px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
+.subtask-list { display:flex; flex-direction:column; gap:4px; margin-bottom:8px; max-height:200px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+.subtask-item { display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--surface2); border:1px solid var(--border); border-radius:4px; transition:all 0.15s; cursor:pointer; }
+.subtask-item:hover { border-color:var(--border-active); background:rgba(0,200,255,0.04); }
+.subtask-item.subtask-done { opacity:0.5; }
+.subtask-item.subtask-done .subtask-text { text-decoration:line-through; color:var(--text-dim); }
+.subtask-checkbox { width:16px; height:16px; border:1.5px solid var(--text-dim); border-radius:3px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:transparent; transition:all 0.2s; }
+.subtask-item.subtask-done .subtask-checkbox { border-color:var(--accent3); background:rgba(0,255,163,0.12); color:var(--accent3); }
+.subtask-text { flex:1; font-size:15px; color:var(--text-bright); font-family:'Rajdhani',sans-serif; }
+.subtask-remove { opacity:0; font-size:11px; color:var(--text-dim); cursor:pointer; padding:2px 5px; border:none; background:none; transition:all 0.15s; flex-shrink:0; }
+.subtask-item:hover .subtask-remove { opacity:1; }
+.subtask-remove:hover { color:var(--danger); }
+.subtask-add-row { display:flex; gap:8px; }
+.subtask-add-input { flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:8px 12px; color:var(--text-bright); font-family:'Rajdhani',sans-serif; font-size:15px; outline:none; transition:border-color 0.2s; }
+.subtask-add-input:focus { border-color:var(--accent); }
+.subtask-add-input::placeholder { color:var(--text-dim); }
+.subtask-add-btn { padding:8px 14px; background:rgba(0,200,255,0.08); border:1px solid var(--accent); border-radius:4px; color:var(--accent); font-size:16px; cursor:pointer; transition:all 0.2s; flex-shrink:0; }
+.subtask-add-btn:hover { background:rgba(0,200,255,0.18); box-shadow:0 0 15px rgba(0,200,255,0.3); }
+/* ===== PROGRESS BAR IN EDIT MODAL ===== */
+.modal-progress-section { margin-top:14px; margin-bottom:6px; padding:12px 14px; background:var(--surface2); border:1px solid var(--border); border-radius:6px; }
+.modal-progress-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.modal-progress-label { font-family:'Space Mono',monospace; font-size:11px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; }
+.modal-progress-pct { font-family:'Orbitron',monospace; font-size:16px; font-weight:700; color:var(--accent); }
+.modal-progress-bar { width:100%; height:6px; background:var(--surface); border-radius:3px; overflow:hidden; }
+.modal-progress-fill { height:100%; border-radius:3px; transition:width 0.4s ease; background:linear-gradient(90deg,var(--accent),var(--accent3)); }
+/* ===== PROGRESS ON TASK CARD ===== */
+.task-card-progress { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.task-card-progress-bar { flex:1; height:4px; background:var(--surface); border-radius:2px; overflow:hidden; max-width:80px; }
+.task-card-progress-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,var(--accent),var(--accent3)); transition:width 0.4s ease; }
+.task-card-progress-text { font-family:'Space Mono',monospace; font-size:9px; color:var(--accent); letter-spacing:0.5px; white-space:nowrap; }
+.task-card-progress-text.complete { color:var(--accent3); }
+/* ===== URGENT TASK TEXT RED ===== */
+.task-item.task-urgent .task-text { color:var(--danger) !important; }
+.kanban-task-list .task-item.task-urgent .task-text { color:var(--danger) !important; }
+
 </style>
 </head>
 <body>
@@ -632,6 +670,15 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1) brightn
     <input type="hidden" id="modal-task-id" value="">
     <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Task title</label><input class="form-input" id="modal-task-text" placeholder="What needs to be done?"></div>
     <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Notes / detail</label><textarea class="note-area" id="modal-task-notes" placeholder="Additional context..." style="min-height:60px;"></textarea></div>
+      <div class="subtask-section" id="modal-subtask-section">
+        <div class="subtask-section-label"><span>Subtasks</span><span id="modal-subtask-count" style="font-size:10px;color:var(--accent);padding:1px 8px;border:1px solid var(--accent);border-radius:2px;">0/0</span></div>
+        <div class="subtask-list" id="modal-subtask-list"><div style="text-align:center;padding:12px;color:var(--text-dim);font-size:13px;font-family:'Space Mono',monospace;letter-spacing:1px;">No subtasks yet</div></div>
+        <div class="subtask-add-row"><input type="text" class="subtask-add-input" id="modal-subtask-input" placeholder="Add a subtask..." onkeydown="if(event.key==='Enter'){event.preventDefault();addModalSubtask();}"><button class="subtask-add-btn" onclick="addModalSubtask()">+</button></div>
+      </div>
+      <div class="modal-progress-section" id="modal-progress-section">
+        <div class="modal-progress-header"><span class="modal-progress-label">Progress</span><span class="modal-progress-pct" id="modal-progress-pct">0%</span></div>
+        <div class="modal-progress-bar"><div class="modal-progress-fill" id="modal-progress-fill" style="width:0%;"></div></div>
+      </div>
     <div class="form-grid">
       <div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="modal-task-priority"><option value="high">High</option><option value="med" selected>Medium</option><option value="low">Low</option></select></div>
       <div class="form-group"><label class="form-label">Column</label><select class="form-select" id="modal-task-col"></select></div>
@@ -760,14 +807,14 @@ const STATE = {
     ],
     tasks: {
       todo: [
-        { id:10, text:'Build personal brand website', priority:'high', notes:'', due:'', tag:'projects', urgent:true },
-        { id:11, text:'Research grad school options', priority:'med', notes:'', due:'', tag:'education', urgent:false },
+        { id:10, text:'Build personal brand website', priority:'high', notes:'', due:'', tag:'projects', urgent:true, subtasks:[] },
+        { id:11, text:'Research grad school options', priority:'med', notes:'', due:'', tag:'education', urgent:false, subtasks:[] },
       ],
       inprogress: [
-        { id:12, text:'Complete online course module 4', priority:'high', notes:'Module on transformers', due:'', tag:'education', urgent:false },
+        { id:12, text:'Complete online course module 4', priority:'high', notes:'Module on transformers', due:'', tag:'education', urgent:false, subtasks:[] },
       ],
       done: [
-        { id:13, text:'Set up J.A.R.V.I.S dashboard', priority:'low', notes:'', due:'', tag:'', urgent:false },
+        { id:13, text:'Set up J.A.R.V.I.S dashboard', priority:'low', notes:'', due:'', tag:'', urgent:false, subtasks:[] },
       ],
     },
   },
@@ -1036,7 +1083,7 @@ function tcpQuickAddTask() {
   // Add to kanban "todo" column (or first column) as the source of truth
   const targetCol = STATE.kanban.columns[0] ? STATE.kanban.columns[0].id : 'todo';
   if (!STATE.kanban.tasks[targetCol]) STATE.kanban.tasks[targetCol] = [];
-  const newTask = { id: Date.now(), text, priority: pri, notes: '', due: '', tag: '', urgent: pri === 'high' };
+  const newTask = { id: Date.now(), text, priority: pri, notes: '', due: '', tag: '', urgent: pri === 'high', subtasks: [] };
   STATE.kanban.tasks[targetCol].push(newTask);
   
   // Auto-add to focus tasks
@@ -1094,7 +1141,39 @@ function toggleTimer() {
 function resetTimer(){clearInterval(STATE.timerInterval);STATE.timerRunning=false;STATE.timerSeconds=STATE.timerTotal;document.getElementById('timerStartBtn').textContent='START';document.getElementById('focusStatus').innerHTML='● READY';var tc=document.querySelector('.timer-circle');if(tc)tc.classList.remove('timer-complete');updateTimerDisplay();}
 function setTimer(m,mode){clearInterval(STATE.timerInterval);STATE.timerRunning=false;STATE.timerSeconds=m*60;STATE.timerTotal=m*60;STATE.timerMode=mode;document.getElementById('timerMode').textContent=mode;document.getElementById('timerStartBtn').textContent='START';document.getElementById('focusStatus').innerHTML='● READY';var tc=document.querySelector('.timer-circle');if(tc)tc.classList.remove('timer-complete');updateTimerDisplay();}
 function updateTimerDisplay(){const m=Math.floor(STATE.timerSeconds/60);const s=STATE.timerSeconds%60;document.getElementById('timerDisplay').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');const c=276.46;const p=STATE.timerSeconds/STATE.timerTotal;document.getElementById('timerArc').style.strokeDashoffset=c*(1-p);}
-// ===================== KANBAN =====================
+
+    // ===== SUBTASK & PROGRESS FUNCTIONS =====
+    var _modalSubtasks = [];
+    function getTaskSubtaskProgress(task) {
+      var subtasks = task.subtasks || [];
+      if (subtasks.length === 0) return { total:0, done:0, pct:0 };
+      var done = subtasks.filter(function(s){return s.done;}).length;
+      var pct = Math.round((done / subtasks.length) * 100);
+      return { total:subtasks.length, done:done, pct:pct };
+    }
+    function renderModalSubtasks() {
+      var container = document.getElementById('modal-subtask-list');
+      var progressPct = document.getElementById('modal-progress-pct');
+      var progressFill = document.getElementById('modal-progress-fill');
+      if (!container) return;
+      var subtasks = _modalSubtasks;
+      var total = subtasks.length;
+      var done = subtasks.filter(function(s){return s.done;}).length;
+      var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      if (progressPct) progressPct.textContent = pct + '%';
+      if (progressFill) progressFill.style.width = pct + '%';
+      var countBadge = document.getElementById('modal-subtask-count');
+      if (countBadge) countBadge.textContent = done + '/' + total;
+      if (total === 0) { container.innerHTML = '<div style="text-align:center;padding:12px;color:var(--text-dim);font-size:13px;font-family:\'Space Mono\',monospace;letter-spacing:1px;">No subtasks yet</div>'; return; }
+      container.innerHTML = subtasks.map(function(s,i) {
+        return '<div class="subtask-item'+(s.done?' subtask-done':'')+'" onclick="toggleModalSubtask('+i+')">'+'<div class="subtask-checkbox">'+(s.done?'\u2713':'')+'</div>'+'<div class="subtask-text">'+s.text+'</div>'+'<button class="subtask-remove" onclick="event.stopPropagation();removeModalSubtask('+i+')">\u2715</button>'+'</div>';
+      }).join('');
+    }
+    function toggleModalSubtask(idx) { if(_modalSubtasks[idx]){_modalSubtasks[idx].done=!_modalSubtasks[idx].done;renderModalSubtasks();} }
+    function removeModalSubtask(idx) { _modalSubtasks.splice(idx,1); renderModalSubtasks(); }
+    function addModalSubtask() { var input=document.getElementById('modal-subtask-input'); if(!input)return; var text=input.value.trim(); if(!text)return; _modalSubtasks.push({text:text,done:false}); input.value=''; renderModalSubtasks(); input.focus(); }
+
+    // ===================== KANBAN =====================
 let kanbanDragTask=null,kanbanDragCol=null,kanbanEditingId=null;
 function getFilteredTasks(colId){const s=(document.getElementById('todoSearch')||{}).value||'';const fp=(document.getElementById('todoFilterPriority')||{}).value||'';const sm=(document.getElementById('todoSort')||{}).value||'manual';let t=[...(STATE.kanban.tasks[colId]||[])];if(s)t=t.filter(x=>x.text.toLowerCase().includes(s.toLowerCase())||(x.tag||'').toLowerCase().includes(s.toLowerCase()));if(fp)t=t.filter(x=>x.priority===fp);if(sm==='priority'){const o={high:0,med:1,low:2};t.sort((a,b)=>o[a.priority]-o[b.priority]);}else if(sm==='alpha')t.sort((a,b)=>a.text.localeCompare(b.text));else if(sm==='due')t.sort((a,b)=>(a.due||'9999')<(b.due||'9999')?-1:1);return t;}
 function renderKanban(){
@@ -1114,23 +1193,31 @@ function renderKanban(){
   syncColumnDropdown();
 }
 function buildTaskCard(t,colId){
-  const card=document.createElement('div');const isUI=t.urgent&&t.priority==='high';
-  card.className='task-item'+(isUI?' urgent-important':'');card.draggable=true;card.style.cursor='grab';card.style.marginBottom='6px';card.style.flexDirection='column';card.style.alignItems='flex-start';card.style.gap='4px';
-  const isOverdue=t.due&&t.due<todayStr();
-  const dueStr=t.due?'<span style="font-family:\'Space Mono\',monospace;font-size:9px;color:'+(isOverdue?'var(--danger)':'var(--text-dim)')+';">📅 '+t.due+'</span>':'';
-  const tagStr=t.tag?'<span style="font-size:9px;padding:1px 7px;border-radius:2px;border:1px solid var(--border);color:var(--text-dim);">'+t.tag+'</span>':'';
-  const notesStr=t.notes?'<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">'+t.notes+'</div>':'';
-  const urgBadge=t.urgent?'<span style="font-size:8px;padding:1px 6px;border-radius:2px;background:rgba(255,51,102,0.15);color:var(--danger);border:1px solid rgba(255,51,102,0.4);font-family:\'Space Mono\',monospace;">URGENT</span>':'';
-  card.innerHTML='<div style="display:flex;align-items:center;gap:8px;width:100%;"><div class="task-priority priority-'+t.priority+'"></div><div class="task-text" style="flex:1;">'+t.text+'</div>'+urgBadge+'<div style="display:flex;gap:4px;flex-shrink:0;"><span onclick="openEditTaskModal(\''+colId+'\','+t.id+')" style="font-size:10px;color:var(--text-dim);cursor:pointer;padding:2px 4px;">✎</span><span onclick="removeKanbanTask(\''+colId+'\','+t.id+')" style="font-size:10px;color:var(--text-dim);cursor:pointer;padding:2px 4px;">✕</span></div></div>'+notesStr+'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'+dueStr+tagStr+'</div>';
-  card.addEventListener('dragstart',()=>{kanbanDragTask=t;kanbanDragCol=colId;card.style.opacity='0.4';});
-  card.addEventListener('dragend',()=>{card.style.opacity='';});
-  card.addEventListener('dblclick',()=>openEditTaskModal(colId,t.id));
+  var card=document.createElement('div');var isUI=t.urgent&&t.priority==='high';var isUrgent=t.urgent;
+  var classes='task-item';if(isUI)classes+=' urgent-important';if(isUrgent)classes+=' task-urgent';
+  card.className=classes;card.draggable=true;card.style.cursor='grab';card.style.marginBottom='6px';card.style.flexDirection='column';card.style.alignItems='flex-start';card.style.gap='4px';
+  var isOverdue=t.due&&t.due<todayStr();
+  var dueStr=t.due?'<span style="font-family:Space Mono,monospace;font-size:9px;color:'+(isOverdue?'var(--danger)':'var(--text-dim)')+';">\u{1F4C5} '+t.due+'<\/span>':'';
+  var tagStr=t.tag?'<span style="font-size:9px;padding:1px 7px;border-radius:2px;border:1px solid var(--border);color:var(--text-dim);">'+t.tag+'<\/span>':'';
+  var urgBadge=t.urgent?'<span style="font-size:8px;padding:1px 6px;border-radius:2px;background:rgba(255,51,102,0.15);color:var(--danger);border:1px solid rgba(255,51,102,0.4);font-family:Space Mono,monospace;">URGENT<\/span>':'';
+  var progress=getTaskSubtaskProgress(t);
+  var bottomRow='';
+  if((t.notes)||progress.total>0){
+    bottomRow='<div style="display:flex;align-items:center;gap:8px;width:100%;margin-top:2px;">';
+    if(t.notes){bottomRow+='<div style="font-size:11px;color:var(--text-dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+t.notes+'<\/div>';}else{bottomRow+='<div style="flex:1;"><\/div>';}
+    if(progress.total>0){var isComplete=progress.pct===100;bottomRow+='<div class="task-card-progress"><div class="task-card-progress-bar"><div class="task-card-progress-fill" style="width:'+progress.pct+'%;'+(isComplete?'background:var(--accent3);':'')+'"><\/div><\/div><span class="task-card-progress-text'+(isComplete?' complete':'')+'">'+progress.pct+'%<\/span><\/div>';}
+    bottomRow+='<\/div>';
+  }
+  card.innerHTML='<div style="display:flex;align-items:center;gap:8px;width:100%;"><div class="task-priority priority-'+t.priority+'"><\/div><div class="task-text" style="flex:1;">'+t.text+'<\/div>'+urgBadge+'<div style="display:flex;gap:4px;flex-shrink:0;"><span onclick="openEditTaskModal(\''+colId+'\','+t.id+')" style="font-size:10px;color:var(--text-dim);cursor:pointer;padding:2px 4px;">\u270E<\/span><span onclick="removeKanbanTask(\''+colId+'\','+t.id+')" style="font-size:10px;color:var(--text-dim);cursor:pointer;padding:2px 4px;">\u2715<\/span><\/div><\/div>'+bottomRow+'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'+dueStr+tagStr+'<\/div>';
+  card.addEventListener('dragstart',function(){kanbanDragTask=t;kanbanDragCol=colId;card.style.opacity='0.4';});
+  card.addEventListener('dragend',function(){card.style.opacity='';});
+  card.addEventListener('dblclick',function(){openEditTaskModal(colId,t.id);});
   return card;
 }
-function syncColumnDropdown(){const s=document.getElementById('modal-task-col');if(!s)return;s.innerHTML=STATE.kanban.columns.map(c=>'<option value="'+c.id+'">'+c.label+'</option>').join('');}
-function openAddTaskModal(colId){kanbanEditingId=null;document.getElementById('taskModalTitle').textContent='// NEW TASK';document.getElementById('taskModalSaveBtn').textContent='ADD TASK';document.getElementById('modal-task-id').value='';document.getElementById('modal-task-text').value='';document.getElementById('modal-task-notes').value='';document.getElementById('modal-task-priority').value='med';document.getElementById('modal-task-due').value='';document.getElementById('modal-task-tag').value='';document.getElementById('modal-task-urgent').value='no';syncColumnDropdown();if(colId)document.getElementById('modal-task-col').value=colId;openModal('addTaskModal');}
-function openEditTaskModal(colId,taskId){const task=(STATE.kanban.tasks[colId]||[]).find(t=>t.id===taskId);if(!task)return;kanbanEditingId={colId,taskId};document.getElementById('taskModalTitle').textContent='// EDIT TASK';document.getElementById('taskModalSaveBtn').textContent='SAVE CHANGES';document.getElementById('modal-task-id').value=taskId;document.getElementById('modal-task-text').value=task.text;document.getElementById('modal-task-notes').value=task.notes||'';document.getElementById('modal-task-priority').value=task.priority;document.getElementById('modal-task-due').value=task.due||'';document.getElementById('modal-task-tag').value=task.tag||'';document.getElementById('modal-task-urgent').value=task.urgent?'yes':'no';syncColumnDropdown();document.getElementById('modal-task-col').value=colId;openModal('addTaskModal');}
-function saveKanbanTask(){const text=document.getElementById('modal-task-text').value.trim();if(!text)return;const pri=document.getElementById('modal-task-priority').value;const col=document.getElementById('modal-task-col').value;const notes=document.getElementById('modal-task-notes').value.trim();const due=document.getElementById('modal-task-due').value;const tag=document.getElementById('modal-task-tag').value.trim();const urgent=document.getElementById('modal-task-urgent').value==='yes';if(kanbanEditingId){const{colId,taskId}=kanbanEditingId;const old=STATE.kanban.tasks[colId]||[];const idx=old.findIndex(t=>t.id===taskId);const ex=idx>-1?old.splice(idx,1)[0]:{id:taskId};if(!STATE.kanban.tasks[col])STATE.kanban.tasks[col]=[];STATE.kanban.tasks[col].push({...ex,text,priority:pri,notes,due,tag,urgent});}else{if(!STATE.kanban.tasks[col])STATE.kanban.tasks[col]=[];STATE.kanban.tasks[col].push({id:Date.now(),text,priority:pri,notes,due,tag,urgent});}kanbanEditingId=null;closeModal('addTaskModal');bumpVersion();renderKanban();}
+  function syncColumnDropdown(){const s=document.getElementById('modal-task-col');if(!s)return;s.innerHTML=STATE.kanban.columns.map(c=>'<option value="'+c.id+'">'+c.label+'</option>').join('');}
+function openAddTaskModal(colId){kanbanEditingId=null;_modalSubtasks=[];document.getElementById('taskModalTitle').textContent='// NEW TASK';document.getElementById('taskModalSaveBtn').textContent='ADD TASK';document.getElementById('modal-task-id').value='';document.getElementById('modal-task-text').value='';document.getElementById('modal-task-notes').value='';document.getElementById('modal-task-priority').value='med';document.getElementById('modal-task-due').value='';document.getElementById('modal-task-tag').value='';document.getElementById('modal-task-urgent').value='no';syncColumnDropdown();if(colId)document.getElementById('modal-task-col').value=colId;openModal('addTaskModal');renderModalSubtasks();}
+function openEditTaskModal(colId,taskId){const task=(STATE.kanban.tasks[colId]||[]).find(t=>t.id===taskId);if(!task)return;kanbanEditingId={colId,taskId};_modalSubtasks=(task.subtasks||[]).map(function(s){return{text:s.text,done:s.done};});document.getElementById('taskModalTitle').textContent='// EDIT TASK';document.getElementById('taskModalSaveBtn').textContent='SAVE CHANGES';document.getElementById('modal-task-id').value=taskId;document.getElementById('modal-task-text').value=task.text;document.getElementById('modal-task-notes').value=task.notes||'';document.getElementById('modal-task-priority').value=task.priority;document.getElementById('modal-task-due').value=task.due||'';document.getElementById('modal-task-tag').value=task.tag||'';document.getElementById('modal-task-urgent').value=task.urgent?'yes':'no';syncColumnDropdown();document.getElementById('modal-task-col').value=colId;openModal('addTaskModal');renderModalSubtasks();}
+function saveKanbanTask(){const text=document.getElementById('modal-task-text').value.trim();if(!text)return;const pri=document.getElementById('modal-task-priority').value;const col=document.getElementById('modal-task-col').value;const notes=document.getElementById('modal-task-notes').value.trim();const due=document.getElementById('modal-task-due').value;const tag=document.getElementById('modal-task-tag').value.trim();const urgent=document.getElementById('modal-task-urgent').value==='yes';const subtasks=_modalSubtasks.map(function(s){return{text:s.text,done:s.done};});if(kanbanEditingId){const{colId,taskId}=kanbanEditingId;const old=STATE.kanban.tasks[colId]||[];const idx=old.findIndex(t=>t.id===taskId);const ex=idx>-1?old.splice(idx,1)[0]:{id:taskId};if(!STATE.kanban.tasks[col])STATE.kanban.tasks[col]=[];STATE.kanban.tasks[col].push({...ex,text,priority:pri,notes,due,tag,urgent,subtasks});}else{if(!STATE.kanban.tasks[col])STATE.kanban.tasks[col]=[];STATE.kanban.tasks[col].push({id:Date.now(),text,priority:pri,notes,due,tag,urgent,subtasks});}kanbanEditingId=null;_modalSubtasks=[];closeModal('addTaskModal');bumpVersion();renderKanban();}
 function removeKanbanTask(colId,taskId){const t=STATE.kanban.tasks[colId]||[];const i=t.findIndex(x=>x.id===taskId);if(i>-1)t.splice(i,1);renderKanban();}
 function clearDoneTasks(){STATE.kanban.columns.forEach(c=>{if(c.id==='done')STATE.kanban.tasks[c.id]=[];});renderKanban();}
 function renameColumn(colId){const c=STATE.kanban.columns.find(x=>x.id===colId);if(!c)return;const n=prompt('Rename column:',c.label);if(n&&n.trim()){c.label=n.trim().toUpperCase();bumpVersion();renderKanban();}}
@@ -1356,7 +1443,7 @@ function applyImportedData(data){if(!data._version)throw new Error('Unrecognised
 // Ensure backwards compat: add missing fields to tasks
 // Focus tasks backwards compat
 if(!Array.isArray(STATE.focusTasks))STATE.focusTasks=[];
-Object.values(STATE.kanban.tasks).forEach(arr=>arr.forEach(t=>{if(t.urgent===undefined)t.urgent=false;}));
+Object.values(STATE.kanban.tasks).forEach(arr=>arr.forEach(t=>{if(t.urgent===undefined)t.urgent=false;if(t.subtasks===undefined)t.subtasks=[];}));
 renderAll();if(data.quickNote){const qn=document.getElementById('quickNote');if(qn)qn.value=data.quickNote;}if(data.skinNote){const sn=document.getElementById('skinNote');if(sn)sn.value=data.skinNote;}const ve=document.getElementById('sysVersion');if(ve)ve.textContent=STATE.sysVersion.toFixed(1);}
 function importData(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(e){try{const data=JSON.parse(e.target.result);applyImportedData(data);const btn=document.querySelector('.header-right label');if(btn){btn.style.color='var(--accent3)';btn.style.borderColor='var(--accent3)';setTimeout(()=>{btn.style.color='';btn.style.borderColor='';},2000);}}catch(err){alert('Import failed: '+err.message);}event.target.value='';};reader.readAsText(file);}
 function applyClientId(){const id=document.getElementById('modal-client-id').value.trim();if(!id)return;closeModal('driveSetupModal');initDriveAuth();}
