@@ -32,7 +32,7 @@ document.addEventListener('click', function(e) {
   --accent4: #ff8a5e;
   --danger: #ff5c85;
   --text: #d9eaf5;
-  --text-dim: #5f84a6;
+  --text-dim: #97afc5;
   --text-bright: #e8f4ff;
   --glow: 0 0 20px rgba(0,200,255,0.3);
   --glow2: 0 0 20px rgba(123,47,255,0.3);
@@ -156,6 +156,7 @@ body::before { content:''; position:fixed; inset:0; background-image:linear-grad
 .form-group { display:flex; flex-direction:column; gap:5px; }
 .form-label { font-family:'Space Mono',monospace; font-size:13px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; }
 .form-input,.form-select,.form-textarea { background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:10px 14px; color:var(--text-bright); font-family:'Rajdhani',sans-serif; font-size:18px; outline:none; transition:border-color 0.2s; width:100%; }
+input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1) brightness(2); cursor:pointer; }
 .form-input:focus,.form-select:focus,.form-textarea:focus { border-color:var(--accent); }
 .form-select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%234a6a8a' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; padding-right:28px; cursor:pointer; }
 .form-select option { background:var(--surface2); }
