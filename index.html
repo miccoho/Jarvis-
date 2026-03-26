@@ -151,7 +151,7 @@ body::before { content:''; position:fixed; inset:0; background-image:linear-grad
   font-family:'Orbitron',sans-serif;transition:all .2s;
 }
 .job-add-btn:hover { background:rgba(0,232,255,0.18);box-shadow:0 0 12px rgba(0,232,255,0.3); }
-.job-modal { max-width:560px; }
+.job-modal { width:560px; max-width:90vw; }
 .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
 .form-group { display:flex; flex-direction:column; gap:5px; }
 .form-label { font-family:'Space Mono',monospace; font-size:13px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; }
@@ -519,19 +519,19 @@ body::before { content:''; position:fixed; inset:0; background-image:linear-grad
         <span class="widget-badge badge-accent" id="job-count">0 active</span>
       </div>
     </div>
-    <div id="jobModal" class="tcp-modal-overlay" style="display:none;" onclick="if(event.target===this)closeJobModal()">
-      <div class="tcp-modal job-modal">
-        <div class="tcp-modal-header">
+    <div id="jobModal" class="modal-backdrop" onclick="if(event.target===this)closeJobModal()">
+      <div class="modal job-modal">
+        <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;">
           <span>LOG APPLICATION</span>
-          <button class="tcp-modal-close" onclick="closeJobModal()">&times;</button>
+          <button style="background:none;border:none;color:var(--text-dim);font-size:22px;cursor:pointer;" onclick="closeJobModal()">&times;</button>
         </div>
-        <div class="tcp-modal-body" style="padding:18px;">
+        <div style="padding:0;">
           <div class="form-grid">
             <div class="form-group"><label class="form-label">Company</label><input id="j-company" class="form-input" placeholder="e.g. Anthropic"></div>
             <div class="form-group"><label class="form-label">Role</label><input id="j-role" class="form-input" placeholder="e.g. ML Engineer"></div>
             <div class="form-group"><label class="form-label">Location</label><input id="j-location" class="form-input" placeholder="Remote / City"></div>
             <div class="form-group"><label class="form-label">Status</label><select id="j-status" class="form-select"><option>Watching</option><option>Applied</option><option>Interview</option><option>Offer</option><option>Rejected</option></select></div>
-            <div class="form-group"><label class="form-label">Salary Range</label><input id="j-salary" class="form-input" placeholder="\u00a360k \u2013 \u00a380k"></div>
+            <div class="form-group"><label class="form-label">Salary Range</label><input id="j-salary" class="form-input" placeholder="£60k – £80k"></div>
             <div class="form-group"><label class="form-label">Date</label><input id="j-date" class="form-input" type="date"></div>
           </div>
           <div class="form-group" style="margin-top:10px;"><label class="form-label">Notes</label><input id="j-notes" class="form-input" placeholder="Referral, culture notes, follow-up..."></div>
@@ -1160,12 +1160,12 @@ function addColumn(){const n=document.getElementById('modal-col-name').value.tri
 // ===================== JOBS =====================
 function openJobModal() {
   var m = document.getElementById('jobModal');
-  m.style.display = 'flex';
+  m.classList.add('open');
   var d = document.getElementById('j-date');
   if (d && !d.value) d.value = new Date().toISOString().slice(0,10);
 }
 function closeJobModal() {
-  document.getElementById('jobModal').style.display = 'none';
+  document.getElementById('jobModal').classList.remove('open');
   ['j-company','j-role','j-location','j-salary','j-notes'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.value = '';
