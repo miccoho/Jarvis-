@@ -519,27 +519,6 @@ body::before { content:''; position:fixed; inset:0; background-image:linear-grad
         <span class="widget-badge badge-accent" id="job-count">0 active</span>
       </div>
     </div>
-    <div id="jobModal" class="modal-backdrop" onclick="if(event.target===this)closeJobModal()">
-      <div class="modal job-modal">
-        <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;">
-          <span>LOG APPLICATION</span>
-          <button style="background:none;border:none;color:var(--text-dim);font-size:22px;cursor:pointer;" onclick="closeJobModal()">&times;</button>
-        </div>
-        <div style="padding:0;">
-          <div class="form-grid">
-            <div class="form-group"><label class="form-label">Company</label><input id="j-company" class="form-input" placeholder="e.g. Anthropic"></div>
-            <div class="form-group"><label class="form-label">Role</label><input id="j-role" class="form-input" placeholder="e.g. ML Engineer"></div>
-            <div class="form-group"><label class="form-label">Location</label><input id="j-location" class="form-input" placeholder="Remote / City"></div>
-            <div class="form-group"><label class="form-label">Status</label><select id="j-status" class="form-select"><option>Watching</option><option>Applied</option><option>Interview</option><option>Offer</option><option>Rejected</option></select></div>
-            <div class="form-group"><label class="form-label">Salary Range</label><input id="j-salary" class="form-input" placeholder="£60k – £80k"></div>
-            <div class="form-group"><label class="form-label">Date</label><input id="j-date" class="form-input" type="date"></div>
-          </div>
-          <div class="form-group" style="margin-top:10px;"><label class="form-label">Notes</label><input id="j-notes" class="form-input" placeholder="Referral, culture notes, follow-up..."></div>
-          <button class="btn-sm btn-accent" style="margin-top:14px;" onclick="addJob();closeJobModal()">LOG APPLICATION</button>
-        </div>
-      </div>
-    </div>
-    
     <div class="job-table-wrap">
       <table class="job-table">
         <thead><tr><th>Company</th><th>Role</th><th>Location</th><th>Salary</th><th>Status</th><th>Date</th><th>Notes</th><th></th></tr></thead>
@@ -1385,5 +1364,25 @@ function renderAll(){renderTaskControlPanel();renderKanban();renderJobs();render
 function init(){checkDayReset();renderNav();renderAll();document.getElementById('j-date').valueAsDate=new Date();STATE.insightIndex=Math.floor(Math.random()*INSIGHTS.length);renderInsight();const ve=document.getElementById('sysVersion');if(ve)ve.textContent=STATE.sysVersion.toFixed(1);}
 init();
 </script>
+  <div id="jobModal" class="modal-backdrop" onclick="if(event.target===this)closeJobModal()">
+      <div class="modal job-modal">
+        <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>LOG APPLICATION</span>
+          <button style="background:none;border:none;color:var(--text-dim);font-size:22px;cursor:pointer;" onclick="closeJobModal()">&times;</button>
+        </div>
+        <div style="padding:0;">
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Company</label><input id="j-company" class="form-input" placeholder="e.g. Anthropic"></div>
+            <div class="form-group"><label class="form-label">Role</label><input id="j-role" class="form-input" placeholder="e.g. ML Engineer"></div>
+            <div class="form-group"><label class="form-label">Location</label><input id="j-location" class="form-input" placeholder="Remote / City"></div>
+            <div class="form-group"><label class="form-label">Status</label><select id="j-status" class="form-select"><option>Watching</option><option>Applied</option><option>Interview</option><option>Offer</option><option>Rejected</option></select></div>
+            <div class="form-group"><label class="form-label">Salary Range</label><input id="j-salary" class="form-input" placeholder="£60k – £80k"></div>
+            <div class="form-group"><label class="form-label">Date</label><input id="j-date" class="form-input" type="date"></div>
+          </div>
+          <div class="form-group" style="margin-top:10px;"><label class="form-label">Notes</label><input id="j-notes" class="form-input" placeholder="Referral, culture notes, follow-up..."></div>
+          <button class="btn-sm btn-accent" style="margin-top:14px;" onclick="addJob();closeJobModal()">LOG APPLICATION</button>
+        </div>
+      </div>
+    </div>
 </body>
 </html>
