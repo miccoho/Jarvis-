@@ -348,6 +348,38 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1) brightn
 .task-item.task-urgent .task-text { color:var(--danger) !important; }
 .kanban-task-list .task-item.task-urgent .task-text { color:var(--danger) !important; }
 
+
+/* ===== WORKOUT DETAIL MODAL ===== */
+.workout-modal { width:520px; max-width:90vw; }
+.workout-modal-header { display:flex; align-items:center; gap:14px; margin-bottom:20px; }
+.workout-modal-icon { font-size:36px; }
+.workout-modal-title { font-family:'Orbitron',monospace; font-size:18px; font-weight:700; letter-spacing:2px; color:var(--accent); flex:1; }
+.workout-modal-detail { font-size:15px; color:var(--text-dim); margin-top:2px; font-family:'Space Mono',monospace; letter-spacing:0.5px; }
+.workout-progress-section { margin:16px 0; padding:16px; background:var(--surface2); border:1px solid var(--border); border-radius:6px; position:relative; overflow:hidden; }
+.workout-progress-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; position:relative; z-index:1; }
+.workout-progress-label { font-family:'Space Mono',monospace; font-size:11px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; }
+.workout-progress-pct { font-family:'Orbitron',monospace; font-size:22px; font-weight:700; color:var(--accent); transition:color 0.3s; }
+.workout-progress-pct.complete { color:var(--accent3); }
+.workout-slider-track { position:relative; width:100%; height:10px; background:var(--surface); border-radius:5px; cursor:pointer; z-index:1; }
+.workout-slider-fill { position:absolute; top:0; left:0; height:100%; border-radius:5px; background:linear-gradient(90deg,var(--accent),var(--accent3)); transition:width 0.05s linear; pointer-events:none; }
+.workout-slider-thumb { position:absolute; top:50%; width:22px; height:22px; background:var(--accent); border:2px solid var(--bg); border-radius:50%; transform:translate(-50%,-50%); cursor:grab; z-index:2; transition:box-shadow 0.2s,transform 0.1s; box-shadow:0 0 10px rgba(0,200,255,0.4); }
+.workout-slider-thumb:hover { box-shadow:0 0 20px rgba(0,200,255,0.6); transform:translate(-50%,-50%) scale(1.15); }
+.workout-slider-thumb:active { cursor:grabbing; }
+.workout-slider-thumb.complete { background:var(--accent3); box-shadow:0 0 15px rgba(51,255,181,0.5); }
+.workout-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+.workout-notes-area { background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:10px 14px; color:var(--text-bright); font-family:'Rajdhani',sans-serif; font-size:16px; line-height:1.5; outline:none; width:100%; resize:vertical; min-height:60px; transition:border-color 0.2s; }
+.workout-notes-area:focus { border-color:var(--accent); }
+.exercise-item.has-progress { position:relative; overflow:hidden; }
+.exercise-item .exercise-progress-bg { position:absolute; top:0; left:0; bottom:0; background:linear-gradient(90deg,rgba(0,200,255,0.10),rgba(51,255,181,0.06)); transition:width 0.3s ease; pointer-events:none; border-radius:4px; }
+.exercise-item .exercise-progress-text { font-family:'Space Mono',monospace; font-size:10px; color:var(--accent); letter-spacing:0.5px; margin-left:auto; flex-shrink:0; z-index:1; position:relative; }
+.exercise-item .exercise-progress-text.complete { color:var(--accent3); }
+.skincare-edit-step-modal { width:480px; max-width:90vw; }
+.skincare-step-preview { display:flex; align-items:center; gap:12px; padding:14px; background:var(--surface2); border:1px solid var(--border); border-radius:6px; margin-bottom:16px; }
+.skincare-step-num { width:32px; height:32px; border:1.5px solid var(--accent2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Orbitron',monospace; font-size:12px; color:var(--accent2); flex-shrink:0; }
+.skincare-step-info { flex:1; }
+.skincare-step-info-name { font-size:18px; font-weight:700; color:var(--text-bright); }
+.skincare-step-info-detail { font-size:14px; color:var(--text-dim); margin-top:2px; }
+
 </style>
 </head>
 <body>
@@ -574,6 +606,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1) brightn
       <div class="page-title"><span>FITNESS</span> PROTOCOL</div>
       <div style="display:flex;gap:8px;align-items:center;">
         <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);" id="fit-date"></div>
+              <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:0.5px;">DBL-CLICK TO EDIT</div>
         <button class="btn-sm btn-accent" onclick="openEditFitnessModal()" style="font-size:10px;padding:5px 12px;">✎ EDIT ROUTINE</button>
       </div>
     </div>
@@ -794,7 +827,29 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1) brightn
     </div>
   </div>
 </div>
-<script>
+
+  <!-- MODAL: Workout Detail -->
+  <div class="modal-backdrop" id="workoutDetailModal" onclick="if(event.target===this)closeModal('workoutDetailModal')">
+    <div class="modal workout-modal">
+      <div class="workout-modal-header"><div class="workout-modal-icon" id="wm-icon"></div><div><div class="workout-modal-title" id="wm-title"></div><div class="workout-modal-detail" id="wm-detail"></div></div></div>
+      <div class="workout-progress-section" id="wm-progress-section"><div class="workout-progress-header"><span class="workout-progress-label">Progress</span><span class="workout-progress-pct" id="wm-progress-pct">0%</span></div><div class="workout-slider-track" id="wm-slider-track"><div class="workout-slider-fill" id="wm-slider-fill" style="width:0%;"></div><div class="workout-slider-thumb" id="wm-slider-thumb" style="left:0%;"></div></div></div>
+      <div class="workout-form-grid"><div class="form-group"><label class="form-label">Exercise Name</label><input class="form-input" id="wm-name" placeholder="Exercise name"></div><div class="form-group"><label class="form-label">Sets / Reps / Duration</label><input class="form-input" id="wm-sets" placeholder="e.g. 4 sets x 10 reps"></div><div class="form-group"><label class="form-label">Icon</label><input class="form-input" id="wm-emoji" placeholder="e.g. 🏋️" style="width:80px;"></div><div class="form-group"><label class="form-label">Weight / Intensity</label><input class="form-input" id="wm-weight" placeholder="e.g. 60kg, Zone 3"></div></div>
+      <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Notes</label><textarea class="workout-notes-area" id="wm-notes" placeholder="Form cues, how it felt, adjustments..."></textarea></div>
+      <div class="modal-footer"><button class="btn-sm btn-ghost" onclick="closeModal('workoutDetailModal')">Cancel</button><button class="btn-sm btn-accent" onclick="saveWorkoutDetail()">SAVE</button></div>
+    </div>
+  </div>
+  <!-- MODAL: Skincare Step Edit -->
+  <div class="modal-backdrop" id="skincareStepModal" onclick="if(event.target===this)closeModal('skincareStepModal')">
+    <div class="modal skincare-edit-step-modal">
+      <div class="modal-title" id="scm-title">// EDIT STEP</div>
+      <div class="skincare-step-preview" id="scm-preview"><div class="skincare-step-num" id="scm-step-num">1</div><div class="skincare-step-info"><div class="skincare-step-info-name" id="scm-preview-name"></div><div class="skincare-step-info-detail" id="scm-preview-detail"></div></div></div>
+      <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Product Name</label><input class="form-input" id="scm-name" placeholder="e.g. Vitamin C Serum" oninput="updateSkincarePreview()"></div>
+      <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Instructions / Details</label><input class="form-input" id="scm-detail" placeholder="e.g. Apply 3-4 drops, wait 1 min" oninput="updateSkincarePreview()"></div>
+      <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Notes / Observations</label><textarea class="workout-notes-area" id="scm-notes" placeholder="Skin reaction, product review, tips..."></textarea></div>
+      <div class="modal-footer"><button class="btn-sm btn-ghost" style="border-color:var(--danger);color:var(--danger);" onclick="deleteSkincareStepFromModal()">DELETE</button><div style="flex:1;"></div><button class="btn-sm btn-ghost" onclick="closeModal('skincareStepModal')">Cancel</button><button class="btn-sm btn-accent" onclick="saveSkincareStepDetail()">SAVE</button></div>
+    </div>
+  </div>
+  <script>
 const SYS_VERSION_BASE = 7.4;
 const STATE = {
   sysVersion: 7.4,
@@ -820,12 +875,12 @@ const STATE = {
   },
   jobs: [],
   exercises: [
-    { id:1, icon:'🏃', name:'Cardio Run', detail:'5km / Zone 2', done:false },
-    { id:2, icon:'💪', name:'Push (Chest/Shoulders)', detail:'4 sets × 8-12 reps', done:false },
-    { id:3, icon:'🏋️', name:'Pull (Back/Biceps)', detail:'4 sets × 8-12 reps', done:false },
-    { id:4, icon:'🦵', name:'Legs (Squats, RDL)', detail:'3 sets × 10 reps', done:false },
-    { id:5, icon:'🧘', name:'Mobility & Stretch', detail:'15 min', done:false },
-    { id:6, icon:'🧊', name:'Cold Exposure', detail:'3 min cold shower', done:false },
+    { id:1, icon:'🏃', name:'Cardio Run', detail:'5km / Zone 2', done:false, progress:0, weight:'', exerciseNotes:'' },
+    { id:2, icon:'💪', name:'Push (Chest/Shoulders)', detail:'4 sets × 8-12 reps', done:false, progress:0, weight:'', exerciseNotes:'' },
+    { id:3, icon:'🏋️', name:'Pull (Back/Biceps)', detail:'4 sets × 8-12 reps', done:false, progress:0, weight:'', exerciseNotes:'' },
+    { id:4, icon:'🦵', name:'Legs (Squats, RDL)', detail:'3 sets × 10 reps', done:false, progress:0, weight:'', exerciseNotes:'' },
+    { id:5, icon:'🧘', name:'Mobility & Stretch', detail:'15 min', done:false, progress:0, weight:'', exerciseNotes:'' },
+    { id:6, icon:'🧊', name:'Cold Exposure', detail:'3 min cold shower', done:false, progress:0, weight:'', exerciseNotes:'' },
   ],
   skincareAM: [
     { step:1, name:'Gentle Cleanser', detail:'Lukewarm water, 60 sec', done:false },
@@ -1323,17 +1378,26 @@ function editJobDate(idx,td){
 }
 function deleteJob(i){STATE.jobs.splice(i,1);bumpVersion();renderJobs();}
 
-// ===================== FITNESS =====================
+
+    // ===================== WORKOUT DETAIL MODAL =====================
+    var _workoutEditIdx=null,_workoutProgress=0;
+    function openWorkoutDetail(idx){var ex=STATE.exercises[idx];if(!ex)return;_workoutEditIdx=idx;_workoutProgress=ex.progress||0;document.getElementById('wm-icon').textContent=ex.icon;document.getElementById('wm-title').textContent=ex.name;document.getElementById('wm-detail').textContent=ex.detail;document.getElementById('wm-name').value=ex.name;document.getElementById('wm-sets').value=ex.detail;document.getElementById('wm-emoji').value=ex.icon;document.getElementById('wm-weight').value=ex.weight||'';document.getElementById('wm-notes').value=ex.exerciseNotes||'';updateWorkoutSliderUI(ex.progress||0);openModal('workoutDetailModal');}
+    function updateWorkoutSliderUI(pct){pct=Math.max(0,Math.min(100,Math.round(pct)));_workoutProgress=pct;var fill=document.getElementById('wm-slider-fill'),thumb=document.getElementById('wm-slider-thumb'),pctEl=document.getElementById('wm-progress-pct'),section=document.getElementById('wm-progress-section');if(fill)fill.style.width=pct+'%';if(thumb){thumb.style.left=pct+'%';if(pct>=100)thumb.classList.add('complete');else thumb.classList.remove('complete');}if(pctEl){pctEl.textContent=pct+'%';if(pct>=100)pctEl.classList.add('complete');else pctEl.classList.remove('complete');}if(section)section.style.background='linear-gradient(90deg, rgba(0,200,255,0.08) 0%, rgba(51,255,181,0.06) '+pct+'%, var(--surface2) '+pct+'%)';}
+    function saveWorkoutDetail(){var idx=_workoutEditIdx;if(idx===null)return;var ex=STATE.exercises[idx];ex.name=document.getElementById('wm-name').value.trim()||ex.name;ex.detail=document.getElementById('wm-sets').value.trim()||ex.detail;ex.icon=document.getElementById('wm-emoji').value.trim()||ex.icon;ex.weight=document.getElementById('wm-weight').value.trim();ex.exerciseNotes=document.getElementById('wm-notes').value.trim();ex.progress=_workoutProgress;if(ex.progress>=100)ex.done=true;closeModal('workoutDetailModal');bumpVersion();renderFitness();}
+    (function(){var dragging=false;function gsp(e,t){var r=t.getBoundingClientRect(),x=(e.clientX||(e.touches&&e.touches[0].clientX)||0)-r.left,p=Math.max(0,Math.min(100,Math.round((x/r.width)*100)));return Math.round(p/5)*5;}document.addEventListener('mousedown',function(e){var t=document.getElementById('wm-slider-track');if(t&&(e.target===t||t.contains(e.target))){dragging=true;updateWorkoutSliderUI(gsp(e,t));}});document.addEventListener('touchstart',function(e){var t=document.getElementById('wm-slider-track');if(t&&(e.target===t||t.contains(e.target))){dragging=true;updateWorkoutSliderUI(gsp(e,t));}},{passive:true});document.addEventListener('mousemove',function(e){if(!dragging)return;var t=document.getElementById('wm-slider-track');if(t)updateWorkoutSliderUI(gsp(e,t));});document.addEventListener('touchmove',function(e){if(!dragging)return;var t=document.getElementById('wm-slider-track');if(t)updateWorkoutSliderUI(gsp(e,t));},{passive:true});document.addEventListener('mouseup',function(){dragging=false;});document.addEventListener('touchend',function(){dragging=false;});})();
+    // ===================== SKINCARE STEP EDIT MODAL =====================
+    var _scmEditPeriod=null,_scmEditIdx=null;
+    function openSkincareStepDetail(period,idx){var steps=period==='am'?STATE.skincareAM:STATE.skincarePM;var step=steps[idx];if(!step)return;_scmEditPeriod=period;_scmEditIdx=idx;document.getElementById('scm-title').textContent='// EDIT '+(period==='am'?'MORNING':'EVENING')+' STEP';document.getElementById('scm-step-num').textContent=step.step;document.getElementById('scm-preview-name').textContent=step.name;document.getElementById('scm-preview-detail').textContent=step.detail;document.getElementById('scm-name').value=step.name;document.getElementById('scm-detail').value=step.detail;document.getElementById('scm-notes').value=step.notes||'';openModal('skincareStepModal');}
+    function updateSkincarePreview(){var n=document.getElementById('scm-name').value.trim(),d=document.getElementById('scm-detail').value.trim();if(n)document.getElementById('scm-preview-name').textContent=n;if(d)document.getElementById('scm-preview-detail').textContent=d;}
+    function saveSkincareStepDetail(){var p=_scmEditPeriod,i=_scmEditIdx;if(p===null||i===null)return;var steps=p==='am'?STATE.skincareAM:STATE.skincarePM;var step=steps[i];if(!step)return;step.name=document.getElementById('scm-name').value.trim()||step.name;step.detail=document.getElementById('scm-detail').value.trim()||step.detail;step.notes=document.getElementById('scm-notes').value.trim();closeModal('skincareStepModal');bumpVersion();renderSkincare();}
+    function deleteSkincareStepFromModal(){var p=_scmEditPeriod,i=_scmEditIdx;if(p===null||i===null)return;if(!confirm('Delete this step?'))return;var steps=p==='am'?STATE.skincareAM:STATE.skincarePM;steps.splice(i,1);steps.forEach(function(s,j){s.step=j+1;});closeModal('skincareStepModal');bumpVersion();renderSkincare();}
+    // ===================== FITNESS =====================
 function renderFitness(){
-  const date=new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const fitDate=document.getElementById('fit-date');if(fitDate)fitDate.textContent=date;
-  const list=document.getElementById('exerciseList');
-  if(list){list.innerHTML='';STATE.exercises.forEach((ex,i)=>{const div=document.createElement('div');div.className='exercise-item'+(ex.done?' done':'');div.innerHTML='<div class="exercise-icon">'+ex.icon+'</div><div><div class="exercise-name">'+ex.name+'</div><div class="exercise-detail">'+ex.detail+'</div></div><div class="exercise-check-box">'+(ex.done?'✓':'')+'</div>';div.addEventListener('click',()=>{ex.done=!ex.done;renderFitness();});list.appendChild(div);});const done=STATE.exercises.filter(e=>e.done).length;document.getElementById('fit-done-count').textContent=done+' / '+STATE.exercises.length;}
-  const prList=document.getElementById('prList');
-  if(prList){const prs=[{lift:'Deadlift',record:'140kg',date:'2 weeks ago'},{lift:'Bench Press',record:'90kg',date:'1 month ago'},{lift:'Squat',record:'110kg',date:'3 weeks ago'},{lift:'5km Run',record:'23:14',date:'10 days ago'}];prList.innerHTML=prs.map(p=>'<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);"><div style="font-size:13px;font-weight:600;color:var(--text-bright);">'+p.lift+'</div><div style="font-family:\'Orbitron\',monospace;font-size:13px;color:var(--accent3);">'+p.record+'</div><div style="font-size:10px;color:var(--text-dim);">'+p.date+'</div></div>').join('');}
-  renderTrackerChart('fitnessTrackerChart', STATE.fitnessHistory, 'var(--accent2)', 14);
-  updateDashStreaks();
-}
+  var date=new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});var fitDate=document.getElementById('fit-date');if(fitDate)fitDate.textContent=date;
+  var list=document.getElementById('exerciseList');
+  if(list){list.innerHTML='';STATE.exercises.forEach(function(ex,i){var progress=ex.progress||0;var hasProgress=progress>0;var div=document.createElement('div');div.className='exercise-item'+(ex.done?' done':'')+(hasProgress?' has-progress':'');div.style.position='relative';div.style.overflow='hidden';var progressBg=hasProgress?'<div class="exercise-progress-bg" style="width:'+progress+'%;"></div>':'';var progressText=hasProgress?'<span class="exercise-progress-text'+(progress>=100?' complete':'')+'">'+progress+'%</span>':'';div.innerHTML=progressBg+'<div class="exercise-icon" style="position:relative;z-index:1;">'+ex.icon+'</div><div style="position:relative;z-index:1;"><div class="exercise-name">'+ex.name+'</div><div class="exercise-detail">'+ex.detail+'</div></div>'+progressText+'<div class="exercise-check-box" style="position:relative;z-index:1;">'+(ex.done?'\u2713':'')+'</div>';div.addEventListener('click',function(){if(div._dblP)return;div._sT=setTimeout(function(){ex.done=!ex.done;renderFitness();},200);});div.addEventListener('dblclick',function(){clearTimeout(div._sT);div._dblP=true;setTimeout(function(){div._dblP=false;},300);openWorkoutDetail(i);});list.appendChild(div);});var done=STATE.exercises.filter(function(e){return e.done;}).length;document.getElementById('fit-done-count').textContent=done+' / '+STATE.exercises.length;}
+  var prList=document.getElementById('prList');if(prList){var prs=[{lift:'Deadlift',record:'140kg',date:'2 weeks ago'},{lift:'Bench Press',record:'90kg',date:'1 month ago'},{lift:'Squat',record:'110kg',date:'3 weeks ago'},{lift:'5km Run',record:'23:14',date:'10 days ago'}];prList.innerHTML=prs.map(function(p){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);"><div style="font-size:13px;font-weight:600;color:var(--text-bright);">'+p.lift+'</div><div style="font-family:Orbitron,monospace;font-size:13px;color:var(--accent3);">'+p.record+'</div><div style="font-size:10px;color:var(--text-dim);">'+p.date+'</div></div>';}).join('');}
+  renderTrackerChart('fitnessTrackerChart',STATE.fitnessHistory,'var(--accent2)',14);updateDashStreaks();}
 function openEditFitnessModal(){
   const list=document.getElementById('fitnessEditList');
   list.innerHTML=STATE.exercises.map((ex,i)=>'<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;padding:8px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;"><span style="font-size:16px;">'+ex.icon+'</span><span style="flex:1;color:var(--text-bright);font-size:13px;">'+ex.name+' — '+ex.detail+'</span><button onclick="removeExercise('+i+')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:11px;">✕</button></div>').join('');
@@ -1346,13 +1410,10 @@ function logFitnessDay(){const done=STATE.exercises.filter(e=>e.done).length;con
 // ===================== SKINCARE =====================
 let editingSkinPeriod='am';
 function renderSkincare(){
-  function buildSteps(containerId,steps){const el=document.getElementById(containerId);if(!el)return;el.innerHTML='';steps.forEach((s,i)=>{const div=document.createElement('div');div.className='skincare-step'+(s.done?' done':'');div.innerHTML='<div class="step-num">'+(s.done?'✓':s.step)+'</div><div><div class="step-name">'+s.name+'</div><div class="step-detail">'+s.detail+'</div></div>';div.addEventListener('click',()=>{s.done=!s.done;renderSkincare();});el.appendChild(div);});}
-  buildSteps('skincare-am',STATE.skincareAM);buildSteps('skincare-pm',STATE.skincarePM);
-  const all=[...STATE.skincareAM,...STATE.skincarePM];const done=all.filter(s=>s.done).length;const pct=Math.round((done/all.length)*100);
-  const prog=document.getElementById('skin-progress');if(prog)prog.textContent=pct+'% complete';
-  renderTrackerChart('skincareTrackerChart',STATE.skincareHistory,'var(--accent3)',30);
-  updateDashStreaks();
-}
+  function buildSteps(cid,steps,period){var el=document.getElementById(cid);if(!el)return;el.innerHTML='';steps.forEach(function(s,i){var div=document.createElement('div');div.className='skincare-step'+(s.done?' done':'');div.innerHTML='<div class="step-num">'+(s.done?'\u2713':s.step)+'</div><div><div class="step-name">'+s.name+'</div><div class="step-detail">'+s.detail+'</div></div>';div.addEventListener('click',function(){if(div._dblP)return;div._sT=setTimeout(function(){s.done=!s.done;renderSkincare();},200);});div.addEventListener('dblclick',function(){clearTimeout(div._sT);div._dblP=true;setTimeout(function(){div._dblP=false;},300);openSkincareStepDetail(period,i);});el.appendChild(div);});}
+  buildSteps('skincare-am',STATE.skincareAM,'am');buildSteps('skincare-pm',STATE.skincarePM,'pm');
+  var all=[].concat(STATE.skincareAM,STATE.skincarePM);var done=all.filter(function(s){return s.done;}).length;var pct=Math.round((done/all.length)*100);var prog=document.getElementById('skin-progress');if(prog)prog.textContent=pct+'% complete';
+  renderTrackerChart('skincareTrackerChart',STATE.skincareHistory,'var(--accent3)',30);updateDashStreaks();}
 function openSkincareEditModal(period){
   editingSkinPeriod=period;
   document.getElementById('skincareEditTitle').textContent='// EDIT '+(period==='am'?'MORNING':'EVENING')+' ROUTINE';
@@ -1444,6 +1505,8 @@ function applyImportedData(data){if(!data._version)throw new Error('Unrecognised
 // Focus tasks backwards compat
 if(!Array.isArray(STATE.focusTasks))STATE.focusTasks=[];
 Object.values(STATE.kanban.tasks).forEach(arr=>arr.forEach(t=>{if(t.urgent===undefined)t.urgent=false;if(t.subtasks===undefined)t.subtasks=[];}));
+    STATE.exercises.forEach(function(ex){if(ex.progress===undefined)ex.progress=0;if(ex.weight===undefined)ex.weight='';if(ex.exerciseNotes===undefined)ex.exerciseNotes='';});
+    [].concat(STATE.skincareAM||[],STATE.skincarePM||[]).forEach(function(s){if(s.notes===undefined)s.notes='';});
 renderAll();if(data.quickNote){const qn=document.getElementById('quickNote');if(qn)qn.value=data.quickNote;}if(data.skinNote){const sn=document.getElementById('skinNote');if(sn)sn.value=data.skinNote;}const ve=document.getElementById('sysVersion');if(ve)ve.textContent=STATE.sysVersion.toFixed(1);}
 function importData(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(e){try{const data=JSON.parse(e.target.result);applyImportedData(data);const btn=document.querySelector('.header-right label');if(btn){btn.style.color='var(--accent3)';btn.style.borderColor='var(--accent3)';setTimeout(()=>{btn.style.color='';btn.style.borderColor='';},2000);}}catch(err){alert('Import failed: '+err.message);}event.target.value='';};reader.readAsText(file);}
 function applyClientId(){const id=document.getElementById('modal-client-id').value.trim();if(!id)return;closeModal('driveSetupModal');initDriveAuth();}
