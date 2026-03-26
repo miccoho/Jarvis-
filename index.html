@@ -293,6 +293,15 @@ body::before { content:''; position:fixed; inset:0; background-image:linear-grad
 .widget.widget-active { border-color:var(--border-active) !important; box-shadow:0 0 25px rgba(51,212,255,0.2), 0 4px 20px rgba(0,0,0,0.4) !important; transform:translateY(-1px); }
 .widget.widget-active::before { opacity:1 !important; }
 .stat-card.widget-active { border-color:var(--border-active) !important; box-shadow:0 0 20px rgba(51,212,255,0.25), 0 4px 16px rgba(0,0,0,0.3) !important; transform:translateY(-2px); }
+
+/* Editable job table cells */
+.job-table td.editable { cursor:pointer; position:relative; }
+.job-table td.editable:hover { background:rgba(51,212,255,0.06); }
+.job-table td.editing { padding:4px 6px; }
+.job-table td.editing input,
+.job-table td.editing select { background:var(--surface2); border:1px solid var(--accent); border-radius:3px; color:var(--text-bright); font-family:'Rajdhani',sans-serif; font-size:16px; padding:6px 10px; outline:none; width:100%; }
+.job-table td.editing select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235f84a6' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; padding-right:28px; cursor:pointer; }
+.job-table td.editing select option { background:var(--surface2); }
 </style>
 </head>
 <body>
@@ -1137,8 +1146,81 @@ function openColumnModal(){openModal('addColumnModal');}
 function addColumn(){const n=document.getElementById('modal-col-name').value.trim();if(!n)return;const col=document.getElementById('modal-col-color').value;const id='col_'+Date.now();STATE.kanban.columns.push({id,label:n.toUpperCase(),color:col});STATE.kanban.tasks[id]=[];closeModal('addColumnModal');document.getElementById('modal-col-name').value='';bumpVersion();renderKanban();}
 // ===================== JOBS =====================
 function addJob(){const co=document.getElementById('j-company').value.trim();const ro=document.getElementById('j-role').value.trim();if(!co||!ro)return;STATE.jobs.push({id:Date.now(),company:co,role:ro,location:document.getElementById('j-location').value.trim()||'—',salary:document.getElementById('j-salary').value.trim()||'—',status:document.getElementById('j-status').value,date:document.getElementById('j-date').value||todayStr(),notes:document.getElementById('j-notes').value.trim()||'—'});['j-company','j-role','j-location','j-salary','j-notes'].forEach(id=>document.getElementById(id).value='');bumpVersion();renderJobs();}
-function renderJobs(){const tb=document.getElementById('jobTableBody');if(!STATE.jobs.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text-dim);font-size:12px;padding:30px;">No applications logged yet.</td></tr>';document.getElementById('job-count').textContent='0 active';return;}const active=STATE.jobs.filter(j=>j.status!=='rejected').length;document.getElementById('job-count').textContent=active+' active';tb.innerHTML=STATE.jobs.map((j,i)=>'<tr><td style="font-weight:600;color:var(--text-bright);">'+j.company+'</td><td>'+j.role+'</td><td style="color:var(--text-dim);">'+j.location+'</td><td style="font-family:\'Space Mono\',monospace;font-size:11px;">'+j.salary+'</td><td><span class="status-pill status-'+j.status+'">'+j.status+'</span></td><td style="color:var(--text-dim);font-size:11px;">'+j.date+'</td><td style="color:var(--text-dim);font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+j.notes+'</td><td><button style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:11px;" onclick="deleteJob('+i+')">✕</button></td></tr>').join('');}
-function deleteJob(i){STATE.jobs.splice(i,1);renderJobs();}
+function renderJobs(){
+  const tb=document.getElementById('jobTableBody');
+  if(!STATE.jobs.length){
+    tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text-dim);font-size:12px;padding:30px;">No applications logged yet.</td></tr>';
+    document.getElementById('job-count').textContent='0 active';
+    return;
+  }
+  const active=STATE.jobs.filter(j=>j.status!=='rejected').length;
+  document.getElementById('job-count').textContent=active+' active';
+  tb.innerHTML=STATE.jobs.map(function(j,i){
+    var statusClass='status-'+j.status;
+    return '<tr>'+
+      '<td class="editable" style="font-weight:600;color:var(--text-bright);" onclick="editJobCell('+i+',\'company\',this)">'+j.company+'</td>'+
+      '<td class="editable" onclick="editJobCell('+i+',\'role\',this)">'+j.role+'</td>'+
+      '<td class="editable" style="color:var(--text-dim);" onclick="editJobCell('+i+',\'location\',this)">'+j.location+'</td>'+
+      '<td class="editable" style="font-family:\'Space Mono\',monospace;font-size:11px;" onclick="editJobCell('+i+',\'salary\',this)">'+j.salary+'</td>'+
+      '<td class="editable" onclick="editJobStatus('+i+',this)"><span class="status-pill '+statusClass+'">'+j.status+'</span></td>'+
+      '<td class="editable" onclick="editJobDate('+i+',this)" style="color:var(--text-dim);font-size:11px;">'+j.date+'</td>'+
+      '<td class="editable" onclick="editJobCell('+i+',\'notes\',this)" style="color:var(--text-dim);font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+j.notes+'</td>'+
+      '<td><button style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:11px;" onclick="deleteJob('+i+')">✕</button></td>'+
+    '</tr>';
+  }).join('');
+}
+function editJobCell(idx,field,td){
+  if(td.classList.contains('editing'))return;
+  var oldVal=STATE.jobs[idx][field];
+  td.classList.add('editing');
+  td.innerHTML='<input type="text" value="'+oldVal.replace(/"/g,'&quot;')+'">';
+  var inp=td.querySelector('input');
+  inp.focus();
+  inp.select();
+  function save(){
+    var nv=inp.value.trim()||'—';
+    STATE.jobs[idx][field]=nv;
+    bumpVersion();
+    renderJobs();
+  }
+  inp.addEventListener('blur',save);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();save();}if(e.key==='Escape'){renderJobs();}});
+}
+function editJobStatus(idx,td){
+  if(td.classList.contains('editing'))return;
+  var oldVal=STATE.jobs[idx].status;
+  td.classList.add('editing');
+  var opts=['watching','applied','interview','offer','rejected'];
+  var optHtml=opts.map(function(o){return '<option value="'+o+'"'+(o===oldVal?' selected':'')+'>'+o.charAt(0).toUpperCase()+o.slice(1)+'</option>';}).join('');
+  td.innerHTML='<select>'+optHtml+'</select>';
+  var sel=td.querySelector('select');
+  sel.focus();
+  function save(){
+    STATE.jobs[idx].status=sel.value;
+    bumpVersion();
+    renderJobs();
+  }
+  sel.addEventListener('change',save);
+  sel.addEventListener('blur',save);
+}
+function editJobDate(idx,td){
+  if(td.classList.contains('editing'))return;
+  var oldVal=STATE.jobs[idx].date;
+  td.classList.add('editing');
+  td.innerHTML='<input type="date" value="'+oldVal+'">';
+  var inp=td.querySelector('input');
+  inp.focus();
+  function save(){
+    var nv=inp.value||oldVal;
+    STATE.jobs[idx].date=nv;
+    bumpVersion();
+    renderJobs();
+  }
+  inp.addEventListener('blur',save);
+  inp.addEventListener('change',save);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();save();}if(e.key==='Escape'){renderJobs();}});
+}
+function deleteJob(i){STATE.jobs.splice(i,1);bumpVersion();renderJobs();}
 
 // ===================== FITNESS =====================
 function renderFitness(){
