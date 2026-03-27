@@ -380,7 +380,49 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1) brightn
 .skincare-step-info-name { font-size:18px; font-weight:700; color:var(--text-bright); }
 .skincare-step-info-detail { font-size:14px; color:var(--text-dim); margin-top:2px; }
 
+
+.reorder-handle {
+  display:inline-flex;
+  flex-direction:column;
+  gap:3px;
+  cursor:grab;
+  padding:4px 6px 4px 2px;
+  opacity:0.4;
+  flex-shrink:0;
+  z-index:1;
+  position:relative;
+  touch-action:none;
+}
+.reorder-handle:hover { opacity:0.9; }
+.reorder-handle:active { cursor:grabbing; }
+.reorder-handle span {
+  display:block;
+  width:12px;
+  height:2px;
+  background:currentColor;
+  border-radius:1px;
+}
+.sortable-ghost { opacity:0.3; background:rgba(0,200,255,0.1) !important; border-color:var(--accent) !important; }
+.sortable-chosen { box-shadow:0 0 20px rgba(0,200,255,0.3) !important; }
+.job-drag-handle {
+  display:inline-flex;
+  flex-direction:column;
+  gap:3px;
+  cursor:grab;
+  padding:4px 8px;
+  opacity:0.35;
+}
+.job-drag-handle:hover { opacity:0.9; }
+.job-drag-handle:active { cursor:grabbing; }
+.job-drag-handle span {
+  display:block;
+  width:12px;
+  height:2px;
+  background:currentColor;
+  border-radius:1px;
+}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
 <body>
 <header class="header">
@@ -592,7 +634,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1) brightn
     </div>
     <div class="job-table-wrap">
       <table class="job-table">
-        <thead><tr><th>Company</th><th>Role</th><th>Location</th><th>Salary</th><th>Status</th><th>Date</th><th>Notes</th><th></th></tr></thead>
+        <thead><tr><th style="width:28px;"></th><th>Company</th><th>Role</th><th>Location</th><th>Salary</th><th>Status</th><th>Date</th><th>Notes</th><th></th></tr></thead>
         <tbody id="jobTableBody"><tr><td colspan="8" style="text-align:center;color:var(--text-dim);font-size:12px;padding:30px;">No applications logged yet.</td></tr></tbody>
       </table>
     </div>
@@ -1307,7 +1349,7 @@ function renderJobs(){
   document.getElementById('job-count').textContent=active+' active';
   tb.innerHTML=STATE.jobs.map(function(j,i){
     var statusClass='status-'+j.status;
-    return '<tr>'+
+    return '<tr data-job-id="'+j.id+'">'+'<td style="width:28px;padding:8px 4px;"><div class="job-drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div></td>'+
       '<td class="editable" style="font-weight:600;color:var(--text-bright);" onclick="editJobCell('+i+',\'company\',this)">'+j.company+'</td>'+
       '<td class="editable" onclick="editJobCell('+i+',\'role\',this)">'+j.role+'</td>'+
       '<td class="editable" style="color:var(--text-dim);" onclick="editJobCell('+i+',\'location\',this)">'+j.location+'</td>'+
@@ -1318,6 +1360,23 @@ function renderJobs(){
       '<td><button style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:11px;" onclick="deleteJob('+i+')">✕</button></td>'+
     '</tr>';
   }).join('');
+// Init Sortable for job reordering
+var jobTb=document.getElementById('jobTableBody');
+if(jobTb&&window.Sortable){
+  if(jobTb._sortable)jobTb._sortable.destroy();
+  jobTb._sortable=new Sortable(jobTb,{
+    handle:'.job-drag-handle',
+    animation:150,
+    ghostClass:'sortable-ghost',
+    chosenClass:'sortable-chosen',
+    onEnd:function(evt){
+      var moved=STATE.jobs.splice(evt.oldIndex,1)[0];
+      STATE.jobs.splice(evt.newIndex,0,moved);
+      bumpVersion();
+      renderJobs();
+    }
+  });
+}
 }
 function editJobCell(idx,field,td){
   if(td.classList.contains('editing'))return;
@@ -1395,7 +1454,24 @@ function deleteJob(i){STATE.jobs.splice(i,1);bumpVersion();renderJobs();}
 function renderFitness(){
   var date=new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});var fitDate=document.getElementById('fit-date');if(fitDate)fitDate.textContent=date;
   var list=document.getElementById('exerciseList');
-  if(list){list.innerHTML='';STATE.exercises.forEach(function(ex,i){var progress=ex.progress||0;var hasProgress=progress>0;var div=document.createElement('div');div.className='exercise-item'+(ex.done?' done':'')+(hasProgress?' has-progress':'');div.style.position='relative';div.style.overflow='hidden';var progressBg=hasProgress?'<div class="exercise-progress-bg" style="width:'+progress+'%;"></div>':'';var progressText=hasProgress?'<span class="exercise-progress-text'+(progress>=100?' complete':'')+'">'+progress+'%</span>':'';div.innerHTML=progressBg+'<div class="exercise-icon" style="position:relative;z-index:1;">'+ex.icon+'</div><div style="position:relative;z-index:1;"><div class="exercise-name">'+ex.name+'</div><div class="exercise-detail">'+ex.detail+'</div></div>'+progressText+'<div class="exercise-check-box" style="position:relative;z-index:1;">'+(ex.done?'\u2713':'')+'</div>';div.addEventListener('click',function(){if(div._dblP)return;div._sT=setTimeout(function(){ex.done=!ex.done;renderFitness();},200);});div.addEventListener('dblclick',function(){clearTimeout(div._sT);div._dblP=true;setTimeout(function(){div._dblP=false;},300);openWorkoutDetail(i);});list.appendChild(div);});var done=STATE.exercises.filter(function(e){return e.done;}).length;document.getElementById('fit-done-count').textContent=done+' / '+STATE.exercises.length;}
+  if(list){list.innerHTML='';STATE.exercises.forEach(function(ex,i){var progress=ex.progress||0;var hasProgress=progress>0;var div=document.createElement('div');div.className='exercise-item'+(ex.done?' done':'')+(hasProgress?' has-progress':'');div.style.position='relative';div.style.overflow='hidden';var progressBg=hasProgress?'<div class="exercise-progress-bg" style="width:'+progress+'%;"></div>':'';var progressText=hasProgress?'<span class="exercise-progress-text'+(progress>=100?' complete':'')+'">'+progress+'%</span>':'';div.innerHTML=progressBg+'<div class="reorder-handle" title="Drag to reorder"><span></span><span></span><span></span></div><div class="exercise-icon" style="position:relative;z-index:1;">'+ex.icon+'</div><div style="position:relative;z-index:1;"><div class="exercise-name">'+ex.name+'</div><div class="exercise-detail">'+ex.detail+'</div></div>'+progressText+'<div class="exercise-check-box" style="position:relative;z-index:1;">'+(ex.done?'\u2713':'')+'</div>';div.addEventListener('click',function(){if(div._dblP)return;div._sT=setTimeout(function(){ex.done=!ex.done;renderFitness();},200);});div.addEventListener('dblclick',function(){clearTimeout(div._sT);div._dblP=true;setTimeout(function(){div._dblP=false;},300);openWorkoutDetail(i);});list.appendChild(div);});var done=STATE.exercises.filter(function(e){return e.done;}).length;document.getElementById('fit-done-count').textContent=done+' / '+STATE.exercises.length;
+// Init Sortable for exercise reordering
+if(window.Sortable && list) {
+  if(list._sortable) list._sortable.destroy();
+  list._sortable = new Sortable(list, {
+    handle: '.reorder-handle',
+    animation: 150,
+    ghostClass: 'sortable-ghost',
+    chosenClass: 'sortable-chosen',
+    onEnd: function(evt) {
+      const moved = STATE.exercises.splice(evt.oldIndex, 1)[0];
+      STATE.exercises.splice(evt.newIndex, 0, moved);
+      bumpVersion();
+      renderFitness();
+    }
+  });
+}
+}
   var prList=document.getElementById('prList');if(prList){var prs=[{lift:'Deadlift',record:'140kg',date:'2 weeks ago'},{lift:'Bench Press',record:'90kg',date:'1 month ago'},{lift:'Squat',record:'110kg',date:'3 weeks ago'},{lift:'5km Run',record:'23:14',date:'10 days ago'}];prList.innerHTML=prs.map(function(p){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);"><div style="font-size:13px;font-weight:600;color:var(--text-bright);">'+p.lift+'</div><div style="font-family:Orbitron,monospace;font-size:13px;color:var(--accent3);">'+p.record+'</div><div style="font-size:10px;color:var(--text-dim);">'+p.date+'</div></div>';}).join('');}
   renderTrackerChart('fitnessTrackerChart',STATE.fitnessHistory,'var(--accent2)',14);updateDashStreaks();}
 function openEditFitnessModal(){
@@ -1410,8 +1486,29 @@ function logFitnessDay(){const done=STATE.exercises.filter(e=>e.done).length;con
 // ===================== SKINCARE =====================
 let editingSkinPeriod='am';
 function renderSkincare(){
-  function buildSteps(cid,steps,period){var el=document.getElementById(cid);if(!el)return;el.innerHTML='';steps.forEach(function(s,i){var div=document.createElement('div');div.className='skincare-step'+(s.done?' done':'');div.innerHTML='<div class="step-num">'+(s.done?'\u2713':s.step)+'</div><div><div class="step-name">'+s.name+'</div><div class="step-detail">'+s.detail+'</div></div>';div.addEventListener('click',function(){if(div._dblP)return;div._sT=setTimeout(function(){s.done=!s.done;renderSkincare();},200);});div.addEventListener('dblclick',function(){clearTimeout(div._sT);div._dblP=true;setTimeout(function(){div._dblP=false;},300);openSkincareStepDetail(period,i);});el.appendChild(div);});}
+  function buildSteps(cid,steps,period){var el=document.getElementById(cid);if(!el)return;el.innerHTML='';steps.forEach(function(s,i){var div=document.createElement('div');div.className='skincare-step'+(s.done?' done':'');div.innerHTML='<div class="reorder-handle" title="Drag to reorder"><span></span><span></span><span></span></div><div class="step-num">'+(s.done?'\u2713':s.step)+'</div><div><div class="step-name">'+s.name+'</div><div class="step-detail">'+s.detail+'</div></div>';div.addEventListener('click',function(){if(div._dblP)return;div._sT=setTimeout(function(){s.done=!s.done;renderSkincare();},200);});div.addEventListener('dblclick',function(){clearTimeout(div._sT);div._dblP=true;setTimeout(function(){div._dblP=false;},300);openSkincareStepDetail(period,i);});el.appendChild(div);});}
   buildSteps('skincare-am',STATE.skincareAM,'am');buildSteps('skincare-pm',STATE.skincarePM,'pm');
+// Init Sortable for skincare step reordering
+['am','pm'].forEach(function(period){
+  var el=document.getElementById('skincare-'+period);
+  if(el&&window.Sortable){
+    if(el._sortable)el._sortable.destroy();
+    el._sortable=new Sortable(el,{
+      handle:'.reorder-handle',
+      animation:150,
+      ghostClass:'sortable-ghost',
+      chosenClass:'sortable-chosen',
+      onEnd:function(evt){
+        var arr=period==='am'?STATE.skincareAM:STATE.skincarePM;
+        var moved=arr.splice(evt.oldIndex,1)[0];
+        arr.splice(evt.newIndex,0,moved);
+        arr.forEach(function(s,j){s.step=j+1;});
+        bumpVersion();
+        renderSkincare();
+      }
+    });
+  }
+});
   var all=[].concat(STATE.skincareAM,STATE.skincarePM);var done=all.filter(function(s){return s.done;}).length;var pct=Math.round((done/all.length)*100);var prog=document.getElementById('skin-progress');if(prog)prog.textContent=pct+'% complete';
   renderTrackerChart('skincareTrackerChart',STATE.skincareHistory,'var(--accent3)',30);updateDashStreaks();}
 function openSkincareEditModal(period){
