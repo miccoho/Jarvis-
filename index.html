@@ -737,6 +737,101 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1) brightn
   </div>
 </div>
 
+<!-- NOTES PAGE -->
+<div class="page" id="page-notes">
+  <div class="notes-shell">
+    <!-- FOLDER SIDEBAR -->
+    <div class="notes-folders" id="notesFolderPanel">
+      <div class="notes-folders-header">
+        <div style="font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;color:var(--accent)">✦ NOTES</div>
+      </div>
+      <div id="folderList" class="folder-list"></div>
+      <div class="folder-add-row">
+        <input id="newFolderInput" class="folder-add-input" placeholder="New folder…" maxlength="30" onkeydown="if(event.key==='Enter')addNoteFolder()">
+        <button class="folder-add-btn" onclick="addNoteFolder()">+</button>
+      </div>
+    </div>
+    <!-- NOTE LIST SIDEBAR -->
+    <div class="notes-list-panel">
+      <div class="notes-list-header">
+        <div style="position:relative;flex:1">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:13px;pointer-events:none">⌕</span>
+          <input id="notesSearch" type="text" placeholder="Search…" oninput="renderNotesList()" class="notes-search-input">
+        </div>
+        <button class="notes-new-btn" onclick="createNewNote()" title="New Note">+</button>
+      </div>
+      <div class="notes-sort-bar">
+        <button class="nsort-btn active" id="nsort-updated" onclick="setNoteSort('updated',this)">Recent</button>
+        <button class="nsort-btn" id="nsort-created" onclick="setNoteSort('created',this)">Created</button>
+        <button class="nsort-btn" id="nsort-alpha" onclick="setNoteSort('alpha',this)">A–Z</button>
+        <button class="nsort-btn" id="nsort-priority" onclick="setNoteSort('priority',this)">Priority</button>
+        <button class="nsort-btn" id="nsort-pinned" onclick="setNoteSort('pinned',this)">Pinned</button>
+      </div>
+      <div id="notesTagFilter" class="notes-tag-strip"></div>
+      <div id="notesList" class="notes-list-scroll"></div>
+    </div>
+    <!-- EDITOR PANEL -->
+    <div class="notes-editor-panel" id="notesEditorPanel">
+      <div id="notesEmptyState" class="notes-empty-state">
+        <div class="notes-empty-icon">✦</div>
+        <div class="notes-empty-title">No Note Selected</div>
+        <div class="notes-empty-sub">Pick a note from the list or create one</div>
+        <button onclick="createNewNote()" class="notes-empty-btn">+ New Note</button>
+      </div>
+      <div id="notesEditorWrap" style="display:none;flex-direction:column;height:100%">
+        <div class="ne-toolbar">
+          <div class="ne-toolbar-group">
+            <button class="ne-btn" onclick="nCmd('bold')" title="Bold"><b>B</b></button>
+            <button class="ne-btn" onclick="nCmd('italic')" title="Italic"><i>I</i></button>
+            <button class="ne-btn" onclick="nCmd('underline')" title="Underline" style="text-decoration:underline">U</button>
+            <button class="ne-btn ne-strike" onclick="nCmd('strikeThrough')" title="Strikethrough">S</button>
+          </div>
+          <div class="ne-toolbar-sep"></div>
+          <div class="ne-toolbar-group">
+            <button class="ne-btn" onclick="nHeading(1)" title="Heading 1">H1</button>
+            <button class="ne-btn" onclick="nHeading(2)" title="Heading 2">H2</button>
+            <button class="ne-btn" onclick="nHeading(3)" title="Heading 3">H3</button>
+          </div>
+          <div class="ne-toolbar-sep"></div>
+          <div class="ne-toolbar-group">
+            <button class="ne-btn" onclick="nChecklist()" title="Checklist">☑</button>
+            <button class="ne-btn" onclick="nCmd('insertUnorderedList')" title="Bullet list">•</button>
+            <button class="ne-btn" onclick="nCmd('insertOrderedList')" title="Numbered">1.</button>
+          </div>
+          <div class="ne-toolbar-sep"></div>
+          <div class="ne-toolbar-group">
+            <button class="ne-btn" onclick="nCodeBlock()" title="Code block">&lt;&gt;</button>
+            <button class="ne-btn" onclick="nQuote()" title="Blockquote">❝</button>
+            <button class="ne-btn" onclick="nDivider()" title="Divider">―</button>
+          </div>
+          <div style="flex:1"></div>
+          <select id="notePriority" class="ne-priority-sel" onchange="saveActiveNote()" title="Priority">
+            <option value="">Priority</option>
+            <option value="high">🔴 High</option>
+            <option value="med">🟠 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <select id="noteFolderAssign" class="ne-priority-sel" onchange="moveNoteToFolder(this.value)" title="Folder"></select>
+          <button id="notePinBtn" class="ne-pin-btn" onclick="toggleNotePin()" title="Pin">📌</button>
+          <button onclick="deleteActiveNote()" class="ne-del-btn" title="Delete note">🗑</button>
+        </div>
+        <div class="ne-tags-row" id="neTagsRow">
+          <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:1px;flex-shrink:0">TAGS</span>
+          <div id="neTagChips"></div>
+          <input id="neTagInput" class="ne-tag-input" placeholder="+ add tag" maxlength="20" onkeydown="if(event.key==='Enter'||event.key===','){event.preventDefault();addNoteTag()}">
+        </div>
+        <input id="noteTitleInput" type="text" placeholder="Note title…" oninput="saveActiveNote()" class="ne-title-input">
+        <div id="noteMeta" class="ne-meta"></div>
+        <div id="noteContent" class="ne-content" contenteditable="true" oninput="saveActiveNote()" onkeydown="nContentKey(event)" spellcheck="false"></div>
+        <div class="ne-footer">
+          <span id="noteWordCount" style="color:var(--text-dim)"></span>
+          <span id="noteReadTime" style="color:var(--text-dim)"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </main>
 <!-- MODAL: Add/Edit Task -->
 <div class="modal-backdrop" id="addTaskModal">
@@ -955,6 +1050,7 @@ const STATE = {
     { id:'fitness', label:'Fitness', icon:'△' },
     { id:'skincare', label:'Skincare', icon:'◇' },
     { id:'vitamins', label:'Supplements', icon:'○' },
+    { id:'notes', label:'Notes', icon:'✦' },
   ],
   currentPage:'dashboard',
   timerRunning:false, timerSeconds:1500, timerTotal:1500, timerMode:'FOCUS', timerInterval:null, pomodoroCount:1,
@@ -963,6 +1059,17 @@ const STATE = {
   skincareHistory: [],
   fitnessHistory: [],
   supplementHistory: [],
+  notes: [],
+  noteFolders: [
+    { id:'all', label:'All Notes', icon:'✦', system:true },
+    { id:'inbox', label:'Inbox', icon:'◈', system:false },
+    { id:'work', label:'Work', icon:'◉', system:false },
+    { id:'personal', label:'Personal', icon:'◇', system:false },
+    { id:'journal', label:'Journal', icon:'○', system:false },
+  ],
+  activeNoteId: null,
+  activeFolderId: 'all',
+  noteSort: 'updated',
   lastDayReset: null,
 };
 
@@ -1628,7 +1735,7 @@ renderAll();if(data.quickNote){const qn=document.getElementById('quickNote');if(
 function importData(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(e){try{const data=JSON.parse(e.target.result);applyImportedData(data);const btn=document.querySelector('.header-right label');if(btn){btn.style.color='var(--accent3)';btn.style.borderColor='var(--accent3)';setTimeout(()=>{btn.style.color='';btn.style.borderColor='';},2000);}}catch(err){alert('Import failed: '+err.message);}event.target.value='';};reader.readAsText(file);}
 function applyClientId(){const id=document.getElementById('modal-client-id').value.trim();if(!id)return;closeModal('driveSetupModal');initDriveAuth();}
 
-function renderAll(){renderTaskControlPanel();renderKanban();renderJobs();renderFitness();renderSkincare();renderVitamins();renderInsight();updateTimerDisplay();updateTaskRing();updateDashStreaks();}
+function renderAll(){renderTaskControlPanel();renderKanban();renderJobs();renderFitness();renderSkincare();renderVitamins();renderInsight();updateTimerDisplay();updateTaskRing();updateDashStreaks();initNotes();}
 
     // ===================== ESCAPE KEY = SAVE & CLOSE MODAL =====================
     document.addEventListener('keydown', function(e) {
@@ -1676,5 +1783,549 @@ init();setInterval(saveToLocalStorage,30000);
         </div>
       </div>
     </div>
+<style>
+/* ===================== NOTES ===================== */
+.notes-shell {
+  display:flex; height:calc(100vh - 170px);
+  border:1px solid var(--border); border-radius:6px; overflow:hidden;
+}
+.notes-folders {
+  width:190px; flex-shrink:0; background:var(--surface);
+  border-right:1px solid var(--border); display:flex; flex-direction:column;
+}
+.notes-folders-header {
+  padding:14px 14px 10px; border-bottom:1px solid var(--border);
+}
+.folder-list { flex:1; overflow-y:auto; padding:6px 0; }
+.folder-item {
+  display:flex; align-items:center; gap:8px; padding:8px 14px; cursor:pointer;
+  color:var(--text-dim); font-size:13px; transition:background .15s;
+}
+.folder-item:hover { background:var(--surface2); }
+.folder-item.active { background:var(--surface2); color:var(--accent); }
+.folder-item .folder-count {
+  margin-left:auto; font-size:11px; color:var(--text-dim); opacity:.6;
+}
+.folder-item .folder-del {
+  margin-left:4px; background:none; border:none; color:var(--danger);
+  cursor:pointer; font-size:12px; opacity:0; transition:opacity .15s; padding:0 2px;
+}
+.folder-item:hover .folder-del { opacity:.7; }
+.folder-add-row {
+  display:flex; gap:4px; padding:8px 10px; border-top:1px solid var(--border);
+}
+.folder-add-input {
+  flex:1; background:var(--surface2); border:1px solid var(--border);
+  border-radius:4px; padding:5px 8px; color:var(--text); font-size:12px;
+}
+.folder-add-btn {
+  background:var(--accent); color:#000; border:none; border-radius:4px;
+  width:28px; cursor:pointer; font-size:16px; font-weight:700;
+}
+.notes-list-panel {
+  width:280px; flex-shrink:0; display:flex; flex-direction:column;
+  border-right:1px solid var(--border); background:var(--bg);
+}
+.notes-list-header {
+  display:flex; align-items:center; gap:6px; padding:10px 10px 6px;
+  border-bottom:1px solid var(--border);
+}
+.notes-search-input {
+  width:100%; background:var(--surface2); border:1px solid var(--border);
+  border-radius:4px; padding:7px 10px 7px 28px; color:var(--text); font-size:13px;
+}
+.notes-new-btn {
+  background:var(--accent); color:#000; border:none; border-radius:4px;
+  width:32px; height:32px; cursor:pointer; font-size:18px; font-weight:700; flex-shrink:0;
+}
+.notes-sort-bar {
+  display:flex; gap:2px; padding:6px 10px; border-bottom:1px solid var(--border);
+  flex-wrap:wrap;
+}
+.nsort-btn {
+  background:none; border:1px solid var(--border); border-radius:3px;
+  color:var(--text-dim); font-size:10px; padding:3px 7px; cursor:pointer;
+  transition:all .15s; font-family:'Space Mono',monospace;
+}
+.nsort-btn:hover { border-color:var(--accent); color:var(--accent); }
+.nsort-btn.active { background:var(--accent); color:#000; border-color:var(--accent); }
+.notes-tag-strip {
+  display:flex; gap:6px; padding:4px 10px; flex-wrap:wrap; min-height:0;
+}
+.notes-tag-chip {
+  font-size:10px; padding:2px 8px; border-radius:10px; cursor:pointer;
+  background:var(--surface2); color:var(--text-dim); border:1px solid var(--border);
+  transition:all .15s;
+}
+.notes-tag-chip:hover, .notes-tag-chip.active {
+  background:var(--accent); color:#000; border-color:var(--accent);
+}
+.notes-list-scroll { flex:1; overflow-y:auto; padding:4px 0; }
+.note-card {
+  padding:10px 14px; cursor:pointer; border-bottom:1px solid var(--border);
+  transition:background .15s;
+}
+.note-card:hover { background:var(--surface2); }
+.note-card.active { background:var(--surface2); border-left:3px solid var(--accent); }
+.note-card-title {
+  font-size:13px; font-weight:600; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.note-card-preview {
+  font-size:11px; color:var(--text-dim); margin-top:3px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.note-card-meta {
+  display:flex; align-items:center; gap:6px; margin-top:4px; font-size:10px; color:var(--text-dim);
+}
+.note-card-pin { color:var(--accent); }
+.note-card-priority {
+  width:8px; height:8px; border-radius:50%; display:inline-block;
+}
+.notes-editor-panel { flex:1; display:flex; flex-direction:column; background:var(--bg); }
+.notes-empty-state {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:12px; color:var(--text-dim);
+}
+.notes-empty-icon { font-size:48px; opacity:.3; }
+.notes-empty-title { font-size:18px; font-weight:600; }
+.notes-empty-sub { font-size:13px; }
+.notes-empty-btn {
+  background:var(--accent); color:#000; border:none; border-radius:6px;
+  padding:8px 20px; cursor:pointer; font-weight:600; margin-top:8px;
+}
+.ne-toolbar {
+  display:flex; align-items:center; gap:4px; padding:8px 12px;
+  border-bottom:1px solid var(--border); flex-wrap:wrap;
+}
+.ne-toolbar-group { display:flex; gap:2px; }
+.ne-toolbar-sep { width:1px; height:20px; background:var(--border); margin:0 4px; }
+.ne-btn {
+  background:none; border:1px solid transparent; border-radius:3px;
+  color:var(--text-dim); width:28px; height:28px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-size:13px;
+  transition:all .15s;
+}
+.ne-btn:hover { background:var(--surface2); border-color:var(--border); color:var(--text); }
+.ne-strike { text-decoration:line-through; }
+.ne-priority-sel {
+  background:var(--surface2); border:1px solid var(--border); border-radius:4px;
+  color:var(--text); font-size:11px; padding:4px 6px; cursor:pointer;
+}
+.ne-pin-btn {
+  background:none; border:1px solid transparent; border-radius:3px;
+  cursor:pointer; font-size:14px; padding:4px; transition:all .15s;
+}
+.ne-pin-btn:hover { background:var(--surface2); }
+.ne-pin-btn.pinned { background:var(--accent); border-radius:3px; }
+.ne-del-btn {
+  background:none; border:1px solid transparent; border-radius:3px;
+  cursor:pointer; font-size:14px; padding:4px; transition:all .15s;
+}
+.ne-del-btn:hover { background:rgba(255,0,0,.15); }
+.ne-tags-row {
+  display:flex; align-items:center; gap:8px; padding:6px 14px;
+  border-bottom:1px solid var(--border); flex-wrap:wrap;
+}
+.ne-tag-chip {
+  display:inline-flex; align-items:center; gap:4px; font-size:11px;
+  padding:2px 8px; border-radius:10px; background:var(--surface2);
+  color:var(--accent); border:1px solid var(--border);
+}
+.ne-tag-chip .ne-tag-x {
+  cursor:pointer; opacity:.6; font-size:10px;
+}
+.ne-tag-chip .ne-tag-x:hover { opacity:1; color:var(--danger); }
+.ne-tag-input {
+  background:none; border:none; color:var(--text); font-size:12px;
+  outline:none; min-width:80px; padding:2px 0;
+}
+.ne-title-input {
+  background:none; border:none; color:var(--text); font-size:22px;
+  font-weight:700; padding:14px 18px 4px; outline:none;
+  font-family:'Space Grotesk',sans-serif;
+}
+.ne-meta {
+  padding:0 18px 6px; font-size:11px; color:var(--text-dim);
+  font-family:'Space Mono',monospace;
+}
+.ne-content {
+  flex:1; padding:10px 18px; overflow-y:auto; color:var(--text);
+  font-size:14px; line-height:1.7; outline:none;
+  font-family:'Space Grotesk',sans-serif;
+}
+.ne-content h1 { font-size:24px; font-weight:700; margin:12px 0 6px; color:var(--accent); }
+.ne-content h2 { font-size:20px; font-weight:600; margin:10px 0 4px; }
+.ne-content h3 { font-size:16px; font-weight:600; margin:8px 0 4px; }
+.ne-content blockquote {
+  border-left:3px solid var(--accent); padding-left:12px;
+  margin:8px 0; color:var(--text-dim); font-style:italic;
+}
+.ne-content pre {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:4px; padding:10px 14px; margin:8px 0;
+  font-family:'Space Mono',monospace; font-size:13px; overflow-x:auto;
+}
+.ne-content hr {
+  border:none; border-top:1px solid var(--border); margin:12px 0;
+}
+.ne-content .checklist-item {
+  display:flex; align-items:flex-start; gap:8px; padding:2px 0;
+}
+.ne-content .checklist-item input[type=checkbox] {
+  margin-top:4px; accent-color:var(--accent);
+}
+.ne-content .checklist-item.checked { text-decoration:line-through; color:var(--text-dim); }
+.ne-footer {
+  display:flex; justify-content:space-between; padding:6px 18px;
+  border-top:1px solid var(--border); font-size:11px;
+  font-family:'Space Mono',monospace;
+}
+</style>
+<script>
+/* ===================== NOTES JS ===================== */
+let _noteFilterTag = null;
+
+function initNotes() {
+  renderFolderList();
+  renderNotesList();
+  populateFolderAssign();
+}
+
+/* ---------- FOLDERS ---------- */
+function renderFolderList() {
+  const el = document.getElementById('folderList');
+  if (!el) return;
+  const folders = STATE.noteFolders || [];
+  const counts = {};
+  (STATE.notes || []).forEach(n => { counts[n.folder||'inbox'] = (counts[n.folder||'inbox']||0)+1; });
+  let total = (STATE.notes||[]).length;
+  el.innerHTML = folders.map(f => {
+    const c = f.id === 'all' ? total : (counts[f.id]||0);
+    const active = STATE.activeFolderId === f.id ? ' active' : '';
+    const del = !f.system ? ` <span class="folder-del" onclick="event.stopPropagation();deleteFolder('${f.id}')">&times;</span>` : '';
+    return `<div class="folder-item${active}" onclick="selectFolder('${f.id}')">${f.icon} ${f.label}<span class="folder-count">${c}</span>${del}</div>`;
+  }).join('');
+}
+
+function selectFolder(id) {
+  STATE.activeFolderId = id;
+  renderFolderList();
+  renderNotesList();
+  saveToLocalStorage();
+}
+
+function addNoteFolder() {
+  const inp = document.getElementById('newFolderInput');
+  const name = (inp.value||'').trim();
+  if (!name) return;
+  const id = 'f_' + Date.now();
+  STATE.noteFolders.push({ id, label:name, icon:'\u25C7', system:false });
+  inp.value = '';
+  renderFolderList();
+  populateFolderAssign();
+  saveToLocalStorage();
+}
+
+function deleteFolder(id) {
+  if (!confirm('Delete this folder? Notes will move to Inbox.')) return;
+  STATE.noteFolders = STATE.noteFolders.filter(f => f.id !== id);
+  (STATE.notes||[]).forEach(n => { if (n.folder === id) n.folder = 'inbox'; });
+  if (STATE.activeFolderId === id) STATE.activeFolderId = 'all';
+  renderFolderList();
+  renderNotesList();
+  populateFolderAssign();
+  saveToLocalStorage();
+}
+
+function populateFolderAssign() {
+  const sel = document.getElementById('noteFolderAssign');
+  if (!sel) return;
+  sel.innerHTML = (STATE.noteFolders||[]).filter(f => f.id !== 'all').map(f =>
+    `<option value="${f.id}">${f.icon} ${f.label}</option>`
+  ).join('');
+}
+
+/* ---------- NOTE LIST ---------- */
+function renderNotesList() {
+  const el = document.getElementById('notesList');
+  if (!el) return;
+  let notes = [...(STATE.notes||[])];
+  const folder = STATE.activeFolderId || 'all';
+  if (folder !== 'all') notes = notes.filter(n => (n.folder||'inbox') === folder);
+  const search = (document.getElementById('notesSearch')?.value||'').toLowerCase();
+  if (search) notes = notes.filter(n => (n.title||'').toLowerCase().includes(search) || (n.text||'').toLowerCase().includes(search) || (n.tags||[]).some(t => t.toLowerCase().includes(search)));
+  if (_noteFilterTag) notes = notes.filter(n => (n.tags||[]).includes(_noteFilterTag));
+
+  // Sort
+  const sort = STATE.noteSort || 'updated';
+  if (sort === 'updated') notes.sort((a,b) => (b.updated||0)-(a.updated||0));
+  else if (sort === 'created') notes.sort((a,b) => (b.created||0)-(a.created||0));
+  else if (sort === 'alpha') notes.sort((a,b) => (a.title||'').localeCompare(b.title||''));
+  else if (sort === 'priority') {
+    const pOrder = {high:0,med:1,low:2,'':3};
+    notes.sort((a,b) => (pOrder[a.priority||'']||3)-(pOrder[b.priority||'']||3));
+  }
+  else if (sort === 'pinned') notes.sort((a,b) => (b.pinned?1:0)-(a.pinned?1:0) || (b.updated||0)-(a.updated||0));
+
+  el.innerHTML = notes.map(n => {
+    const active = STATE.activeNoteId === n.id ? ' active' : '';
+    const pin = n.pinned ? '<span class="note-card-pin">\uD83D\uDCCC</span>' : '';
+    const pColor = n.priority === 'high' ? '#ff4444' : n.priority === 'med' ? '#ff9800' : n.priority === 'low' ? '#4caf50' : '';
+    const pDot = pColor ? `<span class="note-card-priority" style="background:${pColor}"></span>` : '';
+    const preview = (n.text||'').replace(/<[^>]*>/g,'').substring(0,60);
+    const date = n.updated ? new Date(n.updated).toLocaleDateString() : '';
+    return `<div class="note-card${active}" onclick="selectNote('${n.id}')">
+      <div class="note-card-title">${pin}${n.title||'Untitled'}</div>
+      <div class="note-card-preview">${preview}</div>
+      <div class="note-card-meta">${pDot}<span>${date}</span></div>
+    </div>`;
+  }).join('');
+
+  renderTagFilter();
+}
+
+function renderTagFilter() {
+  const el = document.getElementById('notesTagFilter');
+  if (!el) return;
+  const allTags = new Set();
+  (STATE.notes||[]).forEach(n => (n.tags||[]).forEach(t => allTags.add(t)));
+  if (allTags.size === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = [...allTags].map(t => {
+    const active = _noteFilterTag === t ? ' active' : '';
+    return `<span class="notes-tag-chip${active}" onclick="toggleTagFilter('${t}')">${t}</span>`;
+  }).join('');
+}
+
+function toggleTagFilter(tag) {
+  _noteFilterTag = _noteFilterTag === tag ? null : tag;
+  renderNotesList();
+}
+
+function setNoteSort(sort, btn) {
+  STATE.noteSort = sort;
+  document.querySelectorAll('.nsort-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderNotesList();
+  saveToLocalStorage();
+}
+
+/* ---------- NOTE CRUD ---------- */
+function createNewNote() {
+  const note = {
+    id: 'n_' + Date.now(),
+    title: '',
+    text: '',
+    html: '',
+    tags: [],
+    priority: '',
+    pinned: false,
+    folder: STATE.activeFolderId === 'all' ? 'inbox' : STATE.activeFolderId,
+    created: Date.now(),
+    updated: Date.now()
+  };
+  STATE.notes = STATE.notes || [];
+  STATE.notes.unshift(note);
+  STATE.activeNoteId = note.id;
+  renderNotesList();
+  renderFolderList();
+  openNoteEditor(note);
+  saveToLocalStorage();
+}
+
+function selectNote(id) {
+  STATE.activeNoteId = id;
+  const note = (STATE.notes||[]).find(n => n.id === id);
+  if (note) openNoteEditor(note);
+  renderNotesList();
+  saveToLocalStorage();
+}
+
+function openNoteEditor(note) {
+  document.getElementById('notesEmptyState').style.display = 'none';
+  const wrap = document.getElementById('notesEditorWrap');
+  wrap.style.display = 'flex';
+  document.getElementById('noteTitleInput').value = note.title || '';
+  document.getElementById('noteContent').innerHTML = note.html || note.text || '';
+  document.getElementById('notePriority').value = note.priority || '';
+  const pinBtn = document.getElementById('notePinBtn');
+  pinBtn.classList.toggle('pinned', !!note.pinned);
+  updateNoteMeta(note);
+  renderEditorTags(note);
+  updateFolderAssign(note);
+  updateWordCount();
+}
+
+function updateNoteMeta(note) {
+  const el = document.getElementById('noteMeta');
+  if (!el) return;
+  const created = note.created ? new Date(note.created).toLocaleString() : '';
+  const updated = note.updated ? new Date(note.updated).toLocaleString() : '';
+  el.textContent = `Created: ${created}  |  Updated: ${updated}`;
+}
+
+function updateFolderAssign(note) {
+  const sel = document.getElementById('noteFolderAssign');
+  if (sel) sel.value = note.folder || 'inbox';
+}
+
+function saveActiveNote() {
+  const note = (STATE.notes||[]).find(n => n.id === STATE.activeNoteId);
+  if (!note) return;
+  note.title = document.getElementById('noteTitleInput').value;
+  note.html = document.getElementById('noteContent').innerHTML;
+  note.text = document.getElementById('noteContent').innerText;
+  note.priority = document.getElementById('notePriority').value;
+  note.updated = Date.now();
+  updateNoteMeta(note);
+  updateWordCount();
+  renderNotesList();
+  renderFolderList();
+  saveToLocalStorage();
+}
+
+function deleteActiveNote() {
+  if (!STATE.activeNoteId) return;
+  if (!confirm('Delete this note?')) return;
+  STATE.notes = (STATE.notes||[]).filter(n => n.id !== STATE.activeNoteId);
+  STATE.activeNoteId = null;
+  document.getElementById('notesEditorWrap').style.display = 'none';
+  document.getElementById('notesEmptyState').style.display = 'flex';
+  renderNotesList();
+  renderFolderList();
+  saveToLocalStorage();
+}
+
+function toggleNotePin() {
+  const note = (STATE.notes||[]).find(n => n.id === STATE.activeNoteId);
+  if (!note) return;
+  note.pinned = !note.pinned;
+  document.getElementById('notePinBtn').classList.toggle('pinned', note.pinned);
+  renderNotesList();
+  saveToLocalStorage();
+}
+
+function moveNoteToFolder(folderId) {
+  const note = (STATE.notes||[]).find(n => n.id === STATE.activeNoteId);
+  if (!note) return;
+  note.folder = folderId;
+  renderNotesList();
+  renderFolderList();
+  saveToLocalStorage();
+}
+
+/* ---------- TAGS ---------- */
+function renderEditorTags(note) {
+  const el = document.getElementById('neTagChips');
+  if (!el) return;
+  el.innerHTML = (note.tags||[]).map(t =>
+    `<span class="ne-tag-chip">${t}<span class="ne-tag-x" onclick="removeNoteTag('${t}')">&times;</span></span>`
+  ).join('');
+}
+
+function addNoteTag() {
+  const inp = document.getElementById('neTagInput');
+  const tag = (inp.value||'').trim().toLowerCase().replace(/,/g,'');
+  if (!tag) return;
+  const note = (STATE.notes||[]).find(n => n.id === STATE.activeNoteId);
+  if (!note) return;
+  note.tags = note.tags || [];
+  if (!note.tags.includes(tag)) note.tags.push(tag);
+  inp.value = '';
+  renderEditorTags(note);
+  renderNotesList();
+  saveToLocalStorage();
+}
+
+function removeNoteTag(tag) {
+  const note = (STATE.notes||[]).find(n => n.id === STATE.activeNoteId);
+  if (!note) return;
+  note.tags = (note.tags||[]).filter(t => t !== tag);
+  renderEditorTags(note);
+  renderNotesList();
+  saveToLocalStorage();
+}
+
+/* ---------- EDITOR COMMANDS ---------- */
+function nCmd(cmd) {
+  document.execCommand(cmd, false, null);
+  document.getElementById('noteContent').focus();
+}
+
+function nHeading(level) {
+  document.execCommand('formatBlock', false, '<h' + level + '>');
+  document.getElementById('noteContent').focus();
+}
+
+function nChecklist() {
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+  const range = sel.getRangeAt(0);
+  const div = document.createElement('div');
+  div.className = 'checklist-item';
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.onchange = function() { this.parentElement.classList.toggle('checked', this.checked); saveActiveNote(); };
+  const span = document.createElement('span');
+  span.contentEditable = 'true';
+  span.textContent = sel.toString() || 'Task item';
+  div.appendChild(cb);
+  div.appendChild(span);
+  range.deleteContents();
+  range.insertNode(div);
+  document.getElementById('noteContent').focus();
+}
+
+function nCodeBlock() {
+  document.execCommand('formatBlock', false, '<pre>');
+  document.getElementById('noteContent').focus();
+}
+
+function nQuote() {
+  document.execCommand('formatBlock', false, '<blockquote>');
+  document.getElementById('noteContent').focus();
+}
+
+function nDivider() {
+  document.execCommand('insertHTML', false, '<hr>');
+  document.getElementById('noteContent').focus();
+}
+
+function nContentKey(e) {
+  // Tab key inserts spaces
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    document.execCommand('insertText', false, '    ');
+  }
+}
+
+/* ---------- WORD COUNT ---------- */
+function updateWordCount() {
+  const content = document.getElementById('noteContent');
+  if (!content) return;
+  const text = content.innerText || '';
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const mins = Math.max(1, Math.ceil(words / 200));
+  const wc = document.getElementById('noteWordCount');
+  const rt = document.getElementById('noteReadTime');
+  if (wc) wc.textContent = words + ' words';
+  if (rt) rt.textContent = mins + ' min read';
+}
+
+/* ---------- INIT HOOK ---------- */
+(function() {
+  const origNavigateTo = window.navigateTo;
+  window.navigateTo = function(id) {
+    origNavigateTo(id);
+    if (id === 'notes') {
+      initNotes();
+    }
+  };
+  // If current page is notes on load, init
+  if (STATE.currentPage === 'notes') {
+    setTimeout(initNotes, 100);
+  }
+})();
+</script>
 </body>
 </html>
