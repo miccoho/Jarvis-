@@ -631,6 +631,17 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1) brightn
         <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);">PIPELINE</span>
         <span class="widget-badge badge-accent" id="job-count">0 active</span>
       </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+        <span style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--text-dim);">FILTER</span>
+        <select id="jobStatusFilter" onchange="renderJobs()" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:12px;padding:5px 10px;font-family:'Space Mono',monospace;cursor:pointer;">
+          <option value="">All Statuses</option>
+          <option value="watching">Watching</option>
+          <option value="applied">Applied</option>
+          <option value="interview">Interview</option>
+          <option value="offer">Offer</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
     </div>
     <div class="job-table-wrap">
       <table class="job-table">
@@ -1454,7 +1465,7 @@ function renderJobs(){
   }
   const active=STATE.jobs.filter(j=>j.status!=='rejected').length;
   document.getElementById('job-count').textContent=active+' active';
-  tb.innerHTML=STATE.jobs.map(function(j,i){
+  tb.innerHTML=(function(){var f=document.getElementById('jobStatusFilter');var fv=f?f.value:'';return fv?STATE.jobs.filter(function(j){return j.status===fv}):STATE.jobs;})().map(function(j,i){
     var statusClass='status-'+j.status;
     return '<tr data-job-id="'+j.id+'">'+'<td style="width:28px;padding:8px 4px;"><div class="job-drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div></td>'+
       '<td class="editable" style="font-weight:600;color:var(--text-bright);" onclick="editJobCell('+i+',\'company\',this)">'+j.company+'</td>'+
