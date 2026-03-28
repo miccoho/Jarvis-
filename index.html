@@ -1735,7 +1735,7 @@ renderAll();if(data.quickNote){const qn=document.getElementById('quickNote');if(
 function importData(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(e){try{const data=JSON.parse(e.target.result);applyImportedData(data);const btn=document.querySelector('.header-right label');if(btn){btn.style.color='var(--accent3)';btn.style.borderColor='var(--accent3)';setTimeout(()=>{btn.style.color='';btn.style.borderColor='';},2000);}}catch(err){alert('Import failed: '+err.message);}event.target.value='';};reader.readAsText(file);}
 function applyClientId(){const id=document.getElementById('modal-client-id').value.trim();if(!id)return;closeModal('driveSetupModal');initDriveAuth();}
 
-function renderAll(){renderTaskControlPanel();renderKanban();renderJobs();renderFitness();renderSkincare();renderVitamins();renderInsight();updateTimerDisplay();updateTaskRing();updateDashStreaks();initNotes();}
+function renderAll(){renderTaskControlPanel();renderKanban();renderJobs();renderFitness();renderSkincare();renderVitamins();renderInsight();updateTimerDisplay();updateTaskRing();updateDashStreaks();if(typeof initNotes==="function")initNotes();}
 
     // ===================== ESCAPE KEY = SAVE & CLOSE MODAL =====================
     document.addEventListener('keydown', function(e) {
