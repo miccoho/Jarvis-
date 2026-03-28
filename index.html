@@ -1183,7 +1183,7 @@ function renderTaskControlPanel() {
       if (isUrgent) cls += ' task-urgent';
       var priClass = 'task-priority priority-' + t.priority;
       var isOverdue = t.due && t.due < todayStr();
-      var dueStr = t.due ? '<span style="font-family:Space Mono,monospace;font-size:9px;color:' + (isOverdue ? 'var(--danger)' : 'var(--text-dim)') + ';">\u{1F4C5} ' + t.due + '</span>' : '';
+      var dueStr = t.due ? '<span style="font-family:Space Mono,monospace;font-size:9px;color:' + (isOverdue ? 'var(--danger)' : 'var(--text-dim)') + ';">' + t.due + '</span>' : '';
       var tagStr = t.tag ? '<span style="font-size:9px;padding:1px 7px;border-radius:2px;border:1px solid var(--border);color:var(--text-dim);">' + t.tag + '</span>' : '';
       var urgBadge = t.urgent ? '<span style="font-size:8px;padding:1px 6px;border-radius:2px;background:rgba(255,51,102,0.15);color:var(--danger);border:1px solid rgba(255,51,102,0.3);">URGENT</span>' : '';
       var notesRow = t.notes ? '<div style="display:flex;align-items:center;gap:8px;width:100%;margin-top:2px;"><div style="font-size:11px;color:var(--text-dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + t.notes + '</div></div>' : '';
@@ -1415,7 +1415,7 @@ function buildTaskCard(t,colId){
   var classes='task-item';if(isUI)classes+=' urgent-important';if(isUrgent)classes+=' task-urgent';
   card.className=classes;card.draggable=true;card.style.cursor='grab';card.style.marginBottom='6px';card.style.flexDirection='column';card.style.alignItems='flex-start';card.style.gap='4px';
   var isOverdue=t.due&&t.due<todayStr();
-  var dueStr=t.due?'<span style="font-family:Space Mono,monospace;font-size:9px;color:'+(isOverdue?'var(--danger)':'var(--text-dim)')+';">\u{1F4C5} '+t.due+'<\/span>':'';
+  var dueStr=t.due?'<span style="font-family:Space Mono,monospace;font-size:9px;color:'+(isOverdue?'var(--danger)':'var(--text-dim)')+';">'+t.due+'<\/span>':'';
   var tagStr=t.tag?'<span style="font-size:9px;padding:1px 7px;border-radius:2px;border:1px solid var(--border);color:var(--text-dim);">'+t.tag+'<\/span>':'';
   var urgBadge=t.urgent?'<span style="font-size:8px;padding:1px 6px;border-radius:2px;background:rgba(255,51,102,0.15);color:var(--danger);border:1px solid rgba(255,51,102,0.4);font-family:Space Mono,monospace;">URGENT<\/span>':'';
   var progress=getTaskSubtaskProgress(t);
