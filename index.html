@@ -258,12 +258,29 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1) brightn
 .tcp-add-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:10px 16px; border-radius:4px; border:1px solid var(--accent); background:rgba(0,200,255,0.06); color:var(--accent); font-family:'Rajdhani',sans-serif; font-size:16px; font-weight:700; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:all 0.25s ease; }
 .tcp-add-btn:hover { background:rgba(0,200,255,0.18); box-shadow:0 0 30px rgba(0,200,255,0.35), inset 0 0 20px rgba(0,200,255,0.05); transform:translateY(-1px); }
 .tcp-add-btn .tcp-plus { font-size:20px; font-weight:300; }
-.tcp-focus-list { overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
-.tcp-focus-item { cursor:pointer; }
-.tcp-focus-item.tcp-done { opacity:0.45; }
-.tcp-focus-item.tcp-done .task-text { text-decoration:line-through; color:var(--text-dim); }
-.tcp-focus-check { width:14px; height:14px; border:1px solid var(--text-dim); border-radius:2px; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; font-size:9px; color:transparent; }
-.tcp-focus-item.tcp-done .tcp-focus-check { border-color:var(--accent3); background:rgba(0,255,163,0.1); color:var(--accent3); }
+.tcp-focus-list { overflow-y:auto; max-height:420px; scrollbar-width:thin; scrollbar-color:rgba(255,51,102,0.3) transparent; }
+.tcp-widget { border-color:rgba(255,51,102,0.25) !important; }
+.tcp-widget .widget-title { color:#ff3366 !important; }
+.tcp-widget .widget-badge { background:rgba(255,51,102,0.15) !important; color:#ff3366 !important; border-color:rgba(255,51,102,0.4) !important; }
+.tcp-widget .task-item { border-color:rgba(255,51,102,0.2); }
+.tcp-widget .task-item:hover { border-color:rgba(255,51,102,0.55); box-shadow:0 0 12px rgba(255,51,102,0.15); background:rgba(255,51,102,0.06); }
+.tcp-widget .task-text { color:#ff6688; }
+.tcp-widget .task-item.tcp-done { opacity:0.4; }
+.tcp-widget .task-item.tcp-done .task-text { text-decoration:line-through; color:var(--text-dim); }
+.tcp-focus-check { width:14px; height:14px; border:1px solid rgba(255,51,102,0.5); border-radius:2px; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; font-size:9px; color:transparent; }
+.tcp-widget .task-item.tcp-done .tcp-focus-check { border-color:#ff3366; background:rgba(255,51,102,0.15); color:#ff3366; }
+.tcp-widget .tcp-col-label { font-family:'Space Mono',monospace; font-size:9px; padding:1px 7px; border-radius:2px; border:1px solid rgba(255,51,102,0.25); color:rgba(255,51,102,0.7); }
+.tcp-widget .tcp-date { font-family:'Space Mono',monospace; font-size:9px; color:rgba(255,51,102,0.5); }
+.tcp-widget .tcp-tag { font-size:9px; padding:1px 7px; border-radius:2px; border:1px solid rgba(255,51,102,0.2); color:rgba(255,51,102,0.6); }
+.tcp-widget .tcp-urgent-badge { font-size:8px; padding:1px 6px; border-radius:2px; background:rgba(255,51,102,0.15); color:#ff3366; border:1px solid rgba(255,51,102,0.3); }
+.tcp-widget .tcp-remove { opacity:0; font-size:10px; color:rgba(255,51,102,0.4); cursor:pointer; padding:2px 4px; border:none; background:none; transition:all 0.15s; }
+.tcp-widget .task-item:hover .tcp-remove { opacity:1; }
+.tcp-widget .tcp-remove:hover { color:#ff3366; }
+.tcp-widget .task-priority { box-shadow:0 0 6px rgba(255,51,102,0.6); background:#ff3366; }
+.tcp-widget .tcp-add-btn { border-color:rgba(255,51,102,0.3) !important; color:#ff3366 !important; }
+.tcp-widget .tcp-add-btn:hover { background:rgba(255,51,102,0.12) !important; box-shadow:0 0 20px rgba(255,51,102,0.25) !important; }
+.tcp-widget .tcp-empty-icon { color:rgba(255,51,102,0.3); }
+.tcp-widget .tcp-empty-text { color:rgba(255,51,102,0.4); }
 /* Task Control Panel Modal */
 .tcp-modal-search { background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:10px 14px; color:var(--text-bright); font-family:'Rajdhani',sans-serif; font-size:16px; outline:none; width:100%; transition:border-color 0.2s; margin-bottom:12px; }
 .tcp-modal-search:focus { border-color:var(--accent); }
@@ -446,12 +463,12 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1) brightn
     <div class="widget tcp-widget">
       <div class="widget-header">
         <div class="widget-title">Task Control</div>
-        <div class="widget-badge badge-accent" id="tcp-focus-badge">0 focus</div>
+        <div class="widget-badge badge-accent" id="tcp-focus-badge">0 tasks</div>
       </div>
       <div id="tcpFocusList" class="tcp-focus-list"></div>
       <div id="tcpEmptyState" class="tcp-empty">
         <div class="tcp-empty-icon">◇</div>
-        <div class="tcp-empty-text">No focus tasks selected</div>
+        <div class="tcp-empty-text">No tasks yet</div>
       </div>
       <div style="padding-top:4px;">
         <button class="tcp-add-btn" onclick="openTaskControlModal()">
@@ -1153,49 +1170,57 @@ function getFocusTaskData() {
 }
 
 function renderTaskControlPanel() {
-  var focusData = getFocusTaskData();
   var listEl = document.getElementById('tcpFocusList');
   var emptyEl = document.getElementById('tcpEmptyState');
   var badgeEl = document.getElementById('tcp-focus-badge');
   if (!listEl || !emptyEl) return;
-  STATE.focusTasks = STATE.focusTasks.filter(function(ft) {
-    var tasks = STATE.kanban.tasks[ft.colId] || [];
-    return tasks.some(function(t) { return t.id === ft.taskId; });
+
+  // Gather ALL tasks from all kanban columns (mirror the To-Do list)
+  var allTasks = [];
+  STATE.kanban.columns.forEach(function(col) {
+    var tasks = STATE.kanban.tasks[col.id] || [];
+    tasks.forEach(function(t) {
+      allTasks.push({ id: t.id, text: t.text, priority: t.priority, notes: t.notes || '', due: t.due || '', tag: t.tag || '', urgent: t.urgent, subtasks: t.subtasks || [], colId: col.id, colLabel: col.label, colColor: col.color });
+    });
   });
-  var data = getFocusTaskData();
-  if (data.length === 0) {
+
+  // Check done state from focusTasks
+  allTasks.forEach(function(t) {
+    var ft = STATE.focusTasks.find(function(f) { return f.taskId === t.id && f.colId === t.colId; });
+    t.focusDone = ft ? ft.done : false;
+  });
+
+  var total = allTasks.length;
+  var doneCount = allTasks.filter(function(t) { return t.focusDone; }).length;
+
+  if (total === 0) {
     listEl.innerHTML = '';
     listEl.style.display = 'none';
     emptyEl.style.display = 'flex';
-    if (badgeEl) badgeEl.textContent = '0 focus';
+    if (badgeEl) badgeEl.textContent = '0 tasks';
   } else {
     emptyEl.style.display = 'none';
     listEl.style.display = 'block';
-    var doneCount = data.filter(function(d) { return d.focusDone; }).length;
-    if (badgeEl) badgeEl.textContent = doneCount + '/' + data.length + ' done';
-    listEl.innerHTML = data.map(function(t, i) {
+    if (badgeEl) badgeEl.textContent = doneCount + '/' + total + ' done';
+
+    listEl.innerHTML = allTasks.map(function(t, i) {
       var isDone = t.focusDone;
-      var isUI = t.urgent && t.priority === 'high';
-      var isUrgent = t.urgent;
       var cls = 'task-item tcp-focus-item';
       if (isDone) cls += ' tcp-done';
-      if (isUI) cls += ' urgent-important';
-      if (isUrgent) cls += ' task-urgent';
-      var priClass = 'task-priority priority-' + t.priority;
       var isOverdue = t.due && t.due < todayStr();
-      var dueStr = t.due ? '<span style="font-family:Space Mono,monospace;font-size:9px;color:' + (isOverdue ? 'var(--danger)' : 'var(--text-dim)') + ';">' + t.due + '</span>' : '';
-      var tagStr = t.tag ? '<span style="font-size:9px;padding:1px 7px;border-radius:2px;border:1px solid var(--border);color:var(--text-dim);">' + t.tag + '</span>' : '';
-      var urgBadge = t.urgent ? '<span style="font-size:8px;padding:1px 6px;border-radius:2px;background:rgba(255,51,102,0.15);color:var(--danger);border:1px solid rgba(255,51,102,0.3);">URGENT</span>' : '';
-      var notesRow = t.notes ? '<div style="display:flex;align-items:center;gap:8px;width:100%;margin-top:2px;"><div style="font-size:11px;color:var(--text-dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + t.notes + '</div></div>' : '';
+      var dueStr = t.due ? '<span class="tcp-date">' + t.due + '</span>' : '';
+      var tagStr = t.tag ? '<span class="tcp-tag">' + t.tag + '</span>' : '';
+      var urgBadge = t.urgent ? '<span class="tcp-urgent-badge">URGENT</span>' : '';
+      var notesRow = t.notes ? '<div style="display:flex;align-items:center;gap:8px;width:100%;margin-top:2px;"><div style="font-size:11px;color:rgba(255,51,102,0.4);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + t.notes + '</div></div>' : '';
       var bottomRow = (dueStr || tagStr) ? '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' + dueStr + tagStr + '</div>' : '';
-      return '<div class="' + cls + '" style="cursor:pointer;margin-bottom:6px;flex-direction:column;align-items:flex-start;gap:4px;" onclick="toggleFocusTaskDone(' + i + ')">' +
+      return '<div class="' + cls + '" style="cursor:pointer;margin-bottom:6px;flex-direction:column;align-items:flex-start;gap:4px;" onclick="tcpToggleDone(\'' + t.colId + '\',' + t.id + ')">' +
         '<div style="display:flex;align-items:center;gap:8px;width:100%;">' +
           '<div class="tcp-focus-check">' + (isDone ? '\u2713' : '') + '</div>' +
-          '<div class="' + priClass + '"></div>' +
+          '<div class="task-priority"></div>' +
           '<div class="task-text" style="flex:1;">' + t.text + '</div>' +
           urgBadge +
           '<div style="display:flex;gap:4px;flex-shrink:0;">' +
-            '<span onclick="event.stopPropagation();removeFocusTask(' + i + ')" style="font-size:10px;color:var(--text-dim);cursor:pointer;padding:2px 4px;">\u2715</span>' +
+            '<span class="tcp-remove" onclick="event.stopPropagation();tcpRemoveTask(\'' + t.colId + '\',' + t.id + ')">\u2715</span>' +
           '</div>' +
         '</div>' +
         notesRow +
@@ -1215,6 +1240,21 @@ function toggleFocusTaskDone(idx) {
 
 function removeFocusTask(idx) {
   STATE.focusTasks.splice(idx, 1);
+  renderTaskControlPanel();
+}
+
+function tcpToggleDone(colId, taskId) {
+  var ft = STATE.focusTasks.find(function(f) { return f.taskId === taskId && f.colId === colId; });
+  if (ft) {
+    ft.done = !ft.done;
+  } else {
+    STATE.focusTasks.push({ taskId: taskId, colId: colId, done: true });
+  }
+  renderTaskControlPanel();
+}
+
+function tcpRemoveTask(colId, taskId) {
+  removeKanbanTask(colId, taskId);
   renderTaskControlPanel();
 }
 
