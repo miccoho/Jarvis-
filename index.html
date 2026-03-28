@@ -259,22 +259,11 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(1) brightn
 .tcp-add-btn:hover { background:rgba(0,200,255,0.18); box-shadow:0 0 30px rgba(0,200,255,0.35), inset 0 0 20px rgba(0,200,255,0.05); transform:translateY(-1px); }
 .tcp-add-btn .tcp-plus { font-size:20px; font-weight:300; }
 .tcp-focus-list { overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
-.tcp-focus-item { display:flex; flex-direction:column; align-items:flex-start; gap:4px; padding:10px 12px; border-radius:4px; margin-bottom:6px; border:1px solid var(--border); background:var(--surface2); transition:all 0.15s; cursor:pointer; position:relative; }
-.tcp-focus-item:hover { background:rgba(0,200,255,0.06); border-color:var(--border-active); box-shadow:0 0 12px rgba(0,200,255,0.1); transform:translateX(2px); }
+.tcp-focus-item { cursor:pointer; }
 .tcp-focus-item.tcp-done { opacity:0.45; }
-.tcp-focus-item.tcp-done .tcp-focus-text { text-decoration:line-through; color:var(--text-dim); }
-.tcp-focus-row { display:flex; align-items:center; gap:10px; width:100%; }
-.tcp-focus-check { width:14px; height:14px; border:1px solid var(--text-dim); border-radius:2px; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; font-size:9px; color:var(--accent3); }
+.tcp-focus-item.tcp-done .task-text { text-decoration:line-through; color:var(--text-dim); }
+.tcp-focus-check { width:14px; height:14px; border:1px solid var(--text-dim); border-radius:2px; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; font-size:9px; color:transparent; }
 .tcp-focus-item.tcp-done .tcp-focus-check { border-color:var(--accent3); background:rgba(0,255,163,0.1); color:var(--accent3); }
-.tcp-focus-text { font-size:18px; font-weight:500; flex:1; line-height:1.4; color:var(--text-bright); }
-.tcp-focus-col { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:0.5px; color:var(--text-dim); padding:1px 7px; border-radius:2px; border:1px solid var(--border); flex-shrink:0; }
-.tcp-focus-remove { opacity:0; font-size:10px; color:var(--text-dim); cursor:pointer; padding:2px 4px; border:none; background:none; transition:all 0.15s; flex-shrink:0; }
-.tcp-focus-item:hover .tcp-focus-remove { opacity:1; }
-.tcp-focus-remove:hover { color:var(--danger); }
-.tcp-focus-meta { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
-.tcp-focus-priority { width:4px; height:4px; border-radius:50%; flex-shrink:0; margin-top:1px; }
-.tcp-focus-count { font-family:'Space Mono',monospace; font-size:10px; color:var(--text-dim); text-align:center; padding:8px 0; }
-
 /* Task Control Panel Modal */
 .tcp-modal-search { background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:10px 14px; color:var(--text-bright); font-family:'Rajdhani',sans-serif; font-size:16px; outline:none; width:100%; transition:border-color 0.2s; margin-bottom:12px; }
 .tcp-modal-search:focus { border-color:var(--accent); }
@@ -1164,21 +1153,16 @@ function getFocusTaskData() {
 }
 
 function renderTaskControlPanel() {
-  const focusData = getFocusTaskData();
-  const listEl = document.getElementById('tcpFocusList');
-  const emptyEl = document.getElementById('tcpEmptyState');
-  const badgeEl = document.getElementById('tcp-focus-badge');
-  
+  var focusData = getFocusTaskData();
+  var listEl = document.getElementById('tcpFocusList');
+  var emptyEl = document.getElementById('tcpEmptyState');
+  var badgeEl = document.getElementById('tcp-focus-badge');
   if (!listEl || !emptyEl) return;
-  
-  // Clean up stale focus tasks (tasks that no longer exist in kanban)
-  STATE.focusTasks = STATE.focusTasks.filter(ft => {
-    const tasks = STATE.kanban.tasks[ft.colId] || [];
-    return tasks.some(t => t.id === ft.taskId);
+  STATE.focusTasks = STATE.focusTasks.filter(function(ft) {
+    var tasks = STATE.kanban.tasks[ft.colId] || [];
+    return tasks.some(function(t) { return t.id === ft.taskId; });
   });
-  
-  const data = getFocusTaskData();
-  
+  var data = getFocusTaskData();
   if (data.length === 0) {
     listEl.innerHTML = '';
     listEl.style.display = 'none';
@@ -1187,30 +1171,38 @@ function renderTaskControlPanel() {
   } else {
     emptyEl.style.display = 'none';
     listEl.style.display = 'block';
-    const doneCount = data.filter(d => d.focusDone).length;
+    var doneCount = data.filter(function(d) { return d.focusDone; }).length;
     if (badgeEl) badgeEl.textContent = doneCount + '/' + data.length + ' done';
-    
-    listEl.innerHTML = data.map((t, i) => {
-      const isDone = t.focusDone;
-      const priColor = t.priority === 'high' ? 'var(--danger)' : t.priority === 'med' ? 'var(--accent4)' : 'var(--accent3)';
-      const urgBadge = t.urgent ? '<span style="font-size:8px;padding:1px 6px;border-radius:2px;background:rgba(255,51,102,0.15);color:var(--danger);border:1px solid rgba(255,51,102,0.3);">URGENT</span>' : '';
-      return '<div class="tcp-focus-item' + (isDone ? ' tcp-done' : '') + '" onclick="toggleFocusTaskDone(' + i + ')">' +
-        '<div class="tcp-focus-row">' +
+    listEl.innerHTML = data.map(function(t, i) {
+      var isDone = t.focusDone;
+      var isUI = t.urgent && t.priority === 'high';
+      var isUrgent = t.urgent;
+      var cls = 'task-item tcp-focus-item';
+      if (isDone) cls += ' tcp-done';
+      if (isUI) cls += ' urgent-important';
+      if (isUrgent) cls += ' task-urgent';
+      var priClass = 'task-priority priority-' + t.priority;
+      var isOverdue = t.due && t.due < todayStr();
+      var dueStr = t.due ? '<span style="font-family:Space Mono,monospace;font-size:9px;color:' + (isOverdue ? 'var(--danger)' : 'var(--text-dim)') + ';">\u{1F4C5} ' + t.due + '</span>' : '';
+      var tagStr = t.tag ? '<span style="font-size:9px;padding:1px 7px;border-radius:2px;border:1px solid var(--border);color:var(--text-dim);">' + t.tag + '</span>' : '';
+      var urgBadge = t.urgent ? '<span style="font-size:8px;padding:1px 6px;border-radius:2px;background:rgba(255,51,102,0.15);color:var(--danger);border:1px solid rgba(255,51,102,0.3);">URGENT</span>' : '';
+      var notesRow = t.notes ? '<div style="display:flex;align-items:center;gap:8px;width:100%;margin-top:2px;"><div style="font-size:11px;color:var(--text-dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + t.notes + '</div></div>' : '';
+      var bottomRow = (dueStr || tagStr) ? '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' + dueStr + tagStr + '</div>' : '';
+      return '<div class="' + cls + '" style="cursor:pointer;margin-bottom:6px;flex-direction:column;align-items:flex-start;gap:4px;" onclick="toggleFocusTaskDone(' + i + ')">' +
+        '<div style="display:flex;align-items:center;gap:8px;width:100%;">' +
           '<div class="tcp-focus-check">' + (isDone ? '\u2713' : '') + '</div>' +
-          '<div class="tcp-focus-priority" style="background:' + priColor + ';box-shadow:0 0 6px ' + priColor + ';"></div>' +
-          '<div class="tcp-focus-text">' + t.text + '</div>' +
+          '<div class="' + priClass + '"></div>' +
+          '<div class="task-text" style="flex:1;">' + t.text + '</div>' +
           urgBadge +
           '<div style="display:flex;gap:4px;flex-shrink:0;">' +
             '<span onclick="event.stopPropagation();removeFocusTask(' + i + ')" style="font-size:10px;color:var(--text-dim);cursor:pointer;padding:2px 4px;">\u2715</span>' +
           '</div>' +
         '</div>' +
-        '<div class="tcp-focus-meta">' +
-          '<span class="tcp-focus-col">' + t.colLabel + '</span>' +
-        '</div>' +
+        notesRow +
+        bottomRow +
       '</div>';
     }).join('');
   }
-  
   updateTaskRing();
 }
 
