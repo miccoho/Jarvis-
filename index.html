@@ -2313,6 +2313,24 @@ function updateWordCount() {
 }
 
 /* ---------- INIT HOOK ---------- */
+// Ensure notes tab exists (migration for existing users)
+if (typeof STATE !== 'undefined' && STATE.tabs && !STATE.tabs.find(t => t.id === 'notes')) {
+  STATE.tabs.push({ id:'notes', label:'Notes', icon:'\u2726' });
+}
+if (typeof STATE !== 'undefined' && !STATE.notes) STATE.notes = [];
+if (typeof STATE !== 'undefined' && !STATE.noteFolders) {
+  STATE.noteFolders = [
+    { id:'all', label:'All Notes', icon:'\u2726', system:true },
+    { id:'inbox', label:'Inbox', icon:'\u25C8', system:false },
+    { id:'work', label:'Work', icon:'\u25C9', system:false },
+    { id:'personal', label:'Personal', icon:'\u25C7', system:false },
+    { id:'journal', label:'Journal', icon:'\u25CB', system:false },
+  ];
+}
+if (typeof STATE !== 'undefined' && !STATE.activeFolderId) STATE.activeFolderId = 'all';
+if (typeof STATE !== 'undefined' && !STATE.noteSort) STATE.noteSort = 'updated';
+if (typeof renderNav === 'function') renderNav();
+
 (function() {
   const origNavigateTo = window.navigateTo;
   window.navigateTo = function(id) {
