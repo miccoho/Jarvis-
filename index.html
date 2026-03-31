@@ -1498,7 +1498,7 @@ function closeJobModal() {
   var sel = document.getElementById('j-status');
   if (sel) sel.selectedIndex = 0;
 }
-function addJob(){const co=document.getElementById('j-company').value.trim();const ro=document.getElementById('j-role').value.trim();if(!co||!ro)return;STATE.jobs.push({id:Date.now(),company:co,role:ro,location:document.getElementById('j-location').value.trim()||'—',salary:document.getElementById('j-salary').value.trim()||'—',status:document.getElementById('j-status').value,date:document.getElementById('j-date').value||todayStr(),notes:document.getElementById('j-notes').value.trim()||'—'});['j-company','j-role','j-location','j-salary','j-notes'].forEach(id=>document.getElementById(id).value='');bumpVersion();renderJobs();}
+function addJob(){const co=document.getElementById('j-company').value.trim();const ro=document.getElementById('j-role').value.trim();STATE.jobs.push({id:Date.now(),company:co||'N/A',role:ro||'N/A',location:document.getElementById('j-location').value.trim()||'N/A',salary:document.getElementById('j-salary').value.trim()||'N/A',status:document.getElementById('j-status').value,date:document.getElementById('j-date').value||todayStr(),notes:document.getElementById('j-notes').value.trim()||'N/A'});['j-company','j-role','j-location','j-salary','j-notes'].forEach(id=>document.getElementById(id).value='');bumpVersion();renderJobs();}
 function renderJobs(){
   const tb=document.getElementById('jobTableBody');
   if(!STATE.jobs.length){
@@ -1550,7 +1550,7 @@ function editJobCell(idx,field,td){
   var saved=false;
   function save(){
     if(saved)return;saved=true;
-    var nv=inp.value.trim()||'—';
+    var nv=inp.value.trim()||'N/A';
     STATE.jobs[idx][field]=nv;
     bumpVersion();
     renderJobs();
