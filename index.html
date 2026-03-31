@@ -1791,9 +1791,9 @@ function applyClientId(){const id=document.getElementById('modal-client-id').val
 
 function renderAll(){renderTaskControlPanel();renderKanban();renderJobs();renderFitness();renderSkincare();renderVitamins();renderInsight();updateTimerDisplay();updateTaskRing();updateDashStreaks();if(typeof initNotes==="function")initNotes();}
 
-    // ===================== ESCAPE KEY = SAVE & CLOSE MODAL =====================
+    // ===================== ESCAPE / ENTER KEY = SAVE & CLOSE MODAL =====================
     document.addEventListener('keydown', function(e) {
-      if (e.key !== 'Escape') return;
+      if (e.key !== 'Escape' && e.key !== 'Enter') return; if (e.key === 'Enter' && document.activeElement.tagName === 'TEXTAREA') return;
       var modalSaveMap = {
         'addTaskModal':       function() { saveKanbanTask(); },
         'addColumnModal':     function() { addColumn(); },
